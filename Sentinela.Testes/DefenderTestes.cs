@@ -5,6 +5,25 @@ namespace Sentinela.Testes;
 public class DefenderTestes
 {
     [Theory]
+    [InlineData("Trojan:Teste", null, "-Restore -Name \"Trojan:Teste\"")]
+    [InlineData("Teste", @"C:\Minha pasta\arquivo.exe", "-Restore -Name \"Teste\" -FilePath \"C:\\Minha pasta\\arquivo.exe\"")]
+    [InlineData("Teste", @"C:\", "-Restore -Name \"Teste\" -FilePath \"C:\\\\\"")]
+    public void ArgumentosRestaurar_Formata(string nome, string? caminho, string esperado)
+        => Assert.Equal(esperado, Defender.ArgumentosRestaurar(nome, caminho));
+
+    [Theory]
+    [InlineData("", null)]
+    [InlineData("   ", null)]
+    [InlineData("Teste", "")]
+    [InlineData("Teste", "  ")]
+    [InlineData("amea\"ça", null)]
+    [InlineData("amea\nça", null)]
+    [InlineData("Teste", "C:\\ar\"quivo")]
+    [InlineData("Teste", "C:\\ar\tquivo")]
+    public void ArgumentosRestaurar_RejeitaEntradaInvalida(string nome, string? caminho)
+        => Assert.Throws<ArgumentException>(() => Defender.ArgumentosRestaurar(nome, caminho));
+
+    [Theory]
     [InlineData(TipoVarredura.Rapida, null, "-Scan -ScanType 1")]
     [InlineData(TipoVarredura.Completa, null, "-Scan -ScanType 2")]
     [InlineData(TipoVarredura.Personalizada, @"C:\Minha pasta\arquivo.txt", "-Scan -ScanType 3 -File \"C:\\Minha pasta\\arquivo.txt\"")]

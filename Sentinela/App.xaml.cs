@@ -95,6 +95,8 @@ public partial class App : Application
             _pedidos = new CaixaDePedidos();
             _pedidos.Chegou += AtenderPedido;
             _pedidos.Iniciar();
+            if (_pedidos.Erro is { } erroPedidos)
+                Diario.Registrar("alerta", "Caixa de pedidos desligada: " + erroPedidos);
             _timerAvisos.Tick += (_, _) => MostrarAvisosPendentes();
             _vigia = new VigiaDefender();
             _vigia.Chegou += evento =>

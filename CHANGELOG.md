@@ -1,5 +1,18 @@
 # Histórico de mudanças
 
+## [1.2.0] - 2026-11-09
+### Novo
+- **Aviso na hora:** o Sentinela escuta o próprio Windows Defender e avisa em segundos quando uma ameaça é encontrada, quando a proteção em tempo real é desligada ou quando alguém adiciona uma exclusão ou desliga uma proteção (mesmo com a janela fechada).
+- Página **Histórico**: eventos do Defender e do Sentinela dos últimos 30 dias, com filtros.
+- **Verificar pasta ou arquivo** escolhido (e arrastar para a janela quando não está como administrador).
+- **"Verificar com o Sentinela"** no clique direito do Explorer (no Windows 11, em "Mostrar mais opções"). Requer rodar o instalador de novo.
+- **Quarentena em lista**, com **Restaurar** (dupla confirmação) e atalho para excluir na Segurança do Windows.
+- **Varredura offline** (avançado): reinicia o PC e verifica antes do Windows carregar.
+- Varreduras rápida e completa mostram uma **estimativa de tempo** baseada nas últimas.
+### Melhorado
+- Abrir o Sentinela quando ele já está rodando como administrador agora mostra a janela, em vez de uma mensagem.
+- Avisos agrupados (no máximo um a cada 5 segundos), sem esconder o mais grave.
+
 ## [1.1.0] - 2026-11-09
 ### Novo
 - Aba **Ajustes**: iniciar com o Windows, manter na bandeja ao fechar, avisos de rotina, diário e versão.

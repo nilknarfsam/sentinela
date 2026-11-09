@@ -32,7 +32,29 @@
                 </DataGrid.Columns>
             </DataGrid>
             <TextBlock Grid.Row="1" Text="Quarentena" Style="{StaticResource Subtitulo}" Margin="2,16,0,10"/>
-            <TextBox Grid.Row="2" x:Name="TxtQuarentena" Style="{StaticResource Log}"/>
+            <DockPanel Grid.Row="2">
+                <TextBlock DockPanel.Dock="Top" Text="Lista montada pelo histórico do Defender. Itens já restaurados ou apagados podem continuar aparecendo; confira em 'Ver texto do Defender'." Style="{StaticResource Fraco}" TextWrapping="Wrap" Margin="0,0,0,8"/>
+                <StackPanel DockPanel.Dock="Bottom" Margin="0,10,0,0">
+                    <WrapPanel VerticalAlignment="Center">
+                        <Button x:Name="BtnRestaurar" Content="Restaurar" IsEnabled="False" Click="Restaurar_Click"/>
+                        <TextBlock x:Name="TxtSemArquivoRestauravel" Text="Este item não tem um arquivo restaurável. Use a Segurança do Windows." Style="{StaticResource Fraco}" TextWrapping="Wrap" VerticalAlignment="Center" Visibility="Collapsed"/>
+                        <Button x:Name="BtnExcluir" Content="Excluir de vez…" Click="AbrirSeguranca_Click"/>
+                        <TextBlock Text="A exclusão de itens da quarentena é feita na Segurança do Windows." Style="{StaticResource Fraco}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                    </WrapPanel>
+                    <TextBlock x:Name="TxtResultadoQuarentena" TextWrapping="Wrap" Margin="0,6,0,6"/>
+                    <Expander x:Name="TextoDefender" Header="Ver texto do Defender">
+                        <TextBox x:Name="TxtQuarentena" Style="{StaticResource Log}" MaxHeight="120"/>
+                    </Expander>
+                </StackPanel>
+                <DataGrid x:Name="GradeQuarentena" SelectionMode="Single" SelectionChanged="Quarentena_SelectionChanged">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Ameaça" Binding="{Binding Nome}" Width="2*"/>
+                        <DataGridTextColumn Header="Arquivo (Local)" Binding="{Binding Local}" Width="3*"/>
+                        <DataGridTextColumn Header="Detectada" Binding="{Binding Detectada, StringFormat=dd/MM/yyyy HH:mm}" Width="130"/>
+                        <DataGridTextColumn Header="Gravidade" Binding="{Binding Gravidade}" Width="90"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
         </Grid>
     </DockPanel>
 </UserControl>

@@ -7,6 +7,17 @@ public class VigiaDefenderTestes
     private static readonly DateTime Data = new(2026, 11, 9, 12, 30, 0);
 
     [Fact]
+    public void ConclusaoPreencheDuracaoEstruturada()
+    {
+        var evento = VigiaDefender.Interpretar(1001, Data, new Dictionary<string, string>
+        {
+            ["Scan Time Hours"] = "1", ["Scan Time Minutes"] = "2", ["Scan Time Seconds"] = "3",
+        });
+        Assert.Equal(new TimeSpan(1, 2, 3), evento?.Duracao);
+        Assert.Null(VigiaDefender.Interpretar(1000, Data, new Dictionary<string, string>())?.Duracao);
+    }
+
+    [Fact]
     public void AmeacaIncluiNomeECaminho()
     {
         var evento = VigiaDefender.Interpretar(1116, Data, new Dictionary<string, string>
@@ -145,5 +156,19 @@ public class VigiaDefenderTestes
     {
         var erro = Record.Exception(() => VigiaDefender.Interpretar(id, Data, new Dictionary<string, string>()));
         Assert.Null(erro);
+    }
+
+    [Fact]
+    public void Interpretar1116_LimpaPrefixoDoCaminho()
+    {
+        var campos = new Dictionary<string, string>
+        {
+            ["Threat Name"] = "Virus:DOS/EICAR_Test_File",
+            ["Path"] = @"file:_C:\Temp\eicar.com",
+        };
+        var evento = VigiaDefender.Interpretar(1116, Data, campos);
+        Assert.NotNull(evento);
+        Assert.Contains(@"C:\Temp\eicar.com", evento!.Detalhe);
+        Assert.DoesNotContain("file:", evento.Detalhe);
     }
 }

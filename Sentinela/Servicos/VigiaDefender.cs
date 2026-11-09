@@ -6,7 +6,7 @@ namespace Sentinela.Servicos;
 
 public enum TipoEvento { Ameaca, AmeacaTratada, Varredura, Assinaturas, Protecao, Configuracao, Outro }
 
-public sealed record EventoDefender(DateTime Data, int Id, TipoEvento Tipo, string Titulo, string Detalhe);
+public sealed record EventoDefender(DateTime Data, int Id, TipoEvento Tipo, string Titulo, string Detalhe, TimeSpan? Duracao = null);
 
 public sealed class VigiaDefender : IDisposable
 {
@@ -90,19 +90,24 @@ public sealed class VigiaDefender : IDisposable
     {
         string Campo(string nome) => campos.TryGetValue(nome, out var valor) ? valor ?? "" : "";
         string Juntar(params string[] valores) => string.Join(" · ", valores.Where(v => !string.IsNullOrWhiteSpace(v)));
+        // "file:_C:\pasta\a.com; process:_pid:12" -> "C:\pasta\a.com; pid:12"
+        static string Caminhos(string valor) => string.Join("; ", valor
+            .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(Defender.LimparRecurso));
         EventoDefender Evento(TipoEvento tipo, string titulo, string detalhe = "") => new(data, id, tipo, titulo, detalhe);
         switch (id)
         {
-            case 1116: return Evento(TipoEvento.Ameaca, "Ameaça detectada", Juntar(Campo("Threat Name"), Campo("Path")));
+            case 1116: return Evento(TipoEvento.Ameaca, "Ameaça detectada", Juntar(Campo("Threat Name"), Caminhos(Campo("Path"))));
             case 1117: return Evento(TipoEvento.AmeacaTratada, "Ameaça tratada", Juntar(Campo("Threat Name"), Campo("Action Name")));
-            case 1118 or 1119: return Evento(TipoEvento.Ameaca, "Falha ao tratar ameaça", Juntar(Campo("Threat Name"), Campo("Path")));
+            case 1118 or 1119: return Evento(TipoEvento.Ameaca, "Falha ao tratar ameaça", Juntar(Campo("Threat Name"), Caminhos(Campo("Path"))));
             case 1000: return Evento(TipoEvento.Varredura, "Varredura iniciada", Campo("Scan Parameters"));
             case 1001:
                 double Numero(string nome) => double.TryParse(Campo(nome), NumberStyles.Number, CultureInfo.InvariantCulture, out var n)
                     && double.IsFinite(n) && n >= 0 ? Math.Min(n, 1000000) : 0;
                 var duracao = TimeSpan.FromHours(Numero("Scan Time Hours")) + TimeSpan.FromMinutes(Numero("Scan Time Minutes"))
                     + TimeSpan.FromSeconds(Numero("Scan Time Seconds"));
-                return Evento(TipoEvento.Varredura, "Varredura terminada", Juntar(Campo("Scan Parameters"), Formatos.Duracao(duracao)));
+                return new EventoDefender(data, id, TipoEvento.Varredura, "Varredura terminada",
+                    Juntar(Campo("Scan Parameters"), Formatos.Duracao(duracao)), duracao);
             case 1002: return Evento(TipoEvento.Varredura, "Varredura cancelada", Campo("Scan Parameters"));
             case 1005: return Evento(TipoEvento.Varredura, "Varredura falhou", Campo("Scan Parameters"));
             case 2000: return Evento(TipoEvento.Assinaturas, "Assinaturas atualizadas");

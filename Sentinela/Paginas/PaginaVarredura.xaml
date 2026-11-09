@@ -41,6 +41,17 @@
                 </DockPanel>
             </Border>
 
+            <Border Style="{StaticResource CartaoBorda}">
+                <DockPanel>
+                    <Button x:Name="BtnOffline" DockPanel.Dock="Right" Content="Reiniciar e verificar" Click="VarreduraOffline_Click" VerticalAlignment="Center" Margin="0"/>
+                    <StackPanel>
+                        <TextBlock Text="Varredura offline (avançado)" Style="{StaticResource Subtitulo}"/>
+                        <TextBlock Text="Reinicia o PC e verifica antes do Windows carregar, para achar vírus que se escondem. Leva uns 15 minutos. Salve seus trabalhos antes." Style="{StaticResource Fraco}" TextWrapping="Wrap" Margin="0,4,12,0"/>
+                        <TextBlock x:Name="TxtOfflineAdmin" Text="Abra como administrador para usar." Style="{StaticResource Fraco}" Visibility="Collapsed" Margin="0,8,0,0"/>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
             <Border x:Name="CartaoAndamento" Style="{StaticResource CartaoBorda}" Visibility="Collapsed">
                 <StackPanel>
                     <DockPanel>
