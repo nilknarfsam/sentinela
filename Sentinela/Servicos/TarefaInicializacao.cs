@@ -11,13 +11,17 @@ public static class TarefaInicializacao
         {
             var (codigo, saida, _) = Executar("/query /tn Sentinela /xml");
             if (codigo != 0) return null;
-            var raiz = XDocument.Parse(saida).Root;
-            if (raiz == null) return null;
-            var ns = raiz.Name.Namespace;
-            var habilitada = raiz.Element(ns + "Settings")?.Element(ns + "Enabled")?.Value.Trim();
-            return !string.Equals(habilitada, "false", StringComparison.OrdinalIgnoreCase);
+            return InterpretarXml(saida);
         }
         catch { return null; }
+    }
+
+    internal static bool InterpretarXml(string xml)
+    {
+        var raiz = XDocument.Parse(xml).Root ?? throw new System.Xml.XmlException("XML sem raiz.");
+        var ns = raiz.Name.Namespace;
+        var habilitada = raiz.Element(ns + "Settings")?.Element(ns + "Enabled")?.Value.Trim();
+        return !string.Equals(habilitada, "false", StringComparison.OrdinalIgnoreCase);
     }
 
     public static (bool ok, string mensagem) Definir(bool ligar)

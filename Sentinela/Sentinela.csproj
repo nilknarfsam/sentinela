@@ -18,6 +18,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="Sentinela.Testes" />
     <!-- Evita conflito de nomes WPF x WinForms (Application, MessageBox...) -->
     <Using Remove="System.Windows.Forms" />
     <Using Remove="System.Drawing" />

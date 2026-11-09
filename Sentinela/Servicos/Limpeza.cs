@@ -118,7 +118,7 @@ public static class Limpeza
         _ => $"{bytes} B",
     };
 
-    private static bool Velho(FileInfo fi, ItemLimpeza item)
+    internal static bool Velho(FileInfo fi, ItemLimpeza item)
         => item.HorasMinimas <= 0 || (DateTime.Now - fi.LastWriteTime).TotalHours >= item.HorasMinimas;
 
     private static IEnumerable<string> Arquivos(string pasta)

@@ -190,19 +190,19 @@ public static class Defender
         catch { return null; }
     }
 
-    private static string LimparRecurso(string r)
+    internal static string LimparRecurso(string r)
     {
         var i = r.IndexOf(':');
         // "file:_C:\pasta\x.exe" -> "C:\pasta\x.exe"
         return i > 0 && i < 12 ? r[(i + 1)..].TrimStart('_') : r;
     }
 
-    private static string Gravidade(int id) => id switch
+    internal static string Gravidade(int id) => id switch
     {
         1 => "Baixa", 2 => "Moderada", 4 => "Alta", 5 => "Grave", _ => "Desconhecida",
     };
 
-    private static string Situacao(int id) => id switch
+    internal static string Situacao(int id) => id switch
     {
         1 => "Detectada",
         2 => "Limpa",
