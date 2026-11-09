@@ -36,7 +36,7 @@ Ele cresce em três direções: **avisar sozinho**, **mostrar a saúde inteira d
 ---
 
 ## Fase 0: Fundação (antes de crescer)
-**✅ Feita em 09/11/2026 (v1.1.0).** Falta só o 0.5 (testes), que espera aprovação do pacote xUnit.
+**✅ Feita em 09/11/2026 (v1.1.0).** Inclui os testes automáticos (79, com xUnit).
 
 Deixa a base pronta para as próximas fases não virarem bagunça.
 
