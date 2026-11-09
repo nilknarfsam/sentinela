@@ -15,6 +15,9 @@ public partial class MainWindow : Window
     private readonly bool _admin = Sistema.EhAdmin();
     private readonly DispatcherTimer _timerRapido = new() { Interval = TimeSpan.FromSeconds(2) };
     private readonly DispatcherTimer _timerDefender = new() { Interval = TimeSpan.FromSeconds(20) };
+    private readonly DispatcherTimer _timerEventosDefender = new() { Interval = TimeSpan.FromSeconds(2) };
+    private bool _relerStatusPendente;
+    private bool _relerAmeacasPendente;
     private bool _avisouBandeja;
     private Task? _inicializacao;
     private Task? _leituraDefender;
@@ -29,13 +32,31 @@ public partial class MainWindow : Window
         TxtAdminMenu.Text = _admin ? "Rodando como administrador" : "Rodando sem administrador";
         TxtVersaoMenu.Text = $"versão {Versao}";
 
-        PaginaInicio.PediuVarredura += IniciarVarredura;
+        PaginaInicio.PediuVarredura += tipo => IniciarVarredura(tipo);
         PaginaInicio.PediuAtualizarStatus += AtualizarStatusAposOperacao;
         PaginaVarredura.VarreduraTerminou += AtualizarStatusAposOperacao;
         PaginaLimpeza.EspacoMudou += PaginaInicio.AtualizarDiscos;
 
         _timerRapido.Tick += (_, _) => PaginaInicio.AtualizarSistema();
         _timerDefender.Tick += async (_, _) => await AtualizarDefender();
+        _timerEventosDefender.Tick += async (_, _) =>
+        {
+            try
+            {
+                _timerEventosDefender.Stop();
+                var relerStatus = _relerStatusPendente;
+                var relerAmeacas = _relerAmeacasPendente;
+                _relerStatusPendente = _relerAmeacasPendente = false;
+                PaginaHistorico.Invalidar();
+                if (relerAmeacas)
+                {
+                    PaginaAmeacas.Carregada = false;
+                    if (PaginaAmeacas.IsVisible) await PaginaAmeacas.Carregar();
+                }
+                if (relerStatus) await AtualizarDefender();
+            }
+            catch { /* Uma falha na releitura não pode escapar do handler assíncrono. */ }
+        };
 
         IsVisibleChanged += async (_, _) =>
         {
@@ -84,12 +105,14 @@ public partial class MainWindow : Window
         PaginaInicio.Visibility = Vis(MenuInicio.IsChecked);
         PaginaVarredura.Visibility = Vis(MenuVarredura.IsChecked);
         PaginaAmeacas.Visibility = Vis(MenuAmeacas.IsChecked);
+        PaginaHistorico.Visibility = Vis(MenuHistorico.IsChecked);
         PaginaLimpeza.Visibility = Vis(MenuLimpeza.IsChecked);
         PaginaInicializacao.Visibility = Vis(MenuInicializacao.IsChecked);
         PaginaAjustes.Visibility = Vis(MenuAjustes.IsChecked);
 
         if (MenuAjustes.IsChecked == true && !PaginaAjustes.Carregada) _ = PaginaAjustes.Carregar();
         if (MenuAmeacas.IsChecked == true && !PaginaAmeacas.Carregada) _ = PaginaAmeacas.Carregar();
+        if (MenuHistorico.IsChecked == true && !PaginaHistorico.Carregada) _ = PaginaHistorico.Carregar();
         if (MenuInicializacao.IsChecked == true && !PaginaInicializacao.Carregada) PaginaInicializacao.Carregar();
     }
 
@@ -122,14 +145,33 @@ public partial class MainWindow : Window
 
     private async void AtualizarStatusAposOperacao()
     {
+        PaginaHistorico.Invalidar();
         PaginaAmeacas.Carregada = false;
         await AtualizarDefender();
     }
 
-    public void IniciarVarredura(TipoVarredura tipo)
+    public void IniciarVarredura(TipoVarredura tipo, string? caminho = null)
     {
         MenuVarredura.IsChecked = true;
-        PaginaVarredura.Iniciar(tipo);
+        PaginaVarredura.Iniciar(tipo, caminho);
+    }
+
+    public bool VarreduraEmAndamento => PaginaVarredura.EmAndamento;
+
+    public void AvisarVarreduraEmAndamento()
+    {
+        MenuVarredura.IsChecked = true;
+        PaginaVarredura.AvisarEmAndamento();
+    }
+
+    public bool IgnorarEventoDeVarredura => PaginaVarredura.EmAndamento
+        || DateTime.UtcNow - PaginaVarredura.UltimoFimUtc <= TimeSpan.FromSeconds(15);
+
+    public void ReceberEventoDefender(bool relerStatus, bool relerAmeacas)
+    {
+        _relerStatusPendente |= relerStatus;
+        _relerAmeacasPendente |= relerAmeacas;
+        if (!_timerEventosDefender.IsEnabled) _timerEventosDefender.Start();
     }
 
     // ================================================================ Admin, bandeja, captura
@@ -166,6 +208,7 @@ public partial class MainWindow : Window
         }
         _timerRapido.Stop();
         _timerDefender.Stop();
+        _timerEventosDefender.Stop();
         PaginaVarredura.Cancelar();
         base.OnClosing(e);
     }
@@ -176,6 +219,7 @@ public partial class MainWindow : Window
         {
             case "varredura": MenuVarredura.IsChecked = true; break;
             case "ameacas": MenuAmeacas.IsChecked = true; break;
+            case "historico": MenuHistorico.IsChecked = true; await PaginaHistorico.Carregar(); break;
             case "limpeza": MenuLimpeza.IsChecked = true; await PaginaLimpeza.Analisar(); break;
             case "inicializacao": MenuInicializacao.IsChecked = true; break;
             case "ajustes": MenuAjustes.IsChecked = true; break;

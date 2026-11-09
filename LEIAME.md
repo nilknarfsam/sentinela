@@ -13,6 +13,12 @@ Sentinela é um painel leve para Windows que usa o **Windows Defender** como mot
 
 O Sentinela **nunca desliga nem muda** configurações de segurança do Defender.
 
+## Verificar uma pasta ou arquivo
+
+Na aba **Varredura**, use **Escolher pasta** ou **Escolher arquivo**, ou arraste um único item para a página quando o app estiver sem elevação. Como administrador, o Windows bloqueia arrastar do Explorer: use os botões ou o clique direito. O Sentinela mostra o caminho em andamento e registra o resultado no histórico.
+
+Depois da instalação, clique com o botão direito em uma pasta ou arquivo e escolha **Verificar com o Sentinela**. No Windows 11, a opção aparece em **Mostrar mais opções**. O pedido é encaminhado ao Sentinela aberto, inclusive quando ele roda como administrador. A caixa de pedidos só funciona quando o administrador é a mesma conta do usuário; elevar com credenciais de outra conta usa outra pasta de pedidos. Se estiver fechado, ele abre e inicia a verificação.
+
 ## Instalar
 1. Compile (precisa do .NET 9 SDK):
    ```

@@ -17,6 +17,8 @@ $atalho    = Join-Path ([Environment]::GetFolderPath('CommonPrograms')) 'Sentine
 $tarefaLogon = 'Sentinela'
 $tarefaAbrir = 'Sentinela-Abrir'
 $usuario   = "$env:USERDOMAIN\$env:USERNAME"
+$chavesVerificar = @('HKLM:\SOFTWARE\Classes\*\shell\SentinelaVerificar',
+                    'HKLM:\SOFTWARE\Classes\Directory\shell\SentinelaVerificar')
 
 function Escreva($t, $c = 'Gray') { Write-Host $t -ForegroundColor $c }
 
@@ -34,6 +36,9 @@ Escreva ''
 if ($Remover) {
     Escreva ' Removendo o Sentinela...' Cyan
     Fechar-Sentinela
+    foreach ($chave in $chavesVerificar) {
+        if (Test-Path -LiteralPath $chave) { Remove-Item -LiteralPath $chave -Recurse -Force }
+    }
     foreach ($t in $tarefaLogon, $tarefaAbrir) {
         if (Get-ScheduledTask -TaskName $t -ErrorAction SilentlyContinue) {
             Unregister-ScheduledTask -TaskName $t -Confirm:$false
@@ -98,7 +103,23 @@ $lnk.Description = 'Sentinela'
 $lnk.Save()
 Escreva '  [OK] Atalho "Sentinela" no menu Iniciar' Green
 
-# 5. Abre agora
+# 5. Verificar arquivos e pastas pelo clique direito
+foreach ($caminhoRegistro in @('SOFTWARE\Classes\*\shell\SentinelaVerificar',
+                              'SOFTWARE\Classes\Directory\shell\SentinelaVerificar')) {
+    $chave = [Microsoft.Win32.Registry]::LocalMachine.CreateSubKey($caminhoRegistro)
+    try {
+        $chave.SetValue('', 'Verificar com o Sentinela')
+        $chave.SetValue('MUIVerb', 'Verificar com o Sentinela')
+        $chave.SetValue('Icon', "`"$exe`",0")
+        $comando = $chave.CreateSubKey('command')
+        try { $comando.SetValue('', ('"{0}" --verificar "%1"' -f $exe)) }
+        finally { $comando.Dispose() }
+    }
+    finally { $chave.Dispose() }
+}
+Escreva "  [OK] Opcao 'Verificar com o Sentinela' no clique direito" Green
+
+# 6. Abre agora
 Start-ScheduledTask -TaskName $tarefaAbrir
 Escreva ''
 Escreva ' Pronto! O Sentinela abriu. Ao fechar no X ele fica na bandeja.' White

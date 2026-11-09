@@ -1,6 +1,7 @@
 <UserControl x:Class="Sentinela.Paginas.PaginaVarredura"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             AllowDrop="True" PreviewDragOver="Pagina_DragOver" PreviewDrop="Pagina_Drop">
     <DockPanel>
         <StackPanel DockPanel.Dock="Top">
             <TextBlock Text="Varredura" Style="{StaticResource Titulo}" Margin="0,0,0,4"/>
@@ -27,6 +28,29 @@
                     </DockPanel>
                 </Border>
             </UniformGrid>
+            <Border Style="{StaticResource CartaoBorda}">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Button x:Name="BtnPasta" Content="Escolher pasta" Click="EscolherPasta_Click"/>
+                        <Button x:Name="BtnArquivo" Content="Escolher arquivo" Click="EscolherArquivo_Click" Margin="8,0,0,0"/>
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock Text="Verificar pasta ou arquivo" Style="{StaticResource Subtitulo}"/>
+                        <TextBlock x:Name="TxtPersonalizada" TextWrapping="Wrap" Text="Escolha ou arraste uma pasta ou arquivo para cá." Style="{StaticResource Fraco}" Margin="0,4,12,0"/>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
+            <Border Style="{StaticResource CartaoBorda}">
+                <DockPanel>
+                    <Button x:Name="BtnOffline" DockPanel.Dock="Right" Content="Reiniciar e verificar" Click="VarreduraOffline_Click" VerticalAlignment="Center" Margin="0"/>
+                    <StackPanel>
+                        <TextBlock Text="Varredura offline (avançado)" Style="{StaticResource Subtitulo}"/>
+                        <TextBlock Text="Reinicia o PC e verifica antes do Windows carregar, para achar vírus que se escondem. Leva uns 15 minutos. Salve seus trabalhos antes." Style="{StaticResource Fraco}" TextWrapping="Wrap" Margin="0,4,12,0"/>
+                        <TextBlock x:Name="TxtOfflineAdmin" Text="Abra como administrador para usar." Style="{StaticResource Fraco}" Visibility="Collapsed" Margin="0,8,0,0"/>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
 
             <Border x:Name="CartaoAndamento" Style="{StaticResource CartaoBorda}" Visibility="Collapsed">
                 <StackPanel>
@@ -34,6 +58,7 @@
                         <Button x:Name="BtnCancelar" DockPanel.Dock="Right" Content="Cancelar" Click="CancelarVarredura_Click" Margin="0"/>
                         <StackPanel>
                             <TextBlock x:Name="TxtAndamento" Style="{StaticResource Subtitulo}"/>
+                            <TextBlock x:Name="TxtCaminho" Style="{StaticResource Fraco}" TextWrapping="Wrap" Visibility="Collapsed" Margin="0,4,0,0"/>
                             <TextBlock x:Name="TxtTempo" Style="{StaticResource Fraco}" Margin="0,4,0,0"/>
                         </StackPanel>
                     </DockPanel>

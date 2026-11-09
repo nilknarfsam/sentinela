@@ -1,6 +1,7 @@
 using System.Windows;
 using WinForms = System.Windows.Forms;
 using Sentinela.Servicos;
+using System.Windows.Threading;
 
 namespace Sentinela;
 
@@ -13,6 +14,15 @@ public partial class App : Application
     private MainWindow? _janela;
     private Dictionary<NivelStatus, System.Drawing.Icon> _icones = new();
     private NivelStatus? _nivelStatus;
+    private VigiaDefender? _vigia;
+    private CaixaDePedidos? _pedidos;
+    private Pedido? _verificarPendente;
+    private int _mostrarPendente;
+    private int _atendendoPedidos;
+    private long _ultimoMostrar;
+    private readonly DispatcherTimer _timerAvisos = new() { Interval = TimeSpan.FromSeconds(5) };
+    private readonly System.Diagnostics.Stopwatch _desdeAviso = new();
+    private readonly List<(string Texto, bool Erro)> _avisosPendentes = [];
 
     /// <summary>Iniciado pelo Windows: fica só na bandeja, sem abrir a janela.</summary>
     public static bool IniciarNaBandeja { get; private set; }
@@ -24,10 +34,12 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        string? caminhoVerificar = null;
         for (int i = 0; i < e.Args.Length; i++)
         {
             switch (e.Args[i].ToLowerInvariant())
             {
+                case "--verificar" when i + 1 < e.Args.Length: caminhoVerificar = e.Args[++i]; break;
                 case "--bandeja": IniciarNaBandeja = true; break;
                 case "--captura" when i + 1 < e.Args.Length: CapturaArquivo = e.Args[++i]; break;
                 case "--aba" when i + 1 < e.Args.Length: CapturaAba = e.Args[++i]; break;
@@ -47,11 +59,7 @@ public partial class App : Application
             }
             catch (UnauthorizedAccessException)
             {
-                // A outra instância roda como administrador e o Windows não deixa
-                // um programa comum falar com ela.
-                MessageBox.Show("O Sentinela já está aberto como administrador.\n\n" +
-                                "Clique no escudo perto do relógio, ou use o atalho \"Sentinela\" do menu Iniciar.",
-                                "Sentinela", MessageBoxButton.OK, MessageBoxImage.Information);
+                EnviarPedido(new Pedido(caminhoVerificar != null ? "verificar" : "mostrar", caminhoVerificar));
                 Shutdown();
                 return;
             }
@@ -63,23 +71,112 @@ public partial class App : Application
             }
             if (!primeira)
             {
-                _sinalMostrar.Set();
+                if (caminhoVerificar != null) EnviarPedido(new Pedido("verificar", caminhoVerificar));
+                else { try { _sinalMostrar.Set(); } catch { AvisarFalhaEnvio(); } }
                 Shutdown();
                 return;
             }
             var t = new Thread(() =>
             {
-                while (_sinalMostrar.WaitOne())
-                    Dispatcher.Invoke(MostrarJanela);
+                try
+                {
+                    while (_sinalMostrar.WaitOne())
+                        if (!Dispatcher.HasShutdownStarted) AtenderPedido(new Pedido("mostrar", null));
+                }
+                catch (ObjectDisposedException) { }
             }) { IsBackground = true };
             t.Start();
             CriarBandeja();
         }
 
         _janela = new MainWindow();
+        if (CapturaArquivo == null)
+        {
+            _pedidos = new CaixaDePedidos();
+            _pedidos.Chegou += AtenderPedido;
+            _pedidos.Iniciar();
+            if (_pedidos.Erro is { } erroPedidos)
+                Diario.Registrar("alerta", "Caixa de pedidos desligada: " + erroPedidos);
+            _timerAvisos.Tick += (_, _) => MostrarAvisosPendentes();
+            _vigia = new VigiaDefender();
+            _vigia.Chegou += evento =>
+            {
+                if (!Dispatcher.HasShutdownStarted)
+                    Dispatcher.BeginInvoke(new Action(() => ReceberEventoDefender(evento)));
+            };
+            _vigia.Iniciar();
+        }
         Diario.Registrar("inicio", IniciarNaBandeja ? "Sentinela iniciado na bandeja" : "Sentinela iniciado");
         _ = _janela.Iniciar();
         if (!IniciarNaBandeja || CapturaArquivo != null) _janela.Show();
+        if (CapturaArquivo == null && caminhoVerificar != null)
+            AtenderPedido(new Pedido("verificar", caminhoVerificar));
+    }
+
+    private static void AvisarFalhaEnvio()
+        => MessageBox.Show("O Sentinela já está aberto como administrador.\n\n" +
+            "Clique no escudo perto do relógio, ou use o atalho \"Sentinela\" do menu Iniciar.",
+            "Sentinela", MessageBoxButton.OK, MessageBoxImage.Information);
+
+    private static void EnviarPedido(Pedido pedido)
+    {
+        if (!Pedidos.Enviar(pedido)) AvisarFalhaEnvio();
+    }
+
+    private void AtenderPedido(Pedido pedido)
+    {
+        if (Pedidos.Validar(pedido) == null) return;
+        if (pedido.Acao == "verificar") Interlocked.Exchange(ref _verificarPendente, pedido);
+        else Interlocked.Exchange(ref _mostrarPendente, 1);
+        AgendarPedidos();
+    }
+
+    private void AgendarPedidos()
+    {
+        if (Dispatcher.HasShutdownStarted || Interlocked.CompareExchange(ref _atendendoPedidos, 1, 0) != 0) return;
+        Dispatcher.BeginInvoke(new Action(ConsumirPedidos));
+    }
+
+    private async void ConsumirPedidos()
+    {
+        try
+        {
+            if (Saindo) return;
+            if (Interlocked.Exchange(ref _mostrarPendente, 0) != 0)
+            {
+                var agora = Environment.TickCount64;
+                if (_ultimoMostrar == 0 || agora - _ultimoMostrar >= 2000)
+                {
+                    _ultimoMostrar = agora;
+                    MostrarJanela();
+                }
+            }
+            var pedido = Interlocked.Exchange(ref _verificarPendente, null);
+            if (pedido == null) return;
+            if (_janela?.VarreduraEmAndamento == true)
+            {
+                MostrarJanela();
+                _janela.AvisarVarreduraEmAndamento();
+                return;
+            }
+            bool existe;
+            try
+            {
+                existe = await Task.Run(() => Pedidos.UnidadePermitida(pedido.Caminho!)
+                    && (File.Exists(pedido.Caminho) || Directory.Exists(pedido.Caminho)))
+                    .WaitAsync(TimeSpan.FromSeconds(3));
+            }
+            catch { return; }
+            if (!existe || Saindo) return;
+            MostrarJanela();
+            _janela?.IniciarVarredura(TipoVarredura.Personalizada, pedido.Caminho);
+        }
+        finally
+        {
+            Interlocked.Exchange(ref _atendendoPedidos, 0);
+            if (!Saindo && (Volatile.Read(ref _verificarPendente) != null || Volatile.Read(ref _mostrarPendente) != 0))
+                AgendarPedidos();
+        }
     }
 
     private void CriarBandeja()
@@ -115,7 +212,85 @@ public partial class App : Application
     public void Avisar(string titulo, string texto, bool erro = false, bool rotina = false)
     {
         if (_bandeja == null || (rotina && !Configuracoes.Atual.AvisosDeRotina)) return;
+        if (_desdeAviso.IsRunning && _desdeAviso.Elapsed < TimeSpan.FromSeconds(5))
+        {
+            _avisosPendentes.Add((texto, erro));
+            if (!_timerAvisos.IsEnabled)
+            {
+                _timerAvisos.Interval = TimeSpan.FromSeconds(5) - _desdeAviso.Elapsed;
+                _timerAvisos.Start();
+            }
+            return;
+        }
+        if (_avisosPendentes.Count > 0)
+        {
+            _avisosPendentes.Add((texto, erro));
+            MostrarAvisosPendentes();
+            return;
+        }
         _bandeja.ShowBalloonTip(5000, titulo, texto, erro ? WinForms.ToolTipIcon.Warning : WinForms.ToolTipIcon.Info);
+        _desdeAviso.Restart();
+    }
+
+    private void MostrarAvisosPendentes()
+    {
+        _timerAvisos.Stop();
+        if (_avisosPendentes.Count == 0 || _bandeja == null) return;
+        var restante = TimeSpan.FromSeconds(5) - _desdeAviso.Elapsed;
+        if (restante > TimeSpan.Zero)
+        {
+            _timerAvisos.Interval = restante;
+            _timerAvisos.Start();
+            return;
+        }
+        var erro = _avisosPendentes.Any(a => a.Erro);
+        var texto = erro ? _avisosPendentes.First(a => a.Erro).Texto : _avisosPendentes[^1].Texto;
+        if (texto.Length > 150) texto = texto[..149] + "…";
+        var outros = _avisosPendentes.Count - 1;
+        if (outros > 0)
+            texto += $" (e mais {outros} {(outros == 1 ? "aviso" : "avisos")}. Abra o Histórico.)";
+        _bandeja.ShowBalloonTip(5000, "Sentinela", texto,
+            erro ? WinForms.ToolTipIcon.Warning : WinForms.ToolTipIcon.Info);
+        _avisosPendentes.Clear();
+        _desdeAviso.Restart();
+    }
+
+    private void ReceberEventoDefender(EventoDefender evento)
+    {
+        if (Saindo) return;
+        if (evento.Id is 1000 or 1001 or 1002 && _janela?.IgnorarEventoDeVarredura == true) return;
+        var relerStatus = false;
+        var relerAmeacas = false;
+        switch (evento.Tipo)
+        {
+            case TipoEvento.Ameaca:
+                Avisar("Sentinela", "Ameaça detectada: " + evento.Detalhe, erro: true);
+                relerStatus = relerAmeacas = true;
+                break;
+            case TipoEvento.AmeacaTratada:
+                Avisar("Sentinela", "O Defender tratou: " + evento.Detalhe, rotina: false);
+                relerStatus = relerAmeacas = true;
+                break;
+            case TipoEvento.Protecao:
+                relerStatus = true;
+                if (evento.Id is 5001 or 5010 or 5012)
+                {
+                    Avisar("Sentinela", evento.Titulo, erro: true);
+                }
+                break;
+            case TipoEvento.Configuracao:
+                Avisar("Sentinela", "Configuração do Defender mudou: " + evento.Detalhe + ". Se não foi você, abra a Segurança do Windows.", erro: true);
+                break;
+            case TipoEvento.Varredura when evento.Id == 1001:
+                Avisar("Sentinela", evento.Titulo + ": " + evento.Detalhe, rotina: true);
+                relerStatus = true;
+                break;
+            case TipoEvento.Assinaturas:
+                relerStatus = true;
+                if (evento.Id == 2001) Avisar("Sentinela", evento.Titulo, erro: true);
+                break;
+        }
+        _janela?.ReceberEventoDefender(relerStatus, relerAmeacas);
     }
 
     public void AtualizarIcone(NivelStatus nivel, string texto, string? aviso = null)
@@ -184,6 +359,9 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        _pedidos?.Dispose();
+        _vigia?.Dispose();
+        _timerAvisos.Stop();
         _bandeja?.Dispose();
         foreach (var icone in _icones.Values) icone.Dispose();
         try { _mutex?.ReleaseMutex(); } catch { }

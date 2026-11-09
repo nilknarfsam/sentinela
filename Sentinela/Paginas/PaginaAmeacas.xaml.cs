@@ -8,6 +8,8 @@ namespace Sentinela.Paginas;
 public partial class PaginaAmeacas : UserControl
 {
     private readonly bool _admin = Sistema.EhAdmin();
+    private Task? _carregamento;
+    private bool _restaurando;
     public bool Carregada { get; set; }
 
     private App App => (App)Application.Current;
@@ -15,17 +17,38 @@ public partial class PaginaAmeacas : UserControl
     public PaginaAmeacas()
     {
         InitializeComponent();
+        GradeQuarentena.IsEnabled = BtnExcluir.IsEnabled = TextoDefender.IsEnabled = _admin;
+        if (!_admin) TxtResultadoQuarentena.Text = "Abra como administrador para ver a quarentena.";
     }
 
-    public async Task Carregar()
+    public Task Carregar() => _carregamento ??= CarregarLista();
+
+    private async Task CarregarLista()
+    {
+        await Task.Yield();
+        try
+        {
+            do
+            {
+                await LerLista();
+            } while (!Carregada && IsVisible);
+        }
+        finally { _carregamento = null; }
+    }
+
+    private async Task LerLista()
     {
         Carregada = true;
         TxtResumoAmeacas.Text = "Carregando...";
         TxtQuarentena.Text = "Carregando...";
+        GradeQuarentena.ItemsSource = null;
         try
         {
             var lista = await Task.Run(Defender.LerAmeacas);
             GradeAmeacas.ItemsSource = lista;
+            if (_admin)
+                GradeQuarentena.ItemsSource = lista.Where(a => a.Situacao == "Em quarentena")
+                    .SelectMany(a => a.Local.Split("  |  ", StringSplitOptions.None).Select(local => a with { Local = local })).ToList();
             int ativas = lista.Count(a => a.Ativa);
             TxtResumoAmeacas.Text = lista.Count == 0
                 ? (_admin ? "Nenhuma ameaça no histórico do Defender." : "Nada encontrado, mas sem administrador o histórico pode vir incompleto.")
@@ -60,4 +83,45 @@ public partial class PaginaAmeacas : UserControl
     }
 
     private void AbrirSeguranca_Click(object sender, RoutedEventArgs e) => Tentar(Defender.AbrirSegurancaDoWindows);
+
+    private void Quarentena_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        => AtualizarRestaurar();
+
+    private void AtualizarRestaurar()
+    {
+        var selecionada = GradeQuarentena.SelectedItem as Ameaca;
+        var restauravel = selecionada != null && Pedidos.CaminhoLocalValido(selecionada.Local);
+        BtnRestaurar.IsEnabled = _admin && !_restaurando && GradeQuarentena.SelectedItems.Count == 1 && restauravel;
+        TxtSemArquivoRestauravel.Visibility = selecionada != null && !restauravel ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private async void Restaurar_Click(object sender, RoutedEventArgs e)
+    {
+        if (!_admin || _restaurando || GradeQuarentena.SelectedItem is not Ameaca ameaca
+            || !Pedidos.CaminhoLocalValido(ameaca.Local)) return;
+        if (MessageBox.Show(Window.GetWindow(this), "Restaurar devolve o arquivo ao lugar original. Só faça isso se tiver CERTEZA de que o arquivo é seguro (por exemplo, um falso alarme num programa seu). Continuar?",
+                "Restaurar", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) != MessageBoxResult.Yes) return;
+        if (MessageBox.Show(Window.GetWindow(this), $"Última confirmação: restaurar {ameaca.Nome} em {ameaca.Local}?",
+                "Restaurar", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) != MessageBoxResult.Yes) return;
+        _restaurando = true;
+        BtnRestaurar.IsEnabled = false;
+        try
+        {
+            string resultado;
+            try
+            {
+                var (codigo, saida) = await Defender.Restaurar(ameaca.Nome, ameaca.Local);
+                resultado = $"Restauração de {ameaca.Nome} em {ameaca.Local}: código {codigo}. {saida.Trim()}";
+            }
+            catch (Exception ex) { resultado = "Não foi possível restaurar: " + ex.Message; }
+            TxtResultadoQuarentena.Text = resultado;
+            Diario.Registrar("restaurar", resultado);
+            await Carregar();
+        }
+        finally
+        {
+            _restaurando = false;
+            AtualizarRestaurar();
+        }
+    }
 }

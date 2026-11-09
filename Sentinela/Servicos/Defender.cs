@@ -31,7 +31,7 @@ public sealed record Ameaca(
     string Local,
     bool Ativa);
 
-public enum TipoVarredura { Rapida = 1, Completa = 2 }
+public enum TipoVarredura { Rapida = 1, Completa = 2, Personalizada = 3 }
 
 /// <summary>
 /// Conversa com o Windows Defender. Só lê o estado e pede ações que o próprio
@@ -100,12 +100,68 @@ public static class Defender
     public static async Task<string> ListarQuarentena()
     {
         var (_, saida) = await RodarMpCmdRun("-Restore -ListAll", CancellationToken.None);
-        var linhas = saida.Split('\n').Select(l => l.TrimEnd()).Where(l => l.Length > 0).ToList();
-        return linhas.Count == 0 ? "A quarentena está vazia." : string.Join(Environment.NewLine, linhas);
+        return string.IsNullOrWhiteSpace(saida) ? "A quarentena está vazia." : saida;
     }
 
-    public static Task<(int codigo, string saida)> Varrer(TipoVarredura tipo, CancellationToken ct)
-        => RodarMpCmdRun($"-Scan -ScanType {(int)tipo}", ct, cancelar: "-Scan -Cancel");
+    internal static string ArgumentosRestaurar(string nome, string? caminho)
+    {
+        static string EntreAspas(string valor, string parametro)
+        {
+            if (valor.Contains('"') || valor.Any(char.IsControl))
+                throw new ArgumentException("Aspas e caracteres de controle não são permitidos.", parametro);
+            var barrasFinais = valor.Length - valor.TrimEnd('\\').Length;
+            return "\"" + valor + new string('\\', barrasFinais) + "\"";
+        }
+        if (string.IsNullOrWhiteSpace(nome)) throw new ArgumentException("Informe o nome da ameaça.", nameof(nome));
+        var argumentos = "-Restore -Name " + EntreAspas(nome, nameof(nome));
+        if (caminho != null)
+        {
+            if (string.IsNullOrWhiteSpace(caminho)) throw new ArgumentException("Informe o caminho do arquivo.", nameof(caminho));
+            var arquivo = EntreAspas(caminho, nameof(caminho));
+            argumentos += " -FilePath " + arquivo;
+        }
+        return argumentos;
+    }
+
+    public static Task<(int codigo, string saida)> Restaurar(string nome, string? caminho)
+        => RodarMpCmdRun(ArgumentosRestaurar(nome, caminho), CancellationToken.None);
+
+    public static async Task IniciarVarreduraOffline()
+    {
+        var psi = new ProcessStartInfo("powershell.exe", "-NoProfile -NonInteractive -Command \"Start-MpWDOScan\"")
+        {
+            UseShellExecute = false, CreateNoWindow = true,
+            RedirectStandardOutput = true, RedirectStandardError = true,
+        };
+        using var processo = Process.Start(psi) ?? throw new InvalidOperationException("Não foi possível iniciar o PowerShell.");
+        var saida = processo.StandardOutput.ReadToEndAsync();
+        var erro = processo.StandardError.ReadToEndAsync();
+        await processo.WaitForExitAsync();
+        var texto = (await saida + await erro).Trim();
+        if (processo.ExitCode != 0)
+            throw new InvalidOperationException($"O Defender recusou a varredura offline (código {processo.ExitCode}). {texto}");
+    }
+
+    internal static string ArgumentosVarredura(TipoVarredura tipo, string? caminho)
+    {
+        if (tipo != TipoVarredura.Personalizada) return $"-Scan -ScanType {(int)tipo}";
+        if (string.IsNullOrWhiteSpace(caminho) || !Pedidos.CaminhoLocalValido(caminho) || !Path.IsPathFullyQualified(caminho))
+            throw new ArgumentException("Informe um caminho absoluto de unidade local.", nameof(caminho));
+        // Duplica barras finais para preservar a aspa de fechamento na linha de comando.
+        var barrasFinais = caminho.Length - caminho.TrimEnd('\\').Length;
+        return "-Scan -ScanType 3 -File \"" + caminho + new string('\\', barrasFinais) + "\"";
+    }
+
+    public static Task<(int codigo, string saida)> Varrer(TipoVarredura tipo, CancellationToken ct, string? caminho = null)
+    {
+        var argumentos = ArgumentosVarredura(tipo, caminho);
+        return Task.Run(async () =>
+        {
+            if (tipo == TipoVarredura.Personalizada && !Pedidos.UnidadePermitida(caminho!))
+                throw new ArgumentException("A unidade deve ser local, fixa ou removível.", nameof(caminho));
+            return await RodarMpCmdRun(argumentos, ct, cancelar: "-Scan -Cancel");
+        }, ct);
+    }
 
     public static Task<(int codigo, string saida)> AtualizarAssinaturas(CancellationToken ct)
         => RodarMpCmdRun("-SignatureUpdate", ct);
@@ -193,8 +249,9 @@ public static class Defender
     internal static string LimparRecurso(string r)
     {
         var i = r.IndexOf(':');
-        // "file:_C:\pasta\x.exe" -> "C:\pasta\x.exe"
-        return i > 0 && i < 12 ? r[(i + 1)..].TrimStart('_') : r;
+        // "file:_C:\pasta\x.exe" -> "C:\pasta\x.exe". Um caminho comum ("C:\x.exe")
+        // tem o ':' na posição 1 e não tem prefixo: fica como está.
+        return i > 1 && i < 12 && r[..i].All(char.IsLetter) ? r[(i + 1)..].TrimStart('_') : r;
     }
 
     internal static string Gravidade(int id) => id switch
