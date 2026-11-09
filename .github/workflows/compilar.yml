@@ -1,0 +1,35 @@
+# Compilar o Sentinela.
+# Este workflow roda a cada push e a cada pull request, em qualquer branch.
+# Ele restaura o .NET 9, compila o projeto em Release, gera o executável
+# único para Windows x64 (sem .NET embutido, que depende do runtime instalado)
+# e publica o Sentinela.exe como artefato para baixar na página da execução.
+
+name: Compilar
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  compilar:
+    runs-on: windows-latest
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Instalar o .NET 9 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Compilar (Release)
+        run: dotnet build Sentinela/Sentinela.csproj -c Release
+
+      - name: Publicar executável único (win-x64)
+        run: dotnet publish Sentinela/Sentinela.csproj -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publicado
+
+      - name: Enviar Sentinela.exe como artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: Sentinela
+          path: publicado/Sentinela.exe

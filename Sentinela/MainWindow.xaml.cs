@@ -27,6 +27,7 @@ public partial class MainWindow : Window
 
         FaixaAdmin.Visibility = _admin ? Visibility.Collapsed : Visibility.Visible;
         TxtAdminMenu.Text = _admin ? "Rodando como administrador" : "Rodando sem administrador";
+        TxtVersaoMenu.Text = $"versão {Versao}";
 
         PaginaInicio.PediuVarredura += IniciarVarredura;
         PaginaInicio.PediuAtualizarStatus += AtualizarStatusAposOperacao;
@@ -85,7 +86,9 @@ public partial class MainWindow : Window
         PaginaAmeacas.Visibility = Vis(MenuAmeacas.IsChecked);
         PaginaLimpeza.Visibility = Vis(MenuLimpeza.IsChecked);
         PaginaInicializacao.Visibility = Vis(MenuInicializacao.IsChecked);
+        PaginaAjustes.Visibility = Vis(MenuAjustes.IsChecked);
 
+        if (MenuAjustes.IsChecked == true && !PaginaAjustes.Carregada) _ = PaginaAjustes.Carregar();
         if (MenuAmeacas.IsChecked == true && !PaginaAmeacas.Carregada) _ = PaginaAmeacas.Carregar();
         if (MenuInicializacao.IsChecked == true && !PaginaInicializacao.Carregada) PaginaInicializacao.Carregar();
     }
@@ -145,13 +148,19 @@ public partial class MainWindow : Window
     {
         if (!App.Saindo && App.CapturaArquivo == null)
         {
-            // Fechar no X só esconde: o painel continua na bandeja.
+            if (!Configuracoes.Atual.FecharParaBandeja)
+            {
+                e.Cancel = true;
+                Dispatcher.BeginInvoke(new Action(App.Sair));
+                return;
+            }
+            // Fechar no X esconde: o painel continua na bandeja.
             e.Cancel = true;
             Hide();
             if (!_avisouBandeja)
             {
                 _avisouBandeja = true;
-                App.Avisar("Sentinela", "Continuo aqui na bandeja, perto do relógio. Para sair, clique com o botão direito no escudo.");
+                App.Avisar("Sentinela", "Continuo aqui na bandeja, perto do relógio. Para sair, clique com o botão direito no escudo.", rotina: true);
             }
             return;
         }
@@ -169,6 +178,7 @@ public partial class MainWindow : Window
             case "ameacas": MenuAmeacas.IsChecked = true; break;
             case "limpeza": MenuLimpeza.IsChecked = true; await PaginaLimpeza.Analisar(); break;
             case "inicializacao": MenuInicializacao.IsChecked = true; break;
+            case "ajustes": MenuAjustes.IsChecked = true; break;
         }
         await Task.Delay(2500);
         PaginaInicio.AtualizarSistema();

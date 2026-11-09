@@ -119,7 +119,7 @@ public partial class PaginaInicio : UserControl
             var (codigo, _) = await Defender.AtualizarAssinaturas(CancellationToken.None);
             var mensagem = codigo == 0 ? "Assinaturas atualizadas." : $"A atualização terminou com o código {codigo}.";
             Diario.Registrar("assinaturas", mensagem);
-            App.Avisar("Sentinela", mensagem, codigo != 0);
+            App.Avisar("Sentinela", mensagem, codigo != 0, rotina: codigo == 0);
         }
         catch (Exception ex)
         {

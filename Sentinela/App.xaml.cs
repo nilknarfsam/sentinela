@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 using WinForms = System.Windows.Forms;
 using Sentinela.Servicos;
 
@@ -112,9 +112,9 @@ public partial class App : Application
         _janela.Activate();
     }
 
-    public void Avisar(string titulo, string texto, bool erro = false)
+    public void Avisar(string titulo, string texto, bool erro = false, bool rotina = false)
     {
-        if (_bandeja == null) return;
+        if (_bandeja == null || (rotina && !Configuracoes.Atual.AvisosDeRotina)) return;
         _bandeja.ShowBalloonTip(5000, titulo, texto, erro ? WinForms.ToolTipIcon.Warning : WinForms.ToolTipIcon.Info);
     }
 

@@ -55,7 +55,7 @@ public partial class PaginaAmeacas : UserControl
         BtnTratar.IsEnabled = false;
         var r = await Defender.RemoverAmeacasAtivas();
         Diario.Registrar("tratar", r);
-        App.Avisar("Sentinela", r);
+        App.Avisar("Sentinela", r, rotina: r == "As ameaças ativas foram tratadas pelo Defender.");
         await Carregar();
     }
 

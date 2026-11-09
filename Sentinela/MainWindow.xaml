@@ -26,6 +26,7 @@
 
                 <StackPanel DockPanel.Dock="Bottom" Margin="22,0,16,20">
                     <TextBlock x:Name="TxtAdminMenu" Style="{StaticResource Fraco}" FontSize="11"/>
+                    <TextBlock x:Name="TxtVersaoMenu" Style="{StaticResource Fraco}" FontSize="11" Margin="0,4,0,0"/>
                 </StackPanel>
 
                 <StackPanel>
@@ -34,6 +35,7 @@
                     <RadioButton x:Name="MenuAmeacas" Style="{StaticResource ItemMenu}" Tag="&#xE7BA;" Content="Ameaças e quarentena" Checked="Menu_Checked"/>
                     <RadioButton x:Name="MenuLimpeza" Style="{StaticResource ItemMenu}" Tag="&#xE74D;" Content="Otimização" Checked="Menu_Checked"/>
                     <RadioButton x:Name="MenuInicializacao" Style="{StaticResource ItemMenu}" Tag="&#xE7E8;" Content="Inicialização" Checked="Menu_Checked"/>
+                    <RadioButton x:Name="MenuAjustes" Style="{StaticResource ItemMenu}" Tag="&#xE713;" Content="Ajustes" Checked="Menu_Checked"/>
                 </StackPanel>
             </DockPanel>
         </Border>
@@ -57,6 +59,7 @@
                 <p:PaginaAmeacas x:Name="PaginaAmeacas" Visibility="Collapsed"/>
                 <p:PaginaLimpeza x:Name="PaginaLimpeza" Visibility="Collapsed"/>
                 <p:PaginaInicializacao x:Name="PaginaInicializacao" Visibility="Collapsed"/>
+                <p:PaginaAjustes x:Name="PaginaAjustes" Visibility="Collapsed"/>
             </Grid>
         </DockPanel>
     </Grid>

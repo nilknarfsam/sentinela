@@ -5,6 +5,8 @@ namespace Sentinela.Servicos;
 
 public static class Formatos
 {
+    public static string Versao => System.Reflection.Assembly.GetEntryAssembly()!.GetName().Version!.ToString(3);
+
     public static Brush Cor(string chave) => (Brush)Application.Current.FindResource(chave);
 
     public static void Tentar(Action a)

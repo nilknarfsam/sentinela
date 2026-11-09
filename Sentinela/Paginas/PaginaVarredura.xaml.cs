@@ -52,6 +52,7 @@ public partial class PaginaVarredura : UserControl
         string resumo;
         bool achou = false;
         bool encontrouAmeaca = false;
+        bool limpa = false;
         try
         {
             var (codigo, saida) = await Defender.Varrer(tipo, _ctsVarredura.Token);
@@ -60,6 +61,7 @@ public partial class PaginaVarredura : UserControl
             bool falhou = saida.Contains("[Failed]", StringComparison.OrdinalIgnoreCase)
                        || saida.Contains("Failed with hr", StringComparison.OrdinalIgnoreCase);
             achou = !falhou && codigo != 0;
+            limpa = !falhou && codigo == 0;
             encontrouAmeaca = achou;
             resumo = falhou
                 ? $"{nome} não rodou: o Defender recusou o pedido. Tente abrir o Sentinela como administrador."
@@ -91,7 +93,7 @@ public partial class PaginaVarredura : UserControl
         if (encontrouAmeaca) Diario.Registrar("ameaca", resumo);
         TxtTempo.Text = "";
         BtnCancelar.IsEnabled = false;
-        App.Avisar("Sentinela", resumo, achou);
+        App.Avisar("Sentinela", resumo, achou, rotina: limpa);
         VarreduraTerminou?.Invoke();
     }
 
