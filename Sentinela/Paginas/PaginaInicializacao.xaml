@@ -1,0 +1,24 @@
+<UserControl x:Class="Sentinela.Paginas.PaginaInicializacao"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DockPanel>
+        <DockPanel DockPanel.Dock="Top" Margin="0,0,12,18">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                <Button Content="Atualizar" Click="AtualizarInicializacao_Click"/>
+                <Button Style="{StaticResource BotaoPrincipal}" Content="Ligar ou desligar no Gerenciador" Click="AbrirGerenciador_Click" Margin="0"/>
+            </StackPanel>
+            <StackPanel>
+                <TextBlock Text="Inicialização" Style="{StaticResource Titulo}" Margin="0,0,0,4"/>
+                <TextBlock x:Name="TxtResumoInicializacao" Style="{StaticResource Fraco}"/>
+            </StackPanel>
+        </DockPanel>
+        <DataGrid x:Name="GradeInicializacao" Margin="0,0,12,0">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Programa" Binding="{Binding Nome}" Width="200"/>
+                <DataGridTextColumn Header="Estado" Binding="{Binding Estado}" Width="90"/>
+                <DataGridTextColumn Header="Origem" Binding="{Binding Origem}" Width="160"/>
+                <DataGridTextColumn Header="Comando" Binding="{Binding Comando}" Width="*"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </DockPanel>
+</UserControl>

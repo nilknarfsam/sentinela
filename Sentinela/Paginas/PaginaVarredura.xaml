@@ -1,0 +1,47 @@
+<UserControl x:Class="Sentinela.Paginas.PaginaVarredura"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top">
+            <TextBlock Text="Varredura" Style="{StaticResource Titulo}" Margin="0,0,0,4"/>
+            <TextBlock Text="O Windows Defender faz a varredura. Você pode continuar usando o PC enquanto isso." Style="{StaticResource Fraco}" Margin="0,0,0,18"/>
+            <UniformGrid Columns="2">
+                <Border Style="{StaticResource CartaoBorda}">
+                    <DockPanel>
+                        <Button x:Name="BtnRapida" DockPanel.Dock="Right" Style="{StaticResource BotaoPrincipal}" Content="Iniciar" Click="VarreduraRapida_Click" VerticalAlignment="Center" Margin="0"/>
+                        <StackPanel>
+                            <TextBlock Text="Varredura rápida" Style="{StaticResource Subtitulo}"/>
+                            <TextBlock Text="Olha os lugares onde vírus costumam ficar. Leva poucos minutos." Style="{StaticResource Fraco}" Margin="0,4,12,0"/>
+                            <TextBlock x:Name="TxtUltimaRapida" Style="{StaticResource Fraco}" Margin="0,8,0,0"/>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+                <Border Style="{StaticResource CartaoBorda}">
+                    <DockPanel>
+                        <Button x:Name="BtnCompleta" DockPanel.Dock="Right" Content="Iniciar" Click="VarreduraCompleta_Click" VerticalAlignment="Center" Margin="0"/>
+                        <StackPanel>
+                            <TextBlock Text="Varredura completa" Style="{StaticResource Subtitulo}"/>
+                            <TextBlock Text="Olha todos os arquivos do PC. Pode levar mais de uma hora." Style="{StaticResource Fraco}" Margin="0,4,12,0"/>
+                            <TextBlock x:Name="TxtUltimaCompleta" Style="{StaticResource Fraco}" Margin="0,8,0,0"/>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+            </UniformGrid>
+
+            <Border x:Name="CartaoAndamento" Style="{StaticResource CartaoBorda}" Visibility="Collapsed">
+                <StackPanel>
+                    <DockPanel>
+                        <Button x:Name="BtnCancelar" DockPanel.Dock="Right" Content="Cancelar" Click="CancelarVarredura_Click" Margin="0"/>
+                        <StackPanel>
+                            <TextBlock x:Name="TxtAndamento" Style="{StaticResource Subtitulo}"/>
+                            <TextBlock x:Name="TxtTempo" Style="{StaticResource Fraco}" Margin="0,4,0,0"/>
+                        </StackPanel>
+                    </DockPanel>
+                    <ProgressBar x:Name="BarraVarredura" IsIndeterminate="True" Margin="0,14,0,0"/>
+                </StackPanel>
+            </Border>
+            <TextBlock Text="Resultado" Style="{StaticResource Subtitulo}" Margin="2,6,0,10"/>
+        </StackPanel>
+        <TextBox x:Name="LogVarredura" Style="{StaticResource Log}" Margin="0,0,12,0" Text="Nenhuma varredura feita pelo Sentinela ainda."/>
+    </DockPanel>
+</UserControl>

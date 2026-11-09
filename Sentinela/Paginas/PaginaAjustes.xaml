@@ -1,0 +1,62 @@
+<UserControl x:Class="Sentinela.Paginas.PaginaAjustes"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top" Margin="0,0,12,18">
+            <TextBlock Text="Ajustes" Style="{StaticResource Titulo}" Margin="0,0,0,4"/>
+            <TextBlock Text="Escolha como o Sentinela se comporta no dia a dia." Style="{StaticResource Fraco}"/>
+        </StackPanel>
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Border Style="{StaticResource CartaoBorda}" Grid.ColumnSpan="2">
+                    <StackPanel>
+                        <TextBlock Text="Iniciar com o Windows" Style="{StaticResource Subtitulo}" Margin="0,0,0,10"/>
+                        <CheckBox x:Name="ChkInicializacao" Content="Abrir o Sentinela na bandeja ao entrar no Windows" Click="Inicializacao_Click"/>
+                        <TextBlock x:Name="TxtInicializacao" Style="{StaticResource Fraco}" Margin="0,8,0,0"/>
+                    </StackPanel>
+                </Border>
+                <Border Grid.Row="1" Style="{StaticResource CartaoBorda}">
+                    <StackPanel>
+                        <TextBlock Text="Ao fechar a janela" Style="{StaticResource Subtitulo}" Margin="0,0,0,10"/>
+                        <CheckBox x:Name="ChkBandeja" Click="Bandeja_Click">
+                            <TextBlock Text="Manter o Sentinela na bandeja (perto do relógio)"/>
+                        </CheckBox>
+                    </StackPanel>
+                </Border>
+                <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource CartaoBorda}">
+                    <StackPanel>
+                        <TextBlock Text="Avisos" Style="{StaticResource Subtitulo}" Margin="0,0,0,10"/>
+                        <CheckBox x:Name="ChkAvisos" Click="Avisos_Click">
+                            <TextBlock Text="Avisar também quando tudo der certo (varredura limpa, assinaturas atualizadas)"/>
+                        </CheckBox>
+                        <TextBlock Text="Avisos de ameaça e de proteção desligada sempre aparecem." Style="{StaticResource Fraco}" Margin="0,10,0,0"/>
+                    </StackPanel>
+                </Border>
+                <Border Grid.Row="2" Style="{StaticResource CartaoBorda}">
+                    <StackPanel>
+                        <TextBlock Text="Diário" Style="{StaticResource Subtitulo}" Margin="0,0,0,10"/>
+                        <TextBlock x:Name="TxtDiario" Style="{StaticResource Fraco}" Margin="0,0,0,12"/>
+                        <Button Content="Abrir a pasta do diário" HorizontalAlignment="Left" Click="AbrirDiario_Click"/>
+                    </StackPanel>
+                </Border>
+                <Border Grid.Row="2" Grid.Column="1" Style="{StaticResource CartaoBorda}">
+                    <StackPanel>
+                        <TextBlock Text="Sobre" Style="{StaticResource Subtitulo}" Margin="0,0,0,10"/>
+                        <TextBlock x:Name="TxtVersao"/>
+                        <TextBlock Text="Motor: Windows Defender" Margin="0,6,0,8"/>
+                        <TextBlock x:Name="TxtExecutavel" Style="{StaticResource Fraco}"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </ScrollViewer>
+    </DockPanel>
+</UserControl>
