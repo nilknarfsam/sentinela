@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Win32;
 
-namespace PainelPC.Servicos;
+namespace Sentinela.Servicos;
 
 /// <summary>Estado do Windows Defender lido pelo WMI (o mesmo que Get-MpComputerStatus).</summary>
 public sealed record StatusDefender(

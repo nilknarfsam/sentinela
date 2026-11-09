@@ -1,11 +1,11 @@
 ﻿using System.Windows;
 using WinForms = System.Windows.Forms;
 
-namespace PainelPC;
+namespace Sentinela;
 
 public partial class App : Application
 {
-    private const string NomeUnico = "PainelPC_Franklin_Instancia";
+    private const string NomeUnico = "Sentinela_Franklin_Instancia";
     private Mutex? _mutex;
     private EventWaitHandle? _sinalMostrar;
     private WinForms.NotifyIcon? _bandeja;
@@ -44,9 +44,9 @@ public partial class App : Application
             {
                 // A outra instância roda como administrador e o Windows não deixa
                 // um programa comum falar com ela.
-                MessageBox.Show("O Painel do PC já está aberto como administrador.\n\n" +
-                                "Clique no escudo perto do relógio, ou use o atalho \"Painel do PC\" do menu Iniciar.",
-                                "Painel do PC", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("O Sentinela já está aberto como administrador.\n\n" +
+                                "Clique no escudo perto do relógio, ou use o atalho \"Sentinela\" do menu Iniciar.",
+                                "Sentinela", MessageBoxButton.OK, MessageBoxImage.Information);
                 Shutdown();
                 return;
             }
@@ -78,7 +78,7 @@ public partial class App : Application
     private void CriarBandeja()
     {
         var menu = new WinForms.ContextMenuStrip();
-        menu.Items.Add("Abrir o painel", null, (_, _) => MostrarJanela());
+        menu.Items.Add("Abrir o Sentinela", null, (_, _) => MostrarJanela());
         menu.Items.Add("Varredura rápida", null, (_, _) => { MostrarJanela(); _janela?.IniciarVarredura(Servicos.TipoVarredura.Rapida); });
         menu.Items.Add(new WinForms.ToolStripSeparator());
         menu.Items.Add("Sair", null, (_, _) => Sair());
@@ -86,7 +86,7 @@ public partial class App : Application
         _bandeja = new WinForms.NotifyIcon
         {
             Icon = System.Drawing.Icon.ExtractAssociatedIcon(Environment.ProcessPath!) ?? System.Drawing.SystemIcons.Shield,
-            Text = "Painel do PC",
+            Text = "Sentinela",
             Visible = true,
             ContextMenuStrip = menu,
         };

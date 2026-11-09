@@ -1,6 +1,6 @@
 @echo off
 chcp 65001 >nul
-title Desinstalar Painel do PC (admin)
+title Desinstalar Sentinela (admin)
 
 net session >nul 2>&1
 if %errorlevel% neq 0 (
@@ -11,5 +11,5 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0instalar-painel.ps1" -Remover
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0instalar-sentinela.ps1" -Remover
 pause

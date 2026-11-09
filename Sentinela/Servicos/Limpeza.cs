@@ -2,7 +2,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace PainelPC.Servicos;
+namespace Sentinela.Servicos;
 
 /// <summary>Um grupo de arquivos descartáveis (temporários, lixeira...).</summary>
 public sealed class ItemLimpeza : INotifyPropertyChanged

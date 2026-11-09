@@ -6,9 +6,9 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using PainelPC.Servicos;
+using Sentinela.Servicos;
 
-namespace PainelPC;
+namespace Sentinela;
 
 public partial class MainWindow : Window
 {
@@ -93,7 +93,7 @@ public partial class MainWindow : Window
         if (s == null)
         {
             DefinirStatus("Não consegui ler o Defender", erro ?? "O Windows Defender não respondeu.", "Vermelho", "");
-            App.AtualizarIconeTexto("Painel do PC: Defender não respondeu");
+            App.AtualizarIconeTexto("Sentinela: Defender não respondeu");
             return;
         }
 
@@ -116,19 +116,19 @@ public partial class MainWindow : Window
         if (!s.TudoLigado)
         {
             DefinirStatus("Atenção: alguma proteção está desligada",
-                "Abra a Segurança do Windows para religar. O painel não muda configurações de segurança.", "Vermelho", "");
-            App.AtualizarIconeTexto("Painel do PC: proteção desligada!");
+                "Abra a Segurança do Windows para religar. O Sentinela não muda configurações de segurança.", "Vermelho", "");
+            App.AtualizarIconeTexto("Sentinela: proteção desligada!");
         }
         else if (s.AssinaturasVelhas)
         {
             DefinirStatus("Protegido, mas as assinaturas estão velhas", "Clique em Atualizar assinaturas.", "Ambar", "");
-            App.AtualizarIconeTexto("Painel do PC: atualize as assinaturas");
+            App.AtualizarIconeTexto("Sentinela: atualize as assinaturas");
         }
         else
         {
             DefinirStatus("Seu PC está protegido",
                 $"Windows Defender ativo  •  assinaturas {Quando(s.AssinaturasAtualizadas)}", "Verde", "");
-            App.AtualizarIconeTexto("Painel do PC: protegido");
+            App.AtualizarIconeTexto("Sentinela: protegido");
         }
     }
 
@@ -188,7 +188,7 @@ public partial class MainWindow : Window
         LogVarredura.Text = $"[{DateTime.Now:HH:mm:ss}] {nome} iniciada.";
         AtualizarTempoVarredura();
         _timerTempo.Start();
-        App.AtualizarIconeTexto($"Painel do PC: {nome.ToLower()} em andamento");
+        App.AtualizarIconeTexto($"Sentinela: {nome.ToLower()} em andamento");
 
         string resumo;
         bool achou = false;
@@ -201,7 +201,7 @@ public partial class MainWindow : Window
                        || saida.Contains("Failed with hr", StringComparison.OrdinalIgnoreCase);
             achou = !falhou && codigo != 0;
             resumo = falhou
-                ? $"{nome} não rodou: o Defender recusou o pedido. Tente abrir o painel como administrador."
+                ? $"{nome} não rodou: o Defender recusou o pedido. Tente abrir o Sentinela como administrador."
                 : codigo == 0
                     ? $"{nome} terminada em {Duracao(duracao)}. Nenhuma ameaça encontrada."
                     : $"{nome} terminada em {Duracao(duracao)}. O Defender ENCONTROU ameaças. Veja em Ameaças e quarentena.";
@@ -228,7 +228,7 @@ public partial class MainWindow : Window
         TxtAndamento.Text = resumo;
         TxtTempo.Text = "";
         BtnCancelar.IsEnabled = false;
-        App.Avisar("Painel do PC", resumo, achou);
+        App.Avisar("Sentinela", resumo, achou);
         _ameacasCarregadas = false;
         await AtualizarDefender();
     }
@@ -243,9 +243,9 @@ public partial class MainWindow : Window
         try
         {
             var (codigo, _) = await Defender.AtualizarAssinaturas(CancellationToken.None);
-            App.Avisar("Painel do PC", codigo == 0 ? "Assinaturas atualizadas." : $"A atualização terminou com o código {codigo}.", codigo != 0);
+            App.Avisar("Sentinela", codigo == 0 ? "Assinaturas atualizadas." : $"A atualização terminou com o código {codigo}.", codigo != 0);
         }
-        catch (Exception ex) { App.Avisar("Painel do PC", ex.Message, true); }
+        catch (Exception ex) { App.Avisar("Sentinela", ex.Message, true); }
         BtnAtualizar.IsEnabled = true;
         await AtualizarDefender();
     }
@@ -289,7 +289,7 @@ public partial class MainWindow : Window
                 "Tratar ameaças", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
         BtnTratar.IsEnabled = false;
         var r = await Defender.RemoverAmeacasAtivas();
-        App.Avisar("Painel do PC", r);
+        App.Avisar("Sentinela", r);
         await CarregarAmeacas();
     }
 
@@ -368,7 +368,7 @@ public partial class MainWindow : Window
             if (!_avisouBandeja)
             {
                 _avisouBandeja = true;
-                App.Avisar("Painel do PC", "Continuo aqui na bandeja, perto do relógio. Para sair, clique com o botão direito no escudo.");
+                App.Avisar("Sentinela", "Continuo aqui na bandeja, perto do relógio. Para sair, clique com o botão direito no escudo.");
             }
             return;
         }
@@ -410,7 +410,7 @@ public partial class MainWindow : Window
 
     private static void Tentar(Action a)
     {
-        try { a(); } catch (Exception ex) { MessageBox.Show(ex.Message, "Painel do PC"); }
+        try { a(); } catch (Exception ex) { MessageBox.Show(ex.Message, "Sentinela"); }
     }
 
     private static string Quando(DateTime? d)

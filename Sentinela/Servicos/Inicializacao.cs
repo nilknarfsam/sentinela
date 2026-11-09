@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using Microsoft.Win32;
 
-namespace PainelPC.Servicos;
+namespace Sentinela.Servicos;
 
 public sealed record ProgramaInicial(string Nome, string Comando, string Origem, bool Ativo)
 {

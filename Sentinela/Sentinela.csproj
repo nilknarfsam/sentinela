@@ -9,9 +9,10 @@
     <!-- WinForms só para o ícone da bandeja (NotifyIcon) -->
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <ApplicationIcon>painel.ico</ApplicationIcon>
-    <AssemblyName>PainelPC</AssemblyName>
-    <Product>Painel do PC</Product>
+    <ApplicationIcon>sentinela.ico</ApplicationIcon>
+    <AssemblyName>Sentinela</AssemblyName>
+    <RootNamespace>Sentinela</RootNamespace>
+    <Product>Sentinela</Product>
     <Version>1.0.0</Version>
     <SatelliteResourceLanguages>pt-BR</SatelliteResourceLanguages>
   </PropertyGroup>

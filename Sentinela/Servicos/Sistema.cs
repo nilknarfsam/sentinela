@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 
-namespace PainelPC.Servicos;
+namespace Sentinela.Servicos;
 
 public sealed record InfoDisco(string Letra, string Nome, double TotalGB, double LivreGB)
 {
