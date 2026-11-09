@@ -8,7 +8,6 @@ namespace Sentinela.Paginas;
 
 public partial class PaginaVarredura : UserControl
 {
-    private readonly bool _admin = Sistema.EhAdmin();
     private readonly DispatcherTimer _timerTempo = new() { Interval = TimeSpan.FromSeconds(1) };
     private CancellationTokenSource? _ctsVarredura;
     private DateTime _inicioVarredura;
@@ -48,10 +47,11 @@ public partial class PaginaVarredura : UserControl
         LogVarredura.Text = $"[{DateTime.Now:HH:mm:ss}] {nome} iniciada.";
         AtualizarTempoVarredura();
         _timerTempo.Start();
-        App.AtualizarIconeTexto($"Sentinela: {nome.ToLower()} em andamento");
+        App.AtualizarAndamentoVarredura($"Sentinela: {nome.ToLower()} em andamento");
 
         string resumo;
         bool achou = false;
+        bool encontrouAmeaca = false;
         try
         {
             var (codigo, saida) = await Defender.Varrer(tipo, _ctsVarredura.Token);
@@ -60,6 +60,7 @@ public partial class PaginaVarredura : UserControl
             bool falhou = saida.Contains("[Failed]", StringComparison.OrdinalIgnoreCase)
                        || saida.Contains("Failed with hr", StringComparison.OrdinalIgnoreCase);
             achou = !falhou && codigo != 0;
+            encontrouAmeaca = achou;
             resumo = falhou
                 ? $"{nome} não rodou: o Defender recusou o pedido. Tente abrir o Sentinela como administrador."
                 : codigo == 0
@@ -86,6 +87,8 @@ public partial class PaginaVarredura : UserControl
         BarraVarredura.IsIndeterminate = false;
         BarraVarredura.Value = 100;
         TxtAndamento.Text = resumo;
+        Diario.Registrar("varredura", resumo);
+        if (encontrouAmeaca) Diario.Registrar("ameaca", resumo);
         TxtTempo.Text = "";
         BtnCancelar.IsEnabled = false;
         App.Avisar("Sentinela", resumo, achou);

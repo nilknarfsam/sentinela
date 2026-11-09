@@ -25,6 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Icones\*.ico" />
     <PackageReference Include="System.Management" Version="10.0.14" />
   </ItemGroup>
 

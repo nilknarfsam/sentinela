@@ -8,7 +8,6 @@ namespace Sentinela.Paginas;
 
 public partial class PaginaInicio : UserControl
 {
-    private readonly bool _admin = Sistema.EhAdmin();
     public event Action<TipoVarredura>? PediuVarredura;
     public event Action? PediuAtualizarStatus;
 
@@ -40,7 +39,8 @@ public partial class PaginaInicio : UserControl
         if (s == null)
         {
             DefinirStatus("Não consegui ler o Defender", erro ?? "O Windows Defender não respondeu.", "Vermelho", "\uE783");
-            App.AtualizarIconeTexto("Sentinela: Defender não respondeu");
+            App.AtualizarIcone(NivelStatus.Alerta, "Sentinela: Defender não respondeu",
+                "Atenção: o Windows Defender não respondeu. Abra o Sentinela para ver.");
             return;
         }
 
@@ -62,18 +62,19 @@ public partial class PaginaInicio : UserControl
         {
             DefinirStatus("Atenção: alguma proteção está desligada",
                 "Abra a Segurança do Windows para religar. O Sentinela não muda configurações de segurança.", "Vermelho", "\uE7BA");
-            App.AtualizarIconeTexto("Sentinela: proteção desligada!");
+            App.AtualizarIcone(NivelStatus.Alerta, "Sentinela: proteção desligada!",
+                "Atenção: uma proteção do Windows Defender está desligada. Abra o Sentinela para ver.");
         }
         else if (s.AssinaturasVelhas)
         {
             DefinirStatus("Protegido, mas as assinaturas estão velhas", "Clique em Atualizar assinaturas.", "Ambar", "\uE7BA");
-            App.AtualizarIconeTexto("Sentinela: atualize as assinaturas");
+            App.AtualizarIcone(NivelStatus.Atencao, "Sentinela: atualize as assinaturas");
         }
         else
         {
             DefinirStatus("Seu PC está protegido",
                 $"Windows Defender ativo  •  assinaturas {Quando(s.AssinaturasAtualizadas)}", "Verde", "\uEA18");
-            App.AtualizarIconeTexto("Sentinela: protegido");
+            App.AtualizarIcone(NivelStatus.Ok, "Sentinela: protegido");
         }
     }
 
@@ -116,9 +117,15 @@ public partial class PaginaInicio : UserControl
         try
         {
             var (codigo, _) = await Defender.AtualizarAssinaturas(CancellationToken.None);
-            App.Avisar("Sentinela", codigo == 0 ? "Assinaturas atualizadas." : $"A atualização terminou com o código {codigo}.", codigo != 0);
+            var mensagem = codigo == 0 ? "Assinaturas atualizadas." : $"A atualização terminou com o código {codigo}.";
+            Diario.Registrar("assinaturas", mensagem);
+            App.Avisar("Sentinela", mensagem, codigo != 0);
         }
-        catch (Exception ex) { App.Avisar("Sentinela", ex.Message, true); }
+        catch (Exception ex)
+        {
+            Diario.Registrar("assinaturas", ex.Message);
+            App.Avisar("Sentinela", ex.Message, true);
+        }
         BtnAtualizar.IsEnabled = true;
         PediuAtualizarStatus?.Invoke();
     }

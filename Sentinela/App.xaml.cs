@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using WinForms = System.Windows.Forms;
+using Sentinela.Servicos;
 
 namespace Sentinela;
 
@@ -10,6 +11,8 @@ public partial class App : Application
     private EventWaitHandle? _sinalMostrar;
     private WinForms.NotifyIcon? _bandeja;
     private MainWindow? _janela;
+    private Dictionary<NivelStatus, System.Drawing.Icon> _icones = new();
+    private NivelStatus? _nivelStatus;
 
     /// <summary>Iniciado pelo Windows: fica só na bandeja, sem abrir a janela.</summary>
     public static bool IniciarNaBandeja { get; private set; }
@@ -30,6 +33,8 @@ public partial class App : Application
                 case "--aba" when i + 1 < e.Args.Length: CapturaAba = e.Args[++i]; break;
             }
         }
+
+        Diario.Desligado = CapturaArquivo != null;
 
         if (CapturaArquivo == null)
         {
@@ -72,6 +77,8 @@ public partial class App : Application
         }
 
         _janela = new MainWindow();
+        Diario.Registrar("inicio", IniciarNaBandeja ? "Sentinela iniciado na bandeja" : "Sentinela iniciado");
+        _ = _janela.Iniciar();
         if (!IniciarNaBandeja || CapturaArquivo != null) _janela.Show();
     }
 
@@ -95,7 +102,11 @@ public partial class App : Application
 
     public void MostrarJanela()
     {
-        _janela ??= new MainWindow();
+        if (_janela == null)
+        {
+            _janela = new MainWindow();
+            _ = _janela.Iniciar();
+        }
         _janela.Show();
         if (_janela.WindowState == WindowState.Minimized) _janela.WindowState = WindowState.Normal;
         _janela.Activate();
@@ -107,9 +118,55 @@ public partial class App : Application
         _bandeja.ShowBalloonTip(5000, titulo, texto, erro ? WinForms.ToolTipIcon.Warning : WinForms.ToolTipIcon.Info);
     }
 
-    public void AtualizarIconeTexto(string texto)
+    public void AtualizarIcone(NivelStatus nivel, string texto, string? aviso = null)
     {
-        if (_bandeja != null) _bandeja.Text = texto.Length > 63 ? texto[..63] : texto;
+        try
+        {
+            var anterior = _nivelStatus;
+            var mudou = anterior != nivel;
+            _nivelStatus = nivel;
+
+            if (mudou)
+            {
+                if (anterior is { } previo ? nivel > previo : nivel != NivelStatus.Ok)
+                    Diario.Registrar("alerta", $"Status mudou de {anterior?.ToString() ?? "desconhecido"} para {nivel}: {texto}");
+                else if (anterior != null)
+                    Diario.Registrar("status", $"Status voltou para {nivel}");
+            }
+
+            if (_bandeja == null) return;
+            _bandeja.Text = texto.Length > 63 ? texto[..63] : texto;
+            if (!mudou) return;
+
+            try
+            {
+                if (_icones.Count == 0)
+                {
+                    var icones = new Dictionary<NivelStatus, System.Drawing.Icon>();
+                    try
+                    {
+                        foreach (var (status, nome) in new[] { (NivelStatus.Ok, "ok"), (NivelStatus.Atencao, "atencao"), (NivelStatus.Alerta, "alerta") })
+                        {
+                            using var stream = GetResourceStream(new Uri($"pack://application:,,,/Icones/status-{nome}.ico")).Stream;
+                            using var icone = new System.Drawing.Icon(stream);
+                            icones.Add(status, (System.Drawing.Icon)icone.Clone());
+                        }
+                    }
+                    catch
+                    {
+                        foreach (var icone in icones.Values) icone.Dispose();
+                        throw;
+                    }
+                    _icones = icones;
+                }
+                _bandeja.Icon = _icones[nivel];
+            }
+            catch { /* Mantém o ícone atual se os recursos não puderem ser carregados. */ }
+
+            if (nivel == NivelStatus.Alerta)
+                Avisar("Sentinela", aviso ?? "Atenção: uma proteção do Windows Defender está desligada. Abra o Sentinela para ver.", erro: true);
+        }
+        catch { /* A atualização da bandeja não pode interromper o aplicativo. */ }
     }
 
     public void Sair()
@@ -120,9 +177,15 @@ public partial class App : Application
         Shutdown();
     }
 
+    public void AtualizarAndamentoVarredura(string texto)
+    {
+        if (_bandeja != null) _bandeja.Text = texto.Length > 63 ? texto[..63] : texto;
+    }
+
     protected override void OnExit(ExitEventArgs e)
     {
         _bandeja?.Dispose();
+        foreach (var icone in _icones.Values) icone.Dispose();
         try { _mutex?.ReleaseMutex(); } catch { }
         base.OnExit(e);
     }

@@ -7,7 +7,6 @@ namespace Sentinela.Paginas;
 
 public partial class PaginaInicializacao : UserControl
 {
-    private readonly bool _admin = Sistema.EhAdmin();
     public bool Carregada { get; private set; }
 
     public PaginaInicializacao()

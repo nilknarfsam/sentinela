@@ -16,6 +16,8 @@ public partial class MainWindow : Window
     private readonly DispatcherTimer _timerRapido = new() { Interval = TimeSpan.FromSeconds(2) };
     private readonly DispatcherTimer _timerDefender = new() { Interval = TimeSpan.FromSeconds(20) };
     private bool _avisouBandeja;
+    private Task? _inicializacao;
+    private Task? _leituraDefender;
 
     private App App => (App)Application.Current;
 
@@ -34,15 +36,43 @@ public partial class MainWindow : Window
         _timerRapido.Tick += (_, _) => PaginaInicio.AtualizarSistema();
         _timerDefender.Tick += async (_, _) => await AtualizarDefender();
 
+        IsVisibleChanged += async (_, _) =>
+        {
+            if (_inicializacao == null || App.Saindo) return;
+            AjustarTimers();
+            if (IsVisible)
+            {
+                Sistema.UsoCpu(); // descarta o intervalo em que a janela ficou oculta
+                PaginaInicio.AtualizarSistema();
+                await AtualizarDefender();
+            }
+        };
         Loaded += async (_, _) =>
         {
-            Sistema.UsoCpu(); // primeira leitura serve de base
-            PaginaInicio.AtualizarSistema();
-            _timerRapido.Start();
-            _timerDefender.Start();
-            await AtualizarDefender();
+            await Iniciar();
             if (App.CapturaArquivo != null) await Capturar();
         };
+    }
+
+    public Task Iniciar() => _inicializacao ??= IniciarMonitoramento();
+
+    private async Task IniciarMonitoramento()
+    {
+        AjustarTimers();
+        if (IsVisible)
+        {
+            Sistema.UsoCpu();
+            PaginaInicio.AtualizarSistema();
+        }
+        await AtualizarDefender();
+    }
+
+    private void AjustarTimers()
+    {
+        if (IsVisible) _timerRapido.Start();
+        else _timerRapido.Stop();
+        _timerDefender.Interval = TimeSpan.FromSeconds(IsVisible ? 20 : 60);
+        _timerDefender.Start();
     }
 
     // ================================================================ Navegação
@@ -64,6 +94,18 @@ public partial class MainWindow : Window
 
     private int _contadorDiscos;
     private async Task AtualizarDefender()
+    {
+        if (_leituraDefender != null)
+        {
+            await _leituraDefender;
+            return;
+        }
+        _leituraDefender = LerDefender();
+        try { await _leituraDefender; }
+        finally { _leituraDefender = null; }
+    }
+
+    private async Task LerDefender()
     {
         if (_contadorDiscos++ % 3 == 0) PaginaInicio.AtualizarDiscos();
 
@@ -113,6 +155,8 @@ public partial class MainWindow : Window
             }
             return;
         }
+        _timerRapido.Stop();
+        _timerDefender.Stop();
         PaginaVarredura.Cancelar();
         base.OnClosing(e);
     }

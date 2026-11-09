@@ -54,6 +54,7 @@ public partial class PaginaAmeacas : UserControl
                 "Tratar ameaças", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
         BtnTratar.IsEnabled = false;
         var r = await Defender.RemoverAmeacasAtivas();
+        Diario.Registrar("tratar", r);
         App.Avisar("Sentinela", r);
         await Carregar();
     }

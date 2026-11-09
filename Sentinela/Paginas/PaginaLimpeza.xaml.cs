@@ -49,6 +49,7 @@ public partial class PaginaLimpeza : UserControl
         long liberado = 0;
         foreach (var item in marcados)
             liberado += await Task.Run(() => Limpeza.Limpar(item));
+        Diario.Registrar("limpeza", "Itens limpos: " + string.Join(", ", marcados.Select(i => i.Nome)), liberado);
         await Analisar();
         TxtResultadoLimpeza.Text = $"Pronto: {Limpeza.Formatar(liberado)} liberados. " + TxtResultadoLimpeza.Text;
         EspacoMudou?.Invoke();
