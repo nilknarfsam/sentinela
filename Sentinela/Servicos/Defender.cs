@@ -1,0 +1,218 @@
+using System.Diagnostics;
+using System.Management;
+using System.Runtime.InteropServices;
+using System.Text;
+using Microsoft.Win32;
+
+namespace PainelPC.Servicos;
+
+/// <summary>Estado do Windows Defender lido pelo WMI (o mesmo que Get-MpComputerStatus).</summary>
+public sealed record StatusDefender(
+    bool AntivirusLigado,
+    bool TempoReal,
+    bool Comportamento,
+    bool Downloads,
+    bool ProtecaoAdulteracao,
+    string Modo,
+    string VersaoAssinaturas,
+    DateTime? AssinaturasAtualizadas,
+    DateTime? UltimaVarreduraRapida,
+    DateTime? UltimaVarreduraCompleta)
+{
+    public bool TudoLigado => AntivirusLigado && TempoReal && Comportamento && Downloads;
+    public bool AssinaturasVelhas => AssinaturasAtualizadas is { } d && (DateTime.Now - d).TotalDays > 3;
+}
+
+public sealed record Ameaca(
+    string Nome,
+    string Gravidade,
+    string Situacao,
+    DateTime? Detectada,
+    string Local,
+    bool Ativa);
+
+public enum TipoVarredura { Rapida = 1, Completa = 2 }
+
+/// <summary>
+/// Conversa com o Windows Defender. Só lê o estado e pede ações que o próprio
+/// Defender oferece (varrer, atualizar, remover ameaças). Nunca desliga nada.
+/// </summary>
+public static class Defender
+{
+    private const string Ns = @"root\Microsoft\Windows\Defender";
+
+    public static StatusDefender? LerStatus()
+    {
+        using var busca = new ManagementObjectSearcher(Ns, "SELECT * FROM MSFT_MpComputerStatus");
+        foreach (ManagementObject o in busca.Get())
+        {
+            using (o)
+            {
+                return new StatusDefender(
+                    Bool(o, "AntivirusEnabled"),
+                    Bool(o, "RealTimeProtectionEnabled"),
+                    Bool(o, "BehaviorMonitorEnabled"),
+                    Bool(o, "IoavProtectionEnabled"),
+                    Bool(o, "IsTamperProtected"),
+                    o["AMRunningMode"]?.ToString() ?? "?",
+                    o["AntivirusSignatureVersion"]?.ToString() ?? "?",
+                    Data(o, "AntivirusSignatureLastUpdated"),
+                    Data(o, "QuickScanEndTime"),
+                    Data(o, "FullScanEndTime"));
+            }
+        }
+        return null;
+    }
+
+    /// <summary>Histórico de ameaças encontradas. Precisa de administrador.</summary>
+    public static List<Ameaca> LerAmeacas()
+    {
+        var nomes = new Dictionary<string, (string nome, int grav, bool ativa)>();
+        using (var b = new ManagementObjectSearcher(Ns, "SELECT * FROM MSFT_MpThreat"))
+            foreach (ManagementObject o in b.Get())
+                using (o)
+                    nomes[o["ThreatID"]?.ToString() ?? ""] = (
+                        o["ThreatName"]?.ToString() ?? "?",
+                        Convert.ToInt32(o["SeverityID"] ?? 0),
+                        Bool(o, "IsActive"));
+
+        var lista = new List<Ameaca>();
+        using (var b = new ManagementObjectSearcher(Ns, "SELECT * FROM MSFT_MpThreatDetection"))
+            foreach (ManagementObject o in b.Get())
+                using (o)
+                {
+                    var id = o["ThreatID"]?.ToString() ?? "";
+                    nomes.TryGetValue(id, out var t);
+                    var recursos = o["Resources"] as string[] ?? [];
+                    lista.Add(new Ameaca(
+                        t.nome ?? "?",
+                        Gravidade(t.grav),
+                        Situacao(Convert.ToInt32(o["ThreatStatusID"] ?? 0)),
+                        Data(o, "InitialDetectionTime"),
+                        string.Join("  |  ", recursos.Select(LimparRecurso)),
+                        t.ativa));
+                }
+
+        return lista.OrderByDescending(a => a.Detectada).ToList();
+    }
+
+    /// <summary>Lista o que está na quarentena (texto do MpCmdRun).</summary>
+    public static async Task<string> ListarQuarentena()
+    {
+        var (_, saida) = await RodarMpCmdRun("-Restore -ListAll", CancellationToken.None);
+        var linhas = saida.Split('\n').Select(l => l.TrimEnd()).Where(l => l.Length > 0).ToList();
+        return linhas.Count == 0 ? "A quarentena está vazia." : string.Join(Environment.NewLine, linhas);
+    }
+
+    public static Task<(int codigo, string saida)> Varrer(TipoVarredura tipo, CancellationToken ct)
+        => RodarMpCmdRun($"-Scan -ScanType {(int)tipo}", ct, cancelar: "-Scan -Cancel");
+
+    public static Task<(int codigo, string saida)> AtualizarAssinaturas(CancellationToken ct)
+        => RodarMpCmdRun("-SignatureUpdate", ct);
+
+    /// <summary>Pede ao Defender para tratar as ameaças ativas (mesmo que Remove-MpThreat).</summary>
+    public static async Task<string> RemoverAmeacasAtivas()
+    {
+        var psi = new ProcessStartInfo("powershell.exe",
+            "-NoProfile -NonInteractive -Command \"Remove-MpThreat -ErrorAction Stop; 'OK'\"")
+        {
+            UseShellExecute = false, CreateNoWindow = true,
+            RedirectStandardOutput = true, RedirectStandardError = true,
+        };
+        using var p = Process.Start(psi)!;
+        var saida = await p.StandardOutput.ReadToEndAsync();
+        var erro = await p.StandardError.ReadToEndAsync();
+        await p.WaitForExitAsync();
+        return saida.Contains("OK") ? "As ameaças ativas foram tratadas pelo Defender." : "Não foi possível: " + erro.Trim();
+    }
+
+    public static void AbrirSegurancaDoWindows()
+        => Process.Start(new ProcessStartInfo("windowsdefender://threat") { UseShellExecute = true });
+
+    // ------------------------------------------------------------------
+
+    public static string? CaminhoMpCmdRun()
+    {
+        var pasta = Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender", "InstallLocation", null) as string;
+        if (!string.IsNullOrEmpty(pasta))
+        {
+            var exe = Path.Combine(pasta, "MpCmdRun.exe");
+            if (File.Exists(exe)) return exe;
+        }
+        var padrao = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Windows Defender", "MpCmdRun.exe");
+        return File.Exists(padrao) ? padrao : null;
+    }
+
+    private static async Task<(int, string)> RodarMpCmdRun(string args, CancellationToken ct, string? cancelar = null)
+    {
+        var exe = CaminhoMpCmdRun() ?? throw new InvalidOperationException("MpCmdRun.exe não encontrado. O Defender está instalado?");
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+        var psi = new ProcessStartInfo(exe, args)
+        {
+            UseShellExecute = false, CreateNoWindow = true,
+            RedirectStandardOutput = true, RedirectStandardError = true,
+            StandardOutputEncoding = Encoding.GetEncoding((int)GetOEMCP()),
+            StandardErrorEncoding = Encoding.GetEncoding((int)GetOEMCP()),
+        };
+        using var p = Process.Start(psi)!;
+        var tOut = p.StandardOutput.ReadToEndAsync();
+        var tErr = p.StandardError.ReadToEndAsync();
+        try
+        {
+            await p.WaitForExitAsync(ct);
+        }
+        catch (OperationCanceledException)
+        {
+            if (cancelar != null)
+            {
+                using var c = Process.Start(new ProcessStartInfo(exe, cancelar) { UseShellExecute = false, CreateNoWindow = true });
+                c?.WaitForExit(15000);
+            }
+            try { if (!p.HasExited) p.Kill(); } catch { }
+            throw;
+        }
+        return (p.ExitCode, (await tOut) + (await tErr));
+    }
+
+    [DllImport("kernel32.dll")] private static extern uint GetOEMCP();
+
+    private static bool Bool(ManagementBaseObject o, string nome) => o[nome] is bool b && b;
+
+    private static DateTime? Data(ManagementBaseObject o, string nome)
+    {
+        var v = o[nome]?.ToString();
+        if (string.IsNullOrEmpty(v)) return null;
+        try
+        {
+            var d = ManagementDateTimeConverter.ToDateTime(v);
+            return d.Year < 2000 ? null : d;
+        }
+        catch { return null; }
+    }
+
+    private static string LimparRecurso(string r)
+    {
+        var i = r.IndexOf(':');
+        // "file:_C:\pasta\x.exe" -> "C:\pasta\x.exe"
+        return i > 0 && i < 12 ? r[(i + 1)..].TrimStart('_') : r;
+    }
+
+    private static string Gravidade(int id) => id switch
+    {
+        1 => "Baixa", 2 => "Moderada", 4 => "Alta", 5 => "Grave", _ => "Desconhecida",
+    };
+
+    private static string Situacao(int id) => id switch
+    {
+        1 => "Detectada",
+        2 => "Limpa",
+        3 => "Em quarentena",
+        4 => "Removida",
+        5 => "Permitida",
+        6 => "Bloqueada",
+        102 => "Falha na quarentena",
+        103 => "Falha ao remover",
+        107 => "Falha ao bloquear",
+        _ => $"Situação {id}",
+    };
+}
