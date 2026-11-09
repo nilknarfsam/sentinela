@@ -1,0 +1,125 @@
+using System.Windows;
+using System.Windows.Controls;
+using Sentinela.Servicos;
+using static Sentinela.Servicos.Formatos;
+using System.Windows.Media;
+
+namespace Sentinela.Paginas;
+
+public partial class PaginaInicio : UserControl
+{
+    private readonly bool _admin = Sistema.EhAdmin();
+    public event Action<TipoVarredura>? PediuVarredura;
+    public event Action? PediuAtualizarStatus;
+
+    private App App => (App)Application.Current;
+
+    public PaginaInicio()
+    {
+        InitializeComponent();
+    }
+
+    public void AtualizarSistema()
+    {
+        var cpu = Sistema.UsoCpu();
+        BarraCpu.Value = cpu;
+        TxtCpu.Text = $"{cpu:0}%";
+        var (usado, total, pct) = Sistema.Memoria();
+        BarraRam.Value = pct;
+        TxtRam.Text = $"{usado:0.0} de {total:0} GB";
+        TxtUptime.Text = Sistema.TempoLigado();
+        BarraCpu.Foreground = Cor(cpu > 85 ? "Ambar" : "Destaque");
+        BarraRam.Foreground = Cor(pct > 85 ? "Ambar" : "Destaque");
+    }
+
+    public void AtualizarDiscos() => ListaDiscos.ItemsSource = Sistema.Discos();
+
+    public void MostrarStatus(StatusDefender? s, string? erro)
+    {
+        GradeProtecao.Children.Clear();
+        if (s == null)
+        {
+            DefinirStatus("Não consegui ler o Defender", erro ?? "O Windows Defender não respondeu.", "Vermelho", "\uE783");
+            App.AtualizarIconeTexto("Sentinela: Defender não respondeu");
+            return;
+        }
+
+        GradeProtecao.Children.Add(CartaoProtecao("\uE9F5", "Proteção em tempo real", s.TempoReal));
+        GradeProtecao.Children.Add(CartaoProtecao("\uE9D9", "Análise de comportamento", s.Comportamento));
+        GradeProtecao.Children.Add(CartaoProtecao("\uE896", "Verificação de downloads", s.Downloads));
+        GradeProtecao.Children.Add(CartaoProtecao("\uE72E", "Proteção contra adulteração", s.ProtecaoAdulteracao));
+        GradeProtecao.Children.Add(CartaoInfo("\uE895", "Assinaturas de vírus",
+            s.AssinaturasAtualizadas is { } d ? $"Atualizadas {Quando(d)}" : "Sem data",
+            $"Versão {s.VersaoAssinaturas}", s.AssinaturasVelhas ? "Ambar" : "Verde"));
+        var ultima = new[] { s.UltimaVarreduraRapida, s.UltimaVarreduraCompleta }.Where(x => x != null).Max();
+        GradeProtecao.Children.Add(CartaoInfo("\uE721", "Última varredura",
+            ultima is { } u ? Quando(u) : "Nenhuma ainda",
+            s.UltimaVarreduraCompleta is { } c ? $"Completa: {Quando(c)}" : "Completa: nunca",
+            ultima == null || (DateTime.Now - ultima.Value).TotalDays > 7 ? "Ambar" : "Verde"));
+
+
+        if (!s.TudoLigado)
+        {
+            DefinirStatus("Atenção: alguma proteção está desligada",
+                "Abra a Segurança do Windows para religar. O Sentinela não muda configurações de segurança.", "Vermelho", "\uE7BA");
+            App.AtualizarIconeTexto("Sentinela: proteção desligada!");
+        }
+        else if (s.AssinaturasVelhas)
+        {
+            DefinirStatus("Protegido, mas as assinaturas estão velhas", "Clique em Atualizar assinaturas.", "Ambar", "\uE7BA");
+            App.AtualizarIconeTexto("Sentinela: atualize as assinaturas");
+        }
+        else
+        {
+            DefinirStatus("Seu PC está protegido",
+                $"Windows Defender ativo  •  assinaturas {Quando(s.AssinaturasAtualizadas)}", "Verde", "\uEA18");
+            App.AtualizarIconeTexto("Sentinela: protegido");
+        }
+    }
+
+    private void DefinirStatus(string titulo, string detalhe, string cor, string icone)
+    {
+        TxtStatus.Text = titulo;
+        TxtStatusDetalhe.Text = detalhe;
+        CirculoStatus.Background = Cor(cor);
+        IconeStatus.Text = icone;
+        CartaoStatus.Background = Cor(cor + "Fundo");
+        var c = ((SolidColorBrush)Cor(cor)).Color;
+        CartaoStatus.BorderBrush = new SolidColorBrush(Color.FromArgb(0x40, c.R, c.G, c.B));
+    }
+
+    private Border CartaoProtecao(string icone, string titulo, bool ligado)
+        => CartaoInfo(icone, titulo, ligado ? "Ligada" : "Desligada", null, ligado ? "Verde" : "Vermelho");
+
+    private Border CartaoInfo(string icone, string titulo, string valor, string? extra, string cor)
+    {
+        var pilha = new StackPanel();
+        var topo = new DockPanel();
+        var bolinha = new Border { Width = 8, Height = 8, CornerRadius = new CornerRadius(4), Background = Cor(cor), VerticalAlignment = VerticalAlignment.Center };
+        DockPanel.SetDock(bolinha, Dock.Right);
+        topo.Children.Add(bolinha);
+        topo.Children.Add(new TextBlock { Text = icone, Style = (Style)FindResource("Icone"), Foreground = Cor("TextoFraco"), FontSize = 15, Margin = new Thickness(0, 0, 10, 0) });
+        topo.Children.Add(new TextBlock { Text = titulo, Style = (Style)FindResource("Fraco"), VerticalAlignment = VerticalAlignment.Center });
+        pilha.Children.Add(topo);
+        pilha.Children.Add(new TextBlock { Text = valor, FontSize = 16, FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 10, 0, 0) });
+        if (extra != null) pilha.Children.Add(new TextBlock { Text = extra, Style = (Style)FindResource("Fraco"), Margin = new Thickness(0, 3, 0, 0) });
+        return new Border { Style = (Style)FindResource("CartaoBorda"), Child = pilha };
+    }
+
+    private void VarreduraRapida_Click(object sender, RoutedEventArgs e)
+        => PediuVarredura?.Invoke(TipoVarredura.Rapida);
+
+    private async void AtualizarAssinaturas_Click(object sender, RoutedEventArgs e)
+    {
+        BtnAtualizar.IsEnabled = false;
+        TxtStatusDetalhe.Text = "Baixando assinaturas novas...";
+        try
+        {
+            var (codigo, _) = await Defender.AtualizarAssinaturas(CancellationToken.None);
+            App.Avisar("Sentinela", codigo == 0 ? "Assinaturas atualizadas." : $"A atualização terminou com o código {codigo}.", codigo != 0);
+        }
+        catch (Exception ex) { App.Avisar("Sentinela", ex.Message, true); }
+        BtnAtualizar.IsEnabled = true;
+        PediuAtualizarStatus?.Invoke();
+    }
+}
