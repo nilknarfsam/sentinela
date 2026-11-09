@@ -25,6 +25,9 @@ jobs:
       - name: Compilar (Release)
         run: dotnet build Sentinela/Sentinela.csproj -c Release
 
+      - name: Rodar os testes
+        run: dotnet test Sentinela.Testes/Sentinela.Testes.csproj -c Release
+
       - name: Publicar executável único (win-x64)
         run: dotnet publish Sentinela/Sentinela.csproj -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publicado
 

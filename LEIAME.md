@@ -31,6 +31,14 @@ Sentinela.exe --captura tela.png --aba inicio|varredura|ameacas|limpeza|iniciali
 ```
 Salva uma imagem da aba escolhida e fecha.
 
+## Testes
+
+Na raiz do projeto, execute os testes automáticos com o .NET 9 SDK:
+
+```
+dotnet test
+```
+
 ## Estrutura
 - `Sentinela/Servicos/Defender.cs`: lê o status pelo WMI e roda varredura, atualização e quarentena pelo `MpCmdRun.exe`.
 - `Sentinela/Servicos/Sistema.cs`: CPU, memória, discos e tempo ligado.

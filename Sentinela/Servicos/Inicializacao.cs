@@ -56,6 +56,9 @@ public static class Inicializacao
     private static bool EstaAtivo(RegistryKey raiz, string caminho, string nome)
     {
         using var k = raiz.OpenSubKey(caminho);
-        return k?.GetValue(nome) is not byte[] { Length: > 0 } b || (b[0] & 1) == 0;
+        return AtivoPeloValor(k?.GetValue(nome));
     }
+
+    internal static bool AtivoPeloValor(object? valor)
+        => valor is not byte[] { Length: > 0 } b || (b[0] & 1) == 0;
 }

@@ -15,8 +15,10 @@ public static class Diario
         set { lock (Trava) _desligado = value; }
     }
 
-    private static string Caminho => Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sentinela", "diario.jsonl");
+    internal static string? PastaTeste;
+
+    private static string Caminho => Path.Combine(PastaTeste ?? Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sentinela"), "diario.jsonl");
 
     public static void Registrar(string tipo, string mensagem, long? bytes = null)
     {
