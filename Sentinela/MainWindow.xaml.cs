@@ -32,7 +32,7 @@ public partial class MainWindow : Window
         TxtAdminMenu.Text = _admin ? "Rodando como administrador" : "Rodando sem administrador";
         TxtVersaoMenu.Text = $"versão {Versao}";
 
-        PaginaInicio.PediuVarredura += IniciarVarredura;
+        PaginaInicio.PediuVarredura += tipo => IniciarVarredura(tipo);
         PaginaInicio.PediuAtualizarStatus += AtualizarStatusAposOperacao;
         PaginaVarredura.VarreduraTerminou += AtualizarStatusAposOperacao;
         PaginaLimpeza.EspacoMudou += PaginaInicio.AtualizarDiscos;
@@ -150,10 +150,18 @@ public partial class MainWindow : Window
         await AtualizarDefender();
     }
 
-    public void IniciarVarredura(TipoVarredura tipo)
+    public void IniciarVarredura(TipoVarredura tipo, string? caminho = null)
     {
         MenuVarredura.IsChecked = true;
-        PaginaVarredura.Iniciar(tipo);
+        PaginaVarredura.Iniciar(tipo, caminho);
+    }
+
+    public bool VarreduraEmAndamento => PaginaVarredura.EmAndamento;
+
+    public void AvisarVarreduraEmAndamento()
+    {
+        MenuVarredura.IsChecked = true;
+        PaginaVarredura.AvisarEmAndamento();
     }
 
     public bool IgnorarEventoDeVarredura => PaginaVarredura.EmAndamento

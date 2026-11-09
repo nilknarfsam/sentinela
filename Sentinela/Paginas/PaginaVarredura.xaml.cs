@@ -21,6 +21,11 @@ public partial class PaginaVarredura : UserControl
     public PaginaVarredura()
     {
         InitializeComponent();
+        if (Sistema.EhAdmin())
+        {
+            AllowDrop = false;
+            TxtPersonalizada.Text = "Escolha uma pasta ou arquivo. No Explorer, use o clique direito > Verificar com o Sentinela.";
+        }
         _timerTempo.Tick += (_, _) => AtualizarTempoVarredura();
     }
 
@@ -33,18 +38,77 @@ public partial class PaginaVarredura : UserControl
         _ctsVarredura?.Cancel();
     }
 
-    public async void Iniciar(TipoVarredura tipo)
+    private void EscolherPasta_Click(object sender, RoutedEventArgs e)
     {
-        if (_ctsVarredura != null) return; // já tem uma rodando
+        var dialogo = new Microsoft.Win32.OpenFolderDialog();
+        if (dialogo.ShowDialog() == true) Iniciar(TipoVarredura.Personalizada, dialogo.FolderName);
+    }
 
-        var nome = tipo == TipoVarredura.Rapida ? "Varredura rápida" : "Varredura completa";
+    private void EscolherArquivo_Click(object sender, RoutedEventArgs e)
+    {
+        var dialogo = new Microsoft.Win32.OpenFileDialog();
+        if (dialogo.ShowDialog() == true) Iniciar(TipoVarredura.Personalizada, dialogo.FileName);
+    }
+
+    private void Pagina_DragOver(object sender, DragEventArgs e)
+    {
+        e.Effects = e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.Copy : DragDropEffects.None;
+        e.Handled = true;
+    }
+
+    private void Pagina_Drop(object sender, DragEventArgs e)
+    {
+        e.Handled = true;
+        if (e.Data.GetData(DataFormats.FileDrop) is not string[] itens) return;
+        if (itens.Length > 1)
+            TxtPersonalizada.Text = "Solte um item por vez.";
+        else if (itens.Length == 1) Iniciar(TipoVarredura.Personalizada, itens[0]);
+    }
+
+    public void AvisarEmAndamento()
+    {
+        const string mensagem = "Já há uma verificação em andamento. Espere terminar.";
+        TxtPersonalizada.Text = mensagem;
+        App.Avisar("Sentinela", mensagem);
+    }
+
+    public async void Iniciar(TipoVarredura tipo, string? caminho = null)
+    {
+        if (_ctsVarredura != null) { AvisarEmAndamento(); return; }
+
+        // Reserve a varredura antes do await para impedir duas partidas simultâneas.
         _ctsVarredura = new CancellationTokenSource();
+        if (tipo == TipoVarredura.Personalizada)
+        {
+            bool existe;
+            try
+            {
+                existe = caminho != null && Pedidos.CaminhoLocalValido(caminho)
+                    && Path.IsPathFullyQualified(caminho)
+                    && await Task.Run(() => Pedidos.UnidadePermitida(caminho)
+                        && (File.Exists(caminho) || Directory.Exists(caminho)))
+                        .WaitAsync(TimeSpan.FromSeconds(3));
+            }
+            catch { existe = false; }
+            if (!existe)
+            {
+                _ctsVarredura.Dispose();
+                _ctsVarredura = null;
+                TxtPersonalizada.Text = "Escolha uma pasta ou arquivo existente em uma unidade local.";
+                return;
+            }
+        }
+        var nome = tipo == TipoVarredura.Personalizada
+            ? "Verificação de " + (Path.GetFileName(Path.TrimEndingDirectorySeparator(caminho!)) is { Length: > 0 } nomeItem ? nomeItem : caminho)
+            : tipo == TipoVarredura.Rapida ? "Varredura rápida" : "Varredura completa";
         _inicioVarredura = DateTime.Now;
-        BtnRapida.IsEnabled = BtnCompleta.IsEnabled = false;
+        BtnRapida.IsEnabled = BtnCompleta.IsEnabled = BtnPasta.IsEnabled = BtnArquivo.IsEnabled = false;
         BtnCancelar.IsEnabled = true;
         CartaoAndamento.Visibility = Visibility.Visible;
         BarraVarredura.IsIndeterminate = true;
         TxtAndamento.Text = $"{nome} em andamento...";
+        TxtCaminho.Text = tipo == TipoVarredura.Personalizada ? "Verificando: " + caminho : "";
+        TxtCaminho.Visibility = tipo == TipoVarredura.Personalizada ? Visibility.Visible : Visibility.Collapsed;
         LogVarredura.Text = $"[{DateTime.Now:HH:mm:ss}] {nome} iniciada.";
         AtualizarTempoVarredura();
         _timerTempo.Start();
@@ -56,7 +120,7 @@ public partial class PaginaVarredura : UserControl
         bool limpa = false;
         try
         {
-            var (codigo, saida) = await Defender.Varrer(tipo, _ctsVarredura.Token);
+            var (codigo, saida) = await Defender.Varrer(tipo, _ctsVarredura.Token, caminho);
             var duracao = DateTime.Now - _inicioVarredura;
             // MpCmdRun devolve 2 tanto para "achou ameaça" quanto para erro: o texto decide.
             bool falhou = saida.Contains("[Failed]", StringComparison.OrdinalIgnoreCase)
@@ -79,7 +143,7 @@ public partial class PaginaVarredura : UserControl
         }
         catch (Exception ex)
         {
-            resumo = "Não foi possível fazer a varredura: " + ex.Message;
+            resumo = $"{nome}: não foi possível fazer a varredura: " + ex.Message;
             LogVarredura.Text += Environment.NewLine + resumo;
         }
 
@@ -87,7 +151,7 @@ public partial class PaginaVarredura : UserControl
         _ctsVarredura.Dispose();
         UltimoFimUtc = DateTime.UtcNow;
         _ctsVarredura = null;
-        BtnRapida.IsEnabled = BtnCompleta.IsEnabled = true;
+        BtnRapida.IsEnabled = BtnCompleta.IsEnabled = BtnPasta.IsEnabled = BtnArquivo.IsEnabled = true;
         BarraVarredura.IsIndeterminate = false;
         BarraVarredura.Value = 100;
         TxtAndamento.Text = resumo;
