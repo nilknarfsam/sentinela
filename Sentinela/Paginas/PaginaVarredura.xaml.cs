@@ -14,6 +14,7 @@ public partial class PaginaVarredura : UserControl
 
     public event Action? VarreduraTerminou;
     public bool EmAndamento => _ctsVarredura != null;
+    public DateTime UltimoFimUtc { get; private set; } = DateTime.MinValue;
 
     private App App => (App)Application.Current;
 
@@ -84,6 +85,7 @@ public partial class PaginaVarredura : UserControl
 
         _timerTempo.Stop();
         _ctsVarredura.Dispose();
+        UltimoFimUtc = DateTime.UtcNow;
         _ctsVarredura = null;
         BtnRapida.IsEnabled = BtnCompleta.IsEnabled = true;
         BarraVarredura.IsIndeterminate = false;

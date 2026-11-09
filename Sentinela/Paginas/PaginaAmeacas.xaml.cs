@@ -8,6 +8,7 @@ namespace Sentinela.Paginas;
 public partial class PaginaAmeacas : UserControl
 {
     private readonly bool _admin = Sistema.EhAdmin();
+    private Task? _carregamento;
     public bool Carregada { get; set; }
 
     private App App => (App)Application.Current;
@@ -17,7 +18,22 @@ public partial class PaginaAmeacas : UserControl
         InitializeComponent();
     }
 
-    public async Task Carregar()
+    public Task Carregar() => _carregamento ??= CarregarLista();
+
+    private async Task CarregarLista()
+    {
+        await Task.Yield();
+        try
+        {
+            do
+            {
+                await LerLista();
+            } while (!Carregada && IsVisible);
+        }
+        finally { _carregamento = null; }
+    }
+
+    private async Task LerLista()
     {
         Carregada = true;
         TxtResumoAmeacas.Text = "Carregando...";

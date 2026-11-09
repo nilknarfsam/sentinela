@@ -33,6 +33,7 @@
                     <RadioButton x:Name="MenuInicio" Style="{StaticResource ItemMenu}" Tag="&#xE80F;" Content="Início" IsChecked="True" Checked="Menu_Checked"/>
                     <RadioButton x:Name="MenuVarredura" Style="{StaticResource ItemMenu}" Tag="&#xE721;" Content="Varredura" Checked="Menu_Checked"/>
                     <RadioButton x:Name="MenuAmeacas" Style="{StaticResource ItemMenu}" Tag="&#xE7BA;" Content="Ameaças e quarentena" Checked="Menu_Checked"/>
+                    <RadioButton x:Name="MenuHistorico" Style="{StaticResource ItemMenu}" Tag="&#xE81C;" Content="Histórico" Checked="Menu_Checked"/>
                     <RadioButton x:Name="MenuLimpeza" Style="{StaticResource ItemMenu}" Tag="&#xE74D;" Content="Otimização" Checked="Menu_Checked"/>
                     <RadioButton x:Name="MenuInicializacao" Style="{StaticResource ItemMenu}" Tag="&#xE7E8;" Content="Inicialização" Checked="Menu_Checked"/>
                     <RadioButton x:Name="MenuAjustes" Style="{StaticResource ItemMenu}" Tag="&#xE713;" Content="Ajustes" Checked="Menu_Checked"/>
@@ -57,6 +58,7 @@
                 <p:PaginaInicio x:Name="PaginaInicio"/>
                 <p:PaginaVarredura x:Name="PaginaVarredura" Visibility="Collapsed"/>
                 <p:PaginaAmeacas x:Name="PaginaAmeacas" Visibility="Collapsed"/>
+                <p:PaginaHistorico x:Name="PaginaHistorico" Visibility="Collapsed"/>
                 <p:PaginaLimpeza x:Name="PaginaLimpeza" Visibility="Collapsed"/>
                 <p:PaginaInicializacao x:Name="PaginaInicializacao" Visibility="Collapsed"/>
                 <p:PaginaAjustes x:Name="PaginaAjustes" Visibility="Collapsed"/>
