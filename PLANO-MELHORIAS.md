@@ -56,6 +56,12 @@ Tarefas. O ícone da bandeja muda de cor. As configurações persistem depois de
 reiniciar. O GitHub Actions passa.
 
 ## Fase 1: Proteção que avisa na hora
+**✅ Feita em 09/11/2026 (v1.2.0).** Mudou em relação ao plano:
+- A quarentena não tem "Excluir" por item, porque o Windows não oferece esse comando. O botão abre a Segurança do Windows.
+- O andamento da varredura é uma estimativa pelas últimas varreduras, porque o Defender não informa a porcentagem.
+
+O teste com o EICAR passou: o arquivo foi detectado, posto em quarentena e apareceu no Histórico.
+
 É o que mais aproxima o Sentinela do Norton, só que leve. Hoje ele só olha
 quando alguém abre a janela.
 
