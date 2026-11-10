@@ -18,17 +18,28 @@ public partial class PaginaInicio : UserControl
         InitializeComponent();
     }
 
-    public void AtualizarSistema()
+    public event Action<double, double>? SistemaAtualizado;
+    private bool _lendoSistema;
+    public async void AtualizarSistema()
     {
-        var cpu = Sistema.UsoCpu();
-        BarraCpu.Value = cpu;
-        TxtCpu.Text = $"{cpu:0}%";
-        var (usado, total, pct) = Sistema.Memoria();
-        BarraRam.Value = pct;
-        TxtRam.Text = $"{usado:0.0} de {total:0} GB";
-        TxtUptime.Text = Sistema.TempoLigado();
-        BarraCpu.Foreground = Cor(cpu > 85 ? "Ambar" : "Destaque");
-        BarraRam.Foreground = Cor(pct > 85 ? "Ambar" : "Destaque");
+        if (_lendoSistema) return;
+        _lendoSistema = true;
+        try
+        {
+            var leitura = await Task.Run(() => (cpu: Sistema.UsoCpu(), memoria: Sistema.Memoria()));
+            var cpu = leitura.cpu;
+            BarraCpu.Value = cpu;
+            TxtCpu.Text = $"{cpu:0}%";
+            var (usado, total, pct) = leitura.memoria;
+            BarraRam.Value = pct;
+            TxtRam.Text = $"{usado:0.0} de {total:0} GB";
+            TxtUptime.Text = Sistema.TempoLigado();
+            BarraCpu.Foreground = Cor(cpu > 85 ? "Ambar" : "Destaque");
+            BarraRam.Foreground = Cor(pct > 85 ? "Ambar" : "Destaque");
+            SistemaAtualizado?.Invoke(cpu, pct);
+        }
+        catch { /* Falhas de leitura não escapam do timer. */ }
+        finally { _lendoSistema = false; }
     }
 
     public void AtualizarDiscos() => ListaDiscos.ItemsSource = Sistema.Discos();

@@ -1,9 +1,35 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Management;
 using System.Text.RegularExpressions;
 using Microsoft.Win32;
 
 namespace Sentinela.Servicos.Checkup;
+
+public sealed class VerificacaoPeso : Verificacao
+{
+    public override string Nome => "O que está pesando";
+    public override int Peso => 2;
+    protected override async Task<ResultadoVerificacao> Ler(CancellationToken ct)
+    {
+        var processos = await Processos.Amostrar(TimeSpan.FromSeconds(1), ct, lerEditoras: false).ConfigureAwait(false);
+        if (ct.IsCancellationRequested || processos.Count == 0) return Checkup.Indisponivel(Nome);
+        var grupos = Processos.Agrupar(processos.Where(p => !p.Protegido));
+        var maior = grupos.OrderByDescending(g => g.CpuPercent).ThenByDescending(g => g.MemoriaBytes).FirstOrDefault();
+        var memoria = Sistema.Memoria().percent;
+        var info = maior == null ? null : new InfoProcesso(0, maior.Nome, 0, null, maior.Editora, maior.CpuPercent, maior.MemoriaBytes, false, null);
+        return new(Nome, "\uE9D9", NivelPeso(processos.Sum(p => p.CpuPercent), memoria, info),
+            maior == null ? "Nenhum programa acessível para comparar" : $"{maior.Nome} está usando {maior.CpuPercent:0.#}% da CPU e {maior.MemoriaTexto}",
+            $"Memória total em {memoria:0}% de uso. A amostra mostra o uso neste instante.", new("Ver o que está pesando", "rolar", "agora"));
+    }
+
+    internal static NivelVerificacao NivelPeso(double cpuTotalPercent, double memoriaPercent, InfoProcesso? maisPesado)
+    {
+        // O total inclui o Windows: os limiares de CPU se aplicam somente ao programa não protegido.
+        var cpu = maisPesado is { Protegido: false } ? maisPesado.CpuPercent : 0;
+        return cpu >= 40 || memoriaPercent >= 90 ? NivelVerificacao.Problema :
+            cpu >= 20 || memoriaPercent >= 80 ? NivelVerificacao.Atencao : NivelVerificacao.Ok;
+    }
+}
 
 public sealed class VerificacaoReinicio : Verificacao
 {

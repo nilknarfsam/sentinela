@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -13,12 +13,118 @@ public partial class PaginaDesempenho : UserControl
     private ResultadoCheckup? _ultimo;
     private Task? _execucao;
 
-    public PaginaDesempenho() => InitializeComponent();
+    private readonly HistoricoDesempenho _historico;
+    private IReadOnlyList<InfoProcesso> _processos = Array.Empty<InfoProcesso>();
+    private Task? _amostra;
+    private CancellationTokenSource? _cancelamentoAmostra;
+    private bool _porMemoria;
+
+    public PaginaDesempenho(HistoricoDesempenho historico)
+    {
+        _historico = historico;
+        InitializeComponent();
+    }
+
+    public void CancelarAmostra() => _cancelamentoAmostra?.Cancel();
+
+    public void AtualizarGrafico()
+    {
+        var pontos = _historico.Pontos;
+        var agora = DateTime.Now;
+        LinhaCpu.Data = CriarLinha(pontos, agora, p => p.CpuPercent);
+        LinhaMemoria.Data = CriarLinha(pontos, agora, p => p.MemoriaPercent);
+        TxtHistorico.Text = $"{pontos.Count} amostras · a cada 5 s";
+    }
+
+    private StreamGeometry CriarLinha(IReadOnlyList<PontoDesempenho> pontos, DateTime agora, Func<PontoDesempenho, double> valor)
+    {
+        var geometria = new StreamGeometry();
+        using (var contexto = geometria.Open())
+        {
+            for (var i = 0; i < pontos.Count; i++)
+            {
+                var ponto = pontos[i];
+                var x = Grafico.ActualWidth * Math.Clamp(1 - (agora - ponto.Instante).TotalHours, 0, 1);
+                var posicao = new Point(x, Grafico.ActualHeight * (1 - valor(ponto) / 100));
+                if (i == 0 || ponto.IniciaSegmento) contexto.BeginFigure(posicao, false, false);
+                else contexto.LineTo(posicao, true, false);
+            }
+        }
+        geometria.Freeze();
+        return geometria;
+    }
+
+    private void Grafico_SizeChanged(object sender, SizeChangedEventArgs e) => AtualizarGrafico();
+    public Task Amostrar()
+    {
+        if (_amostra == null) _amostra = LerProcessos();
+        return _amostra;
+    }
+
+    private async Task LerProcessos()
+    {
+        await Task.Yield();
+        using var cancelamento = new CancellationTokenSource();
+        _cancelamentoAmostra = cancelamento;
+        BtnAmostrar.IsEnabled = false;
+        ProgressoAmostra.Visibility = Visibility.Visible;
+        TxtProcessos.Text = "Amostrando por 2 segundos…";
+        try
+        {
+            var processos = await Processos.Amostrar(TimeSpan.FromSeconds(2), cancelamento.Token);
+            if (cancelamento.IsCancellationRequested) { TxtProcessos.Text = "Amostra cancelada com a janela oculta."; return; }
+            _processos = processos;
+            MostrarProcessos();
+            TxtProcessos.Text = processos.Count == 0 ? "Não consegui ler os processos. Tente novamente." : $"Top 10 · {DateTime.Now:HH:mm:ss} · memória privada quando disponível";
+        }
+        catch (Exception ex) { TxtProcessos.Text = $"Não consegui amostrar: {ex.Message}"; }
+        finally
+        {
+            ProgressoAmostra.Visibility = Visibility.Collapsed;
+            BtnAmostrar.IsEnabled = true;
+            _cancelamentoAmostra = null;
+            _amostra = null;
+        }
+    }
+
+    private void MostrarProcessos()
+    {
+        var grupos = Processos.Agrupar(_processos);
+        ListaProcessos.ItemsSource = (_porMemoria ? grupos.OrderByDescending(g => g.MemoriaBytes).ThenByDescending(g => g.CpuPercent)
+            : grupos.OrderByDescending(g => g.CpuPercent).ThenByDescending(g => g.MemoriaBytes)).Take(10).ToArray();
+        BtnCpu.Content = _porMemoria ? "CPU" : "CPU ↓";
+        BtnMemoria.Content = _porMemoria ? "Memória ↓" : "Memória";
+    }
+
+    private async void Amostrar_Click(object sender, RoutedEventArgs e) => await Amostrar();
+    private void OrdenarCpu_Click(object sender, RoutedEventArgs e) { _porMemoria = false; MostrarProcessos(); }
+    private void OrdenarMemoria_Click(object sender, RoutedEventArgs e) { _porMemoria = true; MostrarProcessos(); }
+
+    private async void Finalizar_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { Tag: GrupoProcessos grupo } || !grupo.PodeFinalizar) return;
+        if (MessageBox.Show(Window.GetWindow(this), $"Finalizar {grupo.Nome}? Trabalho não salvo nesse programa será perdido.",
+            "Sentinela", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) != MessageBoxResult.Yes) return;
+        grupo.Finalizando = true;
+        try
+        {
+            var resultados = await Task.Run(() => grupo.Processos.Select(p => Processos.Finalizar(p.Pid, p.Nome, p.Inicio)).ToArray());
+            // Aguarda o descarte da leitura anterior antes de iniciar uma posterior ao Kill.
+            var anterior = _amostra;
+            CancelarAmostra();
+            if (anterior != null) await anterior;
+            await Amostrar();
+            TxtProcessos.Text = string.Join(" ", resultados.Select(r => r.mensagem).Distinct());
+        }
+        catch (Exception ex) { TxtProcessos.Text = $"Não consegui finalizar: {ex.Message}"; }
+        finally { grupo.Finalizando = false; }
+    }
 
     // A página é mantida pela janela; navegar nunca dispara uma nova leitura.
     public void Carregar()
     {
         if (_ultimo != null) Mostrar(_ultimo);
+        AtualizarGrafico();
     }
 
     public Task Verificar() => _execucao ??= Executar();
@@ -71,6 +177,11 @@ public partial class PaginaDesempenho : UserControl
             if (sender is not Button { Tag: AcaoResolver acao }) return;
             if (acao.Tipo == "pagina" && acao.Alvo != null)
                 (Window.GetWindow(this) as MainWindow)?.IrPara(acao.Alvo);
+            else if (acao.Tipo == "rolar" && acao.Alvo == "agora")
+            {
+                SecaoAgora.BringIntoView();
+                await Amostrar();
+            }
             else if (acao.Tipo == "abrir" && AlvoPermitido(acao.Alvo))
             {
                 // Abrir somente atalhos fixos de configuração; nunca interpretar comandos recebidos.

@@ -1,4 +1,4 @@
-<UserControl x:Class="Sentinela.Paginas.PaginaDesempenho"
+﻿<UserControl x:Class="Sentinela.Paginas.PaginaDesempenho"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <DockPanel>
@@ -16,7 +16,7 @@
                 <Border x:Name="Convite" Style="{StaticResource CartaoBorda}">
                     <StackPanel>
                         <TextBlock Text="Como está o desempenho do seu PC?" Style="{StaticResource Subtitulo}"/>
-                        <TextBlock Text="Clique em Verificar o PC para conferir cinco pontos que podem deixar o Windows lento." Style="{StaticResource Fraco}" Margin="0,8,0,0"/>
+                        <TextBlock Text="Clique em Verificar o PC para conferir o que pode deixar o Windows lento." Style="{StaticResource Fraco}" Margin="0,8,0,0"/>
                     </StackPanel>
                 </Border>
                 <Border x:Name="CartaoNota" Style="{StaticResource CartaoBorda}" Padding="12" Visibility="Collapsed">
@@ -53,6 +53,50 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
+                <Border x:Name="SecaoAgora" Style="{StaticResource CartaoBorda}" Padding="12">
+                    <StackPanel>
+                        <DockPanel>
+                            <TextBlock Text="Agora" Style="{StaticResource Subtitulo}"/>
+                            <TextBlock Text="Última hora · janela aberta" Style="{StaticResource Fraco}" HorizontalAlignment="Right"/>
+                        </DockPanel>
+                        <Grid Margin="0,6,0,6" Height="90">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="38"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                            <TextBlock Text="100%" Style="{StaticResource Fraco}"/>
+                            <TextBlock Text="0%" Style="{StaticResource Fraco}" VerticalAlignment="Bottom"/>
+                            <Canvas x:Name="Grafico" Grid.Column="1" ClipToBounds="True" Background="{StaticResource Fundo}" SizeChanged="Grafico_SizeChanged">
+                                <Path x:Name="LinhaCpu" Stroke="{StaticResource Destaque}" StrokeThickness="2"/>
+                                <Path x:Name="LinhaMemoria" Stroke="{StaticResource Ambar}" StrokeThickness="2"/>
+                            </Canvas>
+                        </Grid>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <TextBlock Text="━ CPU" Foreground="{StaticResource Destaque}" Margin="0,0,16,0"/>
+                            <TextBlock Text="━ Memória" Foreground="{StaticResource Ambar}"/>
+                            <TextBlock x:Name="TxtHistorico" Style="{StaticResource Fraco}" Margin="16,0,0,0"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Button x:Name="BtnAmostrar" Content="Ver o que está pesando" Click="Amostrar_Click" Padding="10,5"/>
+                            <Button x:Name="BtnCpu" Content="CPU ↓" Click="OrdenarCpu_Click" Padding="10,5"/>
+                            <Button x:Name="BtnMemoria" Content="Memória" Click="OrdenarMemoria_Click" Padding="10,5"/>
+                        </StackPanel>
+                        <ProgressBar x:Name="ProgressoAmostra" IsIndeterminate="True" Visibility="Collapsed" Margin="0,6,0,0"/>
+                        <TextBlock x:Name="TxtProcessos" Style="{StaticResource Fraco}" Margin="0,6,0,6" Text="Amostra de 2 segundos. CPU considera todos os núcleos; memória privada quando disponível."/>
+                        <DataGrid x:Name="ListaProcessos" CanUserSortColumns="False" MaxHeight="340" RowHeight="28">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Programa" Binding="{Binding Nome}" Width="2*"/>
+                                <DataGridTextColumn Header="Editora" Binding="{Binding Editora, TargetNullValue=—}" Width="*"/>
+                                <DataGridTextColumn Header="CPU %" Binding="{Binding CpuTexto}" Width="65"/>
+                                <DataGridTextColumn Header="Memória" Binding="{Binding MemoriaTexto}" Width="85"/>
+                                <DataGridTemplateColumn Width="85">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Content="Finalizar" Tag="{Binding}" IsEnabled="{Binding PodeFinalizar}" ToolTip="{Binding Dica}" ToolTipService.ShowOnDisabled="True" Click="Finalizar_Click" Padding="6,2" FontSize="11" Margin="0"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </Border>
             </StackPanel>
         </ScrollViewer>
     </DockPanel>

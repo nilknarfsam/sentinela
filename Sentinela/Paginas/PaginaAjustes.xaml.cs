@@ -72,8 +72,7 @@ public partial class PaginaAjustes : UserControl
             MessageBox.Show(Window.GetWindow(this), motivo, "Pasta ignorada", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
-        if (!Configuracoes.Atual.PastasProjetos.Contains(pasta, StringComparer.OrdinalIgnoreCase))
-            Configuracoes.Atual.PastasProjetos.Add(pasta);
+        Configuracoes.Atual.AdicionarPastaProjeto(pasta);
         ListaProjetos.ItemsSource = Configuracoes.Atual.ListarPastasProjetos();
         await Task.Run(Configuracoes.Atual.Salvar);
     }
@@ -82,8 +81,7 @@ public partial class PaginaAjustes : UserControl
         if (ListaProjetos.SelectedItem is not Configuracoes.PastaProjeto pasta) return;
         if (MessageBox.Show(Window.GetWindow(this), $"Remover esta pasta da lista de projetos?\n\n{pasta.Caminho}",
             "Remover pasta", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
-        Configuracoes.Atual.PastasProjetos.Remove(pasta.Caminho);
-        Configuracoes.Atual.PastasIgnoradas.Remove(pasta);
+        Configuracoes.Atual.RemoverPastaProjeto(pasta);
         ListaProjetos.ItemsSource = Configuracoes.Atual.ListarPastasProjetos();
         await Task.Run(Configuracoes.Atual.Salvar);
     }

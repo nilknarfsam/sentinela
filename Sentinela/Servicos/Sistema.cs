@@ -1,4 +1,4 @@
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Security.Principal;
 
 namespace Sentinela.Servicos;
@@ -12,6 +12,7 @@ public sealed record InfoDisco(string Letra, string Nome, double TotalGB, double
 /// <summary>CPU, memória, discos e tempo ligado, sem pacotes extras.</summary>
 public static class Sistema
 {
+    private static readonly object CpuLock = new();
     private static ulong _ociosoAnt, _kernelAnt, _userAnt;
 
     public static bool EhAdmin()
@@ -23,13 +24,16 @@ public static class Sistema
     /// <summary>Uso de CPU em % desde a última chamada.</summary>
     public static double UsoCpu()
     {
-        if (!GetSystemTimes(out var i, out var k, out var u)) return 0;
-        ulong ocioso = i.Valor, kernel = k.Valor, user = u.Valor;
-        ulong dOcioso = ocioso - _ociosoAnt, total = (kernel - _kernelAnt) + (user - _userAnt);
-        bool primeira = _kernelAnt == 0;
-        _ociosoAnt = ocioso; _kernelAnt = kernel; _userAnt = user;
-        if (primeira || total == 0) return 0;
-        return Math.Clamp(100.0 * (total - dOcioso) / total, 0, 100);
+        lock (CpuLock)
+        {
+            if (!GetSystemTimes(out var i, out var k, out var u)) return 0;
+            ulong ocioso = i.Valor, kernel = k.Valor, user = u.Valor;
+            ulong dOcioso = ocioso - _ociosoAnt, total = (kernel - _kernelAnt) + (user - _userAnt);
+            bool primeira = _kernelAnt == 0;
+            _ociosoAnt = ocioso; _kernelAnt = kernel; _userAnt = user;
+            if (primeira || total == 0) return 0;
+            return Math.Clamp(100.0 * (total - dOcioso) / total, 0, 100);
+        }
     }
 
     public static (double usadoGB, double totalGB, double percent) Memoria()

@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
@@ -16,6 +16,10 @@ public partial class MainWindow : Window
     private readonly DispatcherTimer _timerRapido = new() { Interval = TimeSpan.FromSeconds(2) };
     private readonly DispatcherTimer _timerDefender = new() { Interval = TimeSpan.FromSeconds(20) };
     private readonly DispatcherTimer _timerEventosDefender = new() { Interval = TimeSpan.FromSeconds(2) };
+    private readonly DispatcherTimer _timerHistorico = new() { Interval = TimeSpan.FromSeconds(5) };
+    private readonly HistoricoDesempenho _historico = new();
+    private double _cpuAtual, _memoriaAtual;
+    private bool _temLeitura;
     private bool _relerStatusPendente;
     private bool _relerAmeacasPendente;
     private bool _avisouBandeja;
@@ -38,6 +42,23 @@ public partial class MainWindow : Window
         PaginaVarredura.VarreduraTerminou += AtualizarStatusAposOperacao;
         PaginaLimpeza.EspacoMudou += PaginaInicio.AtualizarDiscos;
 
+        PaginaInicio.SistemaAtualizado += (cpu, memoria) =>
+        {
+            if (!ColetarDesempenho) return;
+            _cpuAtual = cpu; _memoriaAtual = memoria; _temLeitura = true;
+            if (_historico.Quantidade == 0)
+            {
+                _historico.Adicionar(DateTime.Now, cpu, memoria);
+                _timerHistorico.Stop();
+                _timerHistorico.Start();
+            }
+        };
+        _timerHistorico.Tick += (_, _) =>
+        {
+            if (!ColetarDesempenho || !_temLeitura) return;
+            _historico.Adicionar(DateTime.Now, _cpuAtual, _memoriaAtual);
+            _paginaDesempenho?.AtualizarGrafico();
+        };
         _timerRapido.Tick += (_, _) => PaginaInicio.AtualizarSistema();
         _timerDefender.Tick += async (_, _) => await AtualizarDefender();
         _timerEventosDefender.Tick += async (_, _) =>
@@ -59,17 +80,20 @@ public partial class MainWindow : Window
             catch { /* Uma falha na releitura não pode escapar do handler assíncrono. */ }
         };
 
-        IsVisibleChanged += async (_, _) =>
+        IsVisibleChanged += async (_, _) => await AtualizarVisibilidade();
+        StateChanged += async (_, _) => await AtualizarVisibilidade();
+
+        async Task AtualizarVisibilidade()
         {
             if (_inicializacao == null || App.Saindo) return;
             AjustarTimers();
-            if (IsVisible)
+            if (ColetarDesempenho)
             {
-                Sistema.UsoCpu(); // descarta o intervalo em que a janela ficou oculta
+                await Task.Run(Sistema.UsoCpu); // descarta o intervalo em que a janela ficou oculta
                 PaginaInicio.AtualizarSistema();
                 await AtualizarDefender();
             }
-        };
+        }
         Loaded += async (_, _) =>
         {
             await Iniciar();
@@ -82,18 +106,24 @@ public partial class MainWindow : Window
     private async Task IniciarMonitoramento()
     {
         AjustarTimers();
-        if (IsVisible)
+        if (ColetarDesempenho)
         {
-            Sistema.UsoCpu();
+            await Task.Run(Sistema.UsoCpu);
             PaginaInicio.AtualizarSistema();
         }
         await AtualizarDefender();
     }
 
+    private bool ColetarDesempenho => IsVisible && WindowState != WindowState.Minimized;
+
     private void AjustarTimers()
     {
-        if (IsVisible) _timerRapido.Start();
-        else _timerRapido.Stop();
+        if (ColetarDesempenho) { _timerRapido.Start(); _timerHistorico.Start(); }
+        else
+        {
+            _timerRapido.Stop(); _timerHistorico.Stop(); _temLeitura = false;
+            _paginaDesempenho?.CancelarAmostra();
+        }
         _timerDefender.Interval = TimeSpan.FromSeconds(IsVisible ? 20 : 60);
         _timerDefender.Start();
     }
@@ -107,7 +137,7 @@ public partial class MainWindow : Window
         ConteudoDesempenho.Visibility = Vis(MenuDesempenho.IsChecked);
         if (MenuDesempenho.IsChecked == true)
         {
-            if (_paginaDesempenho == null) ConteudoDesempenho.Content = _paginaDesempenho = new Paginas.PaginaDesempenho();
+            if (_paginaDesempenho == null) ConteudoDesempenho.Content = _paginaDesempenho = new Paginas.PaginaDesempenho(_historico);
             _paginaDesempenho.Carregar();
         }
         PaginaVarredura.Visibility = Vis(MenuVarredura.IsChecked);
@@ -231,6 +261,8 @@ public partial class MainWindow : Window
             return;
         }
         _timerRapido.Stop();
+        _timerHistorico.Stop();
+        _paginaDesempenho?.CancelarAmostra();
         _timerDefender.Stop();
         _timerEventosDefender.Stop();
         PaginaVarredura.Cancelar();
@@ -242,7 +274,10 @@ public partial class MainWindow : Window
         IrPara(App.CapturaAba ?? "inicio");
         switch (App.CapturaAba?.ToLowerInvariant())
         {
-            case "desempenho": await _paginaDesempenho!.Verificar(); break;
+            case "desempenho":
+                await _paginaDesempenho!.Verificar();
+                await _paginaDesempenho.Amostrar();
+                break;
             case "varredura": MenuVarredura.IsChecked = true; break;
             case "ameacas": MenuAmeacas.IsChecked = true; break;
             case "historico": MenuHistorico.IsChecked = true; await PaginaHistorico.Carregar(); break;
@@ -250,11 +285,24 @@ public partial class MainWindow : Window
             case "inicializacao": MenuInicializacao.IsChecked = true; await PaginaInicializacao.Carregar(); break;
             case "ajustes": MenuAjustes.IsChecked = true; break;
         }
-        await Task.Delay(2500);
+        await Task.Delay(App.CapturaAba?.Equals("desempenho", StringComparison.OrdinalIgnoreCase) == true ? 5500 : 2500);
         PaginaInicio.AtualizarSistema();
         await Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ApplicationIdle);
 
         var conteudo = (FrameworkElement)Content;
+        if (App.CapturaAba?.Equals("desempenho", StringComparison.OrdinalIgnoreCase) == true)
+        {
+            // Renderizar todo o painel, inclusive em monitores com pouca altura.
+            var tamanho = new Size(conteudo.ActualWidth, 1550);
+            Content = null;
+            var painelCaptura = new System.Windows.Controls.Grid { Width = tamanho.Width, Height = tamanho.Height };
+            painelCaptura.Children.Add(conteudo);
+            conteudo = painelCaptura;
+            painelCaptura.Measure(tamanho);
+            painelCaptura.Arrange(new Rect(tamanho));
+            painelCaptura.UpdateLayout();
+            _paginaDesempenho!.AtualizarGrafico();
+        }
         var dpi = VisualTreeHelper.GetDpi(this);
         var bmp = new RenderTargetBitmap((int)(conteudo.ActualWidth * dpi.DpiScaleX), (int)(conteudo.ActualHeight * dpi.DpiScaleY),
             dpi.PixelsPerInchX, dpi.PixelsPerInchY, PixelFormats.Pbgra32);
