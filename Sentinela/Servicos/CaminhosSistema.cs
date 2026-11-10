@@ -4,6 +4,8 @@ internal static class CaminhosSistema
 {
     public static string PowerCfg => Path.Combine(Environment.SystemDirectory, "powercfg.exe");
     public static string Mmc => Path.Combine(Environment.SystemDirectory, "mmc.exe");
+    public static string AgendadorTarefas => Path.Combine(Environment.SystemDirectory, "taskschd.msc");
+    public static string Servicos => Path.Combine(Environment.SystemDirectory, "services.msc");
     public static string GerenciadorDispositivos => Path.Combine(Environment.SystemDirectory, "devmgmt.msc");
     public static string Control => Path.Combine(Environment.SystemDirectory, "control.exe");
     public static string OpcoesEnergia => Path.Combine(Environment.SystemDirectory, "powercfg.cpl");

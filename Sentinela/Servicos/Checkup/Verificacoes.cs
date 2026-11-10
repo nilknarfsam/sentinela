@@ -124,9 +124,14 @@ public sealed class VerificacaoInicializacao : Verificacao
 {
     public override string Nome => "Inicialização";
     public override int Peso => 2;
-    protected override Task<ResultadoVerificacao> Ler(CancellationToken ct) => Task.FromResult(Avaliar(Inicializacao.Listar().Count(p => p.Ativo)));
-    internal static ResultadoVerificacao Avaliar(int ativos) => new("Inicialização", "\uE7E8",
-        ativos > 15 ? NivelVerificacao.Problema : ativos >= 9 ? NivelVerificacao.Atencao : NivelVerificacao.Ok,
-        $"{ativos} programas abrem com o Windows", "Quanto mais programas iniciam juntos, mais a entrada no Windows pode demorar.",
+    protected override Task<ResultadoVerificacao> Ler(CancellationToken ct)
+    {
+        var ativos = Inicializacao.Listar().Where(p => p.Ativo).ToArray();
+        return Task.FromResult(Avaliar(ativos.Length, ativos.Count(p => p.Assinatura is EstadoAssinatura.NaoAssinado or EstadoAssinatura.Invalida)));
+    }
+    internal static ResultadoVerificacao Avaliar(int ativos, int semAssinatura = 0) => new("Inicialização", "\uE7E8",
+        ativos > 15 ? NivelVerificacao.Problema : ativos >= 9 || semAssinatura > 0 ? NivelVerificacao.Atencao : NivelVerificacao.Ok,
+        $"{ativos} programas abrem com o Windows", "Quanto mais programas iniciam juntos, mais a entrada no Windows pode demorar."
+            + $" {semAssinatura} programa(s) ativo(s) sem assinatura ou com assinatura inválida.",
         new("Ver a lista", "pagina", "inicializacao"));
 }

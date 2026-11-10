@@ -59,7 +59,7 @@ public partial class PaginaAjustes : UserControl
     private void AbrirDiario_Click(object sender, RoutedEventArgs e) => Tentar(() =>
     {
         var pasta = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sentinela");
-        Directory.CreateDirectory(pasta);
+        if (!ArquivosSeguros.PastaSegura(pasta)) return;
         Process.Start(new ProcessStartInfo(CaminhosSistema.Explorer, $"\"{pasta}\"") { UseShellExecute = true });
     });
 }

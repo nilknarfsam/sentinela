@@ -15,6 +15,8 @@ public partial class App : Application
     private Dictionary<NivelStatus, System.Drawing.Icon> _icones = new();
     private NivelStatus? _nivelStatus;
     private VigiaDefender? _vigia;
+    private VigiaInicializacao? _vigiaInicializacao;
+    private bool _balaoInicializacao;
     private CaixaDePedidos? _pedidos;
     private Pedido? _verificarPendente;
     private int _mostrarPendente;
@@ -22,7 +24,7 @@ public partial class App : Application
     private long _ultimoMostrar;
     private readonly DispatcherTimer _timerAvisos = new() { Interval = TimeSpan.FromSeconds(5) };
     private readonly System.Diagnostics.Stopwatch _desdeAviso = new();
-    private readonly List<(string Texto, bool Erro)> _avisosPendentes = [];
+    private readonly List<(string Texto, bool Erro, bool Inicializacao)> _avisosPendentes = [];
 
     /// <summary>Iniciado pelo Windows: fica só na bandeja, sem abrir a janela.</summary>
     public static bool IniciarNaBandeja { get; private set; }
@@ -105,6 +107,13 @@ public partial class App : Application
                     Dispatcher.BeginInvoke(new Action(() => ReceberEventoDefender(evento)));
             };
             _vigia.Iniciar();
+            _vigiaInicializacao = new VigiaInicializacao();
+            _vigiaInicializacao.Chegou += texto =>
+            {
+                if (!Dispatcher.HasShutdownStarted)
+                    Dispatcher.BeginInvoke(new Action(() => { if (!Saindo) Avisar("Sentinela", texto, inicializacao: true); }));
+            };
+            _vigiaInicializacao.Iniciar();
         }
         Diario.Registrar("inicio", IniciarNaBandeja ? "Sentinela iniciado na bandeja" : "Sentinela iniciado");
         _ = _janela.Iniciar();
@@ -195,6 +204,11 @@ public partial class App : Application
             ContextMenuStrip = menu,
         };
         _bandeja.MouseClick += (_, a) => { if (a.Button == WinForms.MouseButtons.Left) MostrarJanela(); };
+        _bandeja.BalloonTipClicked += (_, _) =>
+        {
+            MostrarJanela();
+            if (_balaoInicializacao) _janela?.IrPara("inicializacao");
+        };
     }
 
     public void MostrarJanela()
@@ -209,12 +223,12 @@ public partial class App : Application
         _janela.Activate();
     }
 
-    public void Avisar(string titulo, string texto, bool erro = false, bool rotina = false)
+    public void Avisar(string titulo, string texto, bool erro = false, bool rotina = false, bool inicializacao = false)
     {
         if (_bandeja == null || (rotina && !Configuracoes.Atual.AvisosDeRotina)) return;
         if (_desdeAviso.IsRunning && _desdeAviso.Elapsed < TimeSpan.FromSeconds(5))
         {
-            _avisosPendentes.Add((texto, erro));
+            _avisosPendentes.Add((texto, erro, inicializacao));
             if (!_timerAvisos.IsEnabled)
             {
                 _timerAvisos.Interval = TimeSpan.FromSeconds(5) - _desdeAviso.Elapsed;
@@ -224,10 +238,11 @@ public partial class App : Application
         }
         if (_avisosPendentes.Count > 0)
         {
-            _avisosPendentes.Add((texto, erro));
+            _avisosPendentes.Add((texto, erro, inicializacao));
             MostrarAvisosPendentes();
             return;
         }
+        _balaoInicializacao = inicializacao;
         _bandeja.ShowBalloonTip(5000, titulo, texto, erro ? WinForms.ToolTipIcon.Warning : WinForms.ToolTipIcon.Info);
         _desdeAviso.Restart();
     }
@@ -244,6 +259,7 @@ public partial class App : Application
             return;
         }
         var erro = _avisosPendentes.Any(a => a.Erro);
+        _balaoInicializacao = _avisosPendentes.Any(a => a.Inicializacao);
         var texto = erro ? _avisosPendentes.First(a => a.Erro).Texto : _avisosPendentes[^1].Texto;
         if (texto.Length > 150) texto = texto[..149] + "…";
         var outros = _avisosPendentes.Count - 1;
@@ -361,6 +377,7 @@ public partial class App : Application
     {
         _pedidos?.Dispose();
         _vigia?.Dispose();
+        _vigiaInicializacao?.Dispose();
         _timerAvisos.Stop();
         _bandeja?.Dispose();
         foreach (var icone in _icones.Values) icone.Dispose();

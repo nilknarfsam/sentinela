@@ -18,7 +18,7 @@ public sealed class Configuracoes
     {
         try
         {
-            var configuracoes = JsonSerializer.Deserialize<Configuracoes>(File.ReadAllText(Caminho));
+            var configuracoes = JsonSerializer.Deserialize<Configuracoes>(ArquivosSeguros.LerTexto(Caminho, 64 * 1024) ?? "");
             if (configuracoes != null && Enum.IsDefined(configuracoes.DiaVarreduraSemanal)
                 && configuracoes.HoraVarreduraSemanal is >= 0 and <= 23)
                 return configuracoes;
@@ -33,8 +33,7 @@ public sealed class Configuracoes
         try
         {
             var caminho = Caminho;
-            Directory.CreateDirectory(Path.GetDirectoryName(caminho)!);
-            File.WriteAllText(caminho, JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true }));
+            ArquivosSeguros.GravarTexto(caminho, JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true }));
         }
         catch { /* As configurações não podem interromper o aplicativo. */ }
     }

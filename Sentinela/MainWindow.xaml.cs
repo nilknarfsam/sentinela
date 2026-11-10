@@ -120,7 +120,7 @@ public partial class MainWindow : Window
         if (MenuAjustes.IsChecked == true && !PaginaAjustes.Carregada) _ = PaginaAjustes.Carregar();
         if (MenuAmeacas.IsChecked == true && !PaginaAmeacas.Carregada) _ = PaginaAmeacas.Carregar();
         if (MenuHistorico.IsChecked == true && !PaginaHistorico.Carregada) _ = PaginaHistorico.Carregar();
-        if (MenuInicializacao.IsChecked == true && !PaginaInicializacao.Carregada) PaginaInicializacao.Carregar();
+        if (MenuInicializacao.IsChecked == true && !PaginaInicializacao.Carregada) _ = PaginaInicializacao.Carregar();
     }
 
     private static Visibility Vis(bool? b) => b == true ? Visibility.Visible : Visibility.Collapsed;
@@ -247,7 +247,7 @@ public partial class MainWindow : Window
             case "ameacas": MenuAmeacas.IsChecked = true; break;
             case "historico": MenuHistorico.IsChecked = true; await PaginaHistorico.Carregar(); break;
             case "limpeza": MenuLimpeza.IsChecked = true; await PaginaLimpeza.Analisar(); break;
-            case "inicializacao": MenuInicializacao.IsChecked = true; break;
+            case "inicializacao": MenuInicializacao.IsChecked = true; await PaginaInicializacao.Carregar(); break;
             case "ajustes": MenuAjustes.IsChecked = true; break;
         }
         await Task.Delay(2500);
