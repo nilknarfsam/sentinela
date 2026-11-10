@@ -16,6 +16,7 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <Border Style="{StaticResource CartaoBorda}" Grid.ColumnSpan="2">
                     <StackPanel>
@@ -54,6 +55,19 @@
                         <TextBlock x:Name="TxtVersao"/>
                         <TextBlock Text="Motor: Windows Defender" Margin="0,6,0,8"/>
                         <TextBlock x:Name="TxtExecutavel" Style="{StaticResource Fraco}"/>
+                    </StackPanel>
+                </Border>
+                <Border Grid.Row="3" Grid.ColumnSpan="2" Style="{StaticResource CartaoBorda}">
+                    <StackPanel>
+                        <TextBlock Text="Pastas dos seus projetos" Style="{StaticResource Subtitulo}" Margin="0,0,0,10"/>
+                        <TextBlock Text="Analisa até 3 níveis. SDKs do Flutter e links são ignorados." Style="{StaticResource Fraco}"/>
+                        <ListBox x:Name="ListaProjetos" Margin="0,10,0,10" MaxHeight="130"
+                                 Background="{StaticResource Fundo}" Foreground="{StaticResource Texto}"
+                                 BorderBrush="{StaticResource Borda}"/>
+                        <WrapPanel>
+                            <Button Content="Adicionar pasta" Click="AdicionarPasta_Click"/>
+                            <Button Content="Remover" Click="RemoverPasta_Click"/>
+                        </WrapPanel>
                     </StackPanel>
                 </Border>
             </Grid>

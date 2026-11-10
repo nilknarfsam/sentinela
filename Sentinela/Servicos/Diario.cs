@@ -28,14 +28,17 @@ public static class Diario
             try
             {
                 var caminho = Caminho;
-                Directory.CreateDirectory(Path.GetDirectoryName(caminho)!);
-                if (File.Exists(caminho) && new FileInfo(caminho).Length > 5 * 1024 * 1024)
-                    File.Move(caminho, Path.Combine(Path.GetDirectoryName(caminho)!, "diario-anterior.jsonl"), true);
-                File.AppendAllText(caminho, JsonSerializer.Serialize(new EntradaDiario(DateTime.Now, tipo, mensagem, bytes)) + Environment.NewLine);
+                ArquivosSeguros.Acrescentar(caminho,
+                    JsonSerializer.Serialize(new EntradaDiario(DateTime.Now, tipo, mensagem, bytes)) + Environment.NewLine,
+                    5 * 1024 * 1024);
             }
             catch { /* O diário não pode interromper o aplicativo. */ }
         }
     }
+
+    internal static long SomarLiberado(IEnumerable<EntradaDiario> entradas, DateTime agora) => entradas
+        .Where(e => e.Tipo == "limpeza" && e.Data >= agora.AddDays(-30) && e.Data <= agora && e.Bytes > 0)
+        .Sum(e => e.Bytes ?? 0);
 
     public static List<EntradaDiario> Ler(int dias)
     {
@@ -48,8 +51,9 @@ public static class Diario
             {
                 try
                 {
-                    using var stream = new FileStream(arquivo, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
-                    using var leitor = new StreamReader(stream);
+                    var texto = ArquivosSeguros.LerTexto(arquivo, 6 * 1024 * 1024);
+                    if (texto == null) continue;
+                    using var leitor = new StringReader(texto);
                     while (leitor.ReadLine() is { } linha)
                     {
                         try

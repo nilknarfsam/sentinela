@@ -128,7 +128,7 @@ public static class Defender
 
     public static async Task IniciarVarreduraOffline()
     {
-        var psi = new ProcessStartInfo("powershell.exe", "-NoProfile -NonInteractive -Command \"Start-MpWDOScan\"")
+        var psi = new ProcessStartInfo(CaminhosSistema.PowerShell, "-NoProfile -NonInteractive -Command \"Start-MpWDOScan\"")
         {
             UseShellExecute = false, CreateNoWindow = true,
             RedirectStandardOutput = true, RedirectStandardError = true,
@@ -169,7 +169,7 @@ public static class Defender
     /// <summary>Pede ao Defender para tratar as ameaças ativas (mesmo que Remove-MpThreat).</summary>
     public static async Task<string> RemoverAmeacasAtivas()
     {
-        var psi = new ProcessStartInfo("powershell.exe",
+        var psi = new ProcessStartInfo(CaminhosSistema.PowerShell,
             "-NoProfile -NonInteractive -Command \"Remove-MpThreat -ErrorAction Stop; 'OK'\"")
         {
             UseShellExecute = false, CreateNoWindow = true,

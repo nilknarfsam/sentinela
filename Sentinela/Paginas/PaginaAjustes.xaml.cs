@@ -15,6 +15,7 @@ public partial class PaginaAjustes : UserControl
     public async Task Carregar()
     {
         Carregada = true;
+        ListaProjetos.ItemsSource = Configuracoes.Atual.ListarPastasProjetos();
         // schtasks pode demorar: roda fora da thread da tela.
         MostrarInicializacao(await Task.Run(TarefaInicializacao.EstaLigada));
         ChkBandeja.IsChecked = Configuracoes.Atual.FecharParaBandeja;
@@ -59,7 +60,29 @@ public partial class PaginaAjustes : UserControl
     private void AbrirDiario_Click(object sender, RoutedEventArgs e) => Tentar(() =>
     {
         var pasta = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sentinela");
-        Directory.CreateDirectory(pasta);
-        Process.Start(new ProcessStartInfo("explorer.exe", $"\"{pasta}\"") { UseShellExecute = true });
+        if (!ArquivosSeguros.PastaSegura(pasta)) return;
+        Process.Start(new ProcessStartInfo(CaminhosSistema.Explorer, $"\"{pasta}\"") { UseShellExecute = true });
     });
+    private async void AdicionarPasta_Click(object sender, RoutedEventArgs e)
+    {
+        var dialogo = new Microsoft.Win32.OpenFolderDialog { Title = "Pasta dos seus projetos" };
+        if (dialogo.ShowDialog() != true) return;
+        if (!Configuracoes.ValidarPastaProjeto(dialogo.FolderName, out var pasta, out var motivo))
+        {
+            MessageBox.Show(Window.GetWindow(this), motivo, "Pasta ignorada", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+        Configuracoes.Atual.AdicionarPastaProjeto(pasta);
+        ListaProjetos.ItemsSource = Configuracoes.Atual.ListarPastasProjetos();
+        await Task.Run(Configuracoes.Atual.Salvar);
+    }
+    private async void RemoverPasta_Click(object sender, RoutedEventArgs e)
+    {
+        if (ListaProjetos.SelectedItem is not Configuracoes.PastaProjeto pasta) return;
+        if (MessageBox.Show(Window.GetWindow(this), $"Remover esta pasta da lista de projetos?\n\n{pasta.Caminho}",
+            "Remover pasta", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
+        Configuracoes.Atual.RemoverPastaProjeto(pasta);
+        ListaProjetos.ItemsSource = Configuracoes.Atual.ListarPastasProjetos();
+        await Task.Run(Configuracoes.Atual.Salvar);
+    }
 }

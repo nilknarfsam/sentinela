@@ -101,6 +101,16 @@ o botão "Como resolver" abrindo a página certa do Windows.
 solução. Com o firewall desligado num perfil, a nota cai e o item fica vermelho.
 
 ## Fase 3: Checkup de desempenho
+**✅ Feita em 10/11/2026 (v1.3.0).** As seis etapas, 3A a 3F, foram entregues e revisadas.
+
+Mudou em relação ao plano:
+- A revisão de segurança levou a três proteções novas:
+  - `ArquivosSeguros`: o app, rodando como admin, nunca segue links nas pastas do usuário;
+  - `CaminhosSistema`: executáveis do Windows sempre pelo caminho completo;
+  - uma trava contra apagar pastas importantes.
+- A limpeza de temporários deixou de usar a variável TEMP, um risco que existia desde a 1.0.
+- O checkup completo leva cerca de 2 segundos.
+
 Pedido do Franklin em 10/11/2026: um "modo deixar o PC mais rápido", no lugar de
 programas como Driver Booster e CCleaner, só com o que funciona de verdade.
 Esta fase junta as antigas Fases 3 (vigia de inicialização), 4 (otimização) e
@@ -167,17 +177,52 @@ O lançamento da 1.3.0 acontece no fim da 3F.
 | :--- | :--- | :--- | :--- |
 | 7.1 | **Tema claro**, seguindo o tema do Windows | Codex | M |
 | 7.2 | Navegação por teclado e leitor de tela (nomes acessíveis) | Codex | P |
-| 7.3 | **Releases no GitHub** com o `.exe` pronto, e o Sentinela avisando quando sai versão nova. *O repositório é privado: precisaria de token ou de torná-lo público. Decidir antes* | Codex | M |
-| 7.4 | Instalador num arquivo só, com desinstalação em Aplicativos do Windows | Codex | M |
+| 7.3 | *(movido para a Fase 8)* **Releases no GitHub** com o `.exe` pronto, e o Sentinela avisando quando sai versão nova. *O repositório é privado: precisaria de token ou de torná-lo público. Decidir antes* | Codex | M |
+| 7.4 | *(movido para a Fase 8)* Instalador num arquivo só, com desinstalação em Aplicativos do Windows | Codex | M |
+
+## Fase 8: Produto e distribuição (para a comunidade)
+Ideia do Franklin em 10/11/2026: quando o Sentinela estiver maduro, distribuí-lo
+de graça pelo GitHub e pelo site dele. Junto, explicar o raciocínio: por que o
+Defender basta e o que é marketing nos "otimizadores" de PC.
+
+**Quando começar:** depois das Fases 3 e 2, com o Sentinela usado por algumas semanas
+no PC do Franklin sem problemas.
+
+### Decisões antes de começar (do Franklin)
+| Decisão | Opções | Recomendação |
+| :--- | :--- | :--- |
+| Repositório | continuar privado e só publicar o instalador, ou abrir o código | **Abrir o código** (licença MIT). Gera confiança: qualquer um pode conferir que o Sentinela não espiona nem muda o Defender |
+| Assinatura digital do instalador | sem assinatura (o SmartScreen avisa "aplicativo não reconhecido"), certificado comum (~R$ 1–2 mil/ano) ou assinatura via Azure Trusted Signing (mais barato, exige verificação de identidade) | Começar **sem assinatura**, explicando o aviso na página, e assinar quando houver usuários |
+| Formato do instalador | **MSI** (WiX Toolset), **Inno Setup** (.exe) ou **MSIX** | **MSI com WiX**: padrão das empresas, aparece em "Aplicativos" do Windows, desinstala limpo e o `winget` aceita |
+| .NET | exigir o .NET 9 Desktop Runtime instalado ou embutir no instalador | **Embutir** (self-contained). Fica maior (~70 MB) mas funciona em qualquer PC |
+| Idioma | só português ou português + inglês | Português primeiro e inglês depois (os textos já ficam centralizados para isso) |
+
+### Etapas
+| # | Item | Motor |
+| :--- | :--- | :--- |
+| 8.1 | **Generalizar o que é do PC do Franklin:** a pasta `C:\PROJETOS` da limpeza de desenvolvedor vira configurável nos Ajustes; nada de nome, e-mail ou caminho pessoal no código | Codex |
+| 8.2 | **Instalador MSI (WiX):** instala em Program Files, cria as tarefas agendadas, o atalho e o clique direito, e desinstala tudo pelo "Aplicativos" do Windows. Substitui o `instalar-sentinela.bat` | Codex |
+| 8.3 | **Releases no GitHub:** o GitHub Actions gera o MSI e o anexa a cada versão (tag `v1.x.y`), com o CHANGELOG como descrição | Codex |
+| 8.4 | **Aviso de versão nova** dentro do Sentinela (consulta a página de releases, sem enviar nada do usuário) | Codex |
+| 8.5 | **Privacidade:** página curta dizendo o que o Sentinela lê, o que guarda (só no PC) e que não envia nada para a internet | Opus |
+| 8.6 | **Licença e contribuição:** LICENSE (MIT), CONTRIBUTING, modelo de issue para relatar problema | Haiku |
+| 8.7 | **Página do Sentinela no site do Franklin:** o que é, download, capturas de tela e o aviso do SmartScreen explicado | Opus + Codex |
+| 8.8 | **Texto "Por que o Sentinela existe":** o Defender é um dos melhores antivírus nos testes independentes; o que é marketing (atualizador de drivers, limpador de registro, turbo de RAM) e o que funciona de verdade. Vira página do site, seção do LEIAME e base dos posts do Instagram (Passo 10 do plano geral) | Opus escreve, ChatGPT adapta para os posts |
+| 8.9 | **winget** (opcional): publicar no repositório do `winget` para instalar com `winget install Sentinela` | Codex |
+
+**Aceite:**
+- Um PC limpo, sem .NET e sem nada do Franklin, instala pelo MSI baixado do GitHub, usa e desinstala sem deixar sobra.
+- A página do site e o LEIAME explicam o aviso do SmartScreen e a privacidade.
 
 ---
 
 ## Ordem recomendada
 1. ✅ **Fase 0:** fundação (v1.1.0).
 2. ✅ **Fase 1:** aviso na hora (v1.2.0).
-3. 🔜 **Fase 3:** Checkup de desempenho, etapas 3A a 3F (v1.3.0).
+3. ✅ **Fase 3:** Checkup de desempenho (v1.3.0).
 4. **Fase 2:** saúde da segurança.
 5. **Fases 6 e 7:** rotinas, relatórios e acabamento.
+6. **Fase 8:** produto e distribuição para a comunidade (MSI, GitHub, site).
 
 Tamanhos: **P** cabe numa tarefa, **M** em 2 ou 3 tarefas com revisão entre elas, **G** pede plano do Codex (`modo="plan"`) antes.
 

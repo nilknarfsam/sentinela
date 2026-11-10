@@ -32,6 +32,17 @@
             <TextBlock Text="Proteção" Style="{StaticResource Subtitulo}" Margin="2,8,0,10"/>
             <UniformGrid x:Name="GradeProtecao" Columns="3"/>
 
+            <Border Style="{StaticResource CartaoBorda}">
+                <DockPanel>
+                    <Button DockPanel.Dock="Right" Content="Ver" Click="Desempenho_Click" VerticalAlignment="Center" Margin="16,0,0,0"/>
+                    <StackPanel>
+                        <TextBlock Text="Desempenho" Style="{StaticResource Subtitulo}"/>
+                        <TextBlock x:Name="TxtDesempenho" Text="Ainda não verificado" Margin="0,6,0,0" FontSize="16" FontWeight="SemiBold"/>
+                        <TextBlock x:Name="TxtNovoCheckup" Text="Faça uma verificação nova" Foreground="{StaticResource Ambar}" Margin="0,4,0,0" Visibility="Collapsed"/>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
             <TextBlock Text="Computador" Style="{StaticResource Subtitulo}" Margin="2,8,0,10"/>
             <UniformGrid Columns="3">
                 <Border Style="{StaticResource CartaoBorda}">

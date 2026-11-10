@@ -1,23 +1,56 @@
-<UserControl x:Class="Sentinela.Paginas.PaginaInicializacao"
+﻿<UserControl x:Class="Sentinela.Paginas.PaginaInicializacao"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <DockPanel>
-        <DockPanel DockPanel.Dock="Top" Margin="0,0,12,18">
-            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-                <Button Content="Atualizar" Click="AtualizarInicializacao_Click"/>
-                <Button Style="{StaticResource BotaoPrincipal}" Content="Ligar ou desligar no Gerenciador" Click="AbrirGerenciador_Click" Margin="0"/>
-            </StackPanel>
-            <StackPanel>
-                <TextBlock Text="Inicialização" Style="{StaticResource Titulo}" Margin="0,0,0,4"/>
-                <TextBlock x:Name="TxtResumoInicializacao" Style="{StaticResource Fraco}"/>
-            </StackPanel>
-        </DockPanel>
-        <DataGrid x:Name="GradeInicializacao" Margin="0,0,12,0">
+    <UserControl.Resources>
+        <Style x:Key="TextoCelula" TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+            <Setter Property="TextWrapping" Value="NoWrap"/>
+            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+            <Setter Property="ToolTip" Value="{Binding Text, RelativeSource={RelativeSource Self}}"/>
+        </Style>
+        <Style x:Key="TextoAssinatura" TargetType="TextBlock" BasedOn="{StaticResource TextoCelula}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding TextoAssinatura}" Value="Sem assinatura">
+                    <Setter Property="Foreground" Value="{StaticResource Ambar}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding TextoAssinatura}" Value="Assinatura inválida">
+                    <Setter Property="Foreground" Value="{StaticResource Vermelho}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding TextoAssinatura}" Value="Arquivo não existe">
+                    <Setter Property="Foreground" Value="{StaticResource Ambar}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    <DockPanel Margin="0,0,12,0">
+        <StackPanel DockPanel.Dock="Top" Margin="0,0,0,18">
+            <TextBlock Text="Inicialização" Style="{StaticResource Titulo}" Margin="0,0,0,4"/>
+            <TextBlock x:Name="TxtResumoInicializacao" Style="{StaticResource Fraco}" Margin="0,0,0,16"/>
+            <WrapPanel x:Name="Filtros">
+                <Button Content="Programas" Tag="programas" Click="Filtrar_Click" Style="{StaticResource BotaoPrincipal}"/>
+                <Button Content="Tarefas agendadas" Tag="tarefas" Click="Filtrar_Click"/>
+                <Button Content="Serviços" Tag="servicos" Click="Filtrar_Click"/>
+            </WrapPanel>
+            <WrapPanel Margin="0,12,0,0">
+                <Button x:Name="BotaoAtualizar" Content="Atualizar" Click="AtualizarInicializacao_Click"/>
+                <Button x:Name="BotaoConsole" Visibility="Collapsed" Click="AbrirConsole_Click"/>
+            </WrapPanel>
+            <TextBlock x:Name="TxtMensagem" Style="{StaticResource Fraco}" Margin="0,8,0,0"/>
+        </StackPanel>
+        <DataGrid x:Name="GradeInicializacao">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Programa" Binding="{Binding Nome}" Width="200"/>
-                <DataGridTextColumn Header="Estado" Binding="{Binding Estado}" Width="90"/>
-                <DataGridTextColumn Header="Origem" Binding="{Binding Origem}" Width="160"/>
-                <DataGridTextColumn Header="Comando" Binding="{Binding Comando}" Width="*"/>
+                <DataGridTextColumn Header="Nome" Binding="{Binding Nome}" Width="170" ElementStyle="{StaticResource TextoCelula}"/>
+                <DataGridTemplateColumn x:Name="ColunaAtivo" Header="Abre com o Windows" Width="145">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <CheckBox IsChecked="{Binding Ativo, Mode=OneWay}" Click="Ativo_Click" HorizontalAlignment="Center"
+                                      VerticalAlignment="Center" Foreground="{StaticResource Texto}" AutomationProperties.Name="Abre com o Windows"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Editora" Binding="{Binding Editora}" Width="150" ElementStyle="{StaticResource TextoCelula}"/>
+                <DataGridTextColumn Header="Assinatura" Binding="{Binding TextoAssinatura}" Width="145" ElementStyle="{StaticResource TextoAssinatura}"/>
+                <DataGridTextColumn Header="Origem" Binding="{Binding Origem}" Width="135" ElementStyle="{StaticResource TextoCelula}"/>
+                <DataGridTextColumn Header="Comando" Binding="{Binding Comando}" Width="*" MinWidth="100" ElementStyle="{StaticResource TextoCelula}"/>
             </DataGrid.Columns>
         </DataGrid>
     </DockPanel>
