@@ -1,9 +1,48 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Sentinela.Servicos;
 
 public sealed class Configuracoes
 {
+    public sealed record PastaProjeto(string Caminho, string? Motivo)
+    {
+        public override string ToString() => Motivo == null ? Caminho : $"{Caminho} — Ignorada: {Motivo}";
+    }
+
+    [JsonIgnore]
+    public List<PastaProjeto> PastasIgnoradas { get; } = [];
+
+    internal static bool ValidarPastaProjeto(string? pasta, out string normalizada, out string motivo)
+    {
+        normalizada = "";
+        motivo = "Caminho inválido";
+        try
+        {
+            if (string.IsNullOrWhiteSpace(pasta) || !Path.IsPathFullyQualified(pasta)) { motivo = "Use um caminho totalmente qualificado"; return false; }
+            if (ArvoreDescartavel.PastaProibidaParaApagar(pasta)) { motivo = "Pasta protegida"; return false; }
+            normalizada = ArvoreDescartavel.Normalizar(pasta);
+            if (!Directory.Exists(normalizada)) { motivo = "Pasta inexistente ou inacessível"; return false; }
+            return true;
+        }
+        catch { return false; }
+    }
+
+    public string[] PastasProjetosValidas()
+    {
+        var validas = new List<string>();
+        foreach (var pasta in PastasProjetos)
+        {
+            if (ValidarPastaProjeto(pasta, out var normalizada, out var motivo)) validas.Add(normalizada);
+            else if (!PastasIgnoradas.Any(p => p.Caminho == pasta)) PastasIgnoradas.Add(new(pasta, motivo));
+        }
+        PastasProjetos = validas.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        return PastasProjetos.ToArray();
+    }
+
+    public PastaProjeto[] ListarPastasProjetos() => PastasProjetosValidas().Select(p => new PastaProjeto(p, null)).Concat(PastasIgnoradas).ToArray();
+
+    public List<string> PastasProjetos { get; set; } = Directory.Exists(@"C:\PROJETOS") ? [@"C:\PROJETOS"] : [];
     public bool FecharParaBandeja { get; set; } = true;
     public bool AvisosDeRotina { get; set; } = true;
     public DayOfWeek DiaVarreduraSemanal { get; set; } = DayOfWeek.Sunday;
@@ -21,7 +60,11 @@ public sealed class Configuracoes
             var configuracoes = JsonSerializer.Deserialize<Configuracoes>(ArquivosSeguros.LerTexto(Caminho, 64 * 1024) ?? "");
             if (configuracoes != null && Enum.IsDefined(configuracoes.DiaVarreduraSemanal)
                 && configuracoes.HoraVarreduraSemanal is >= 0 and <= 23)
+            {
+                configuracoes.PastasProjetos ??= [];
+                configuracoes.PastasProjetosValidas();
                 return configuracoes;
+            }
         }
         catch { /* Arquivo ausente, inválido ou indisponível: usa os padrões. */ }
         return new Configuracoes();

@@ -1,37 +1,55 @@
 <UserControl x:Class="Sentinela.Paginas.PaginaLimpeza"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <DockPanel>
-        <StackPanel DockPanel.Dock="Top">
-            <DockPanel Margin="0,0,12,18">
-                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button x:Name="BtnAnalisar" Content="Analisar" Click="Analisar_Click"/>
-                    <Button x:Name="BtnLimpar" Style="{StaticResource BotaoPrincipal}" Content="Limpar selecionados" Click="Limpar_Click" Margin="0"/>
-                </StackPanel>
-                <StackPanel>
-                    <TextBlock Text="Otimização" Style="{StaticResource Titulo}" Margin="0,0,0,4"/>
-                    <TextBlock Text="Apaga só arquivos que o Windows e os programas recriam sozinhos. Arquivos em uso são pulados." Style="{StaticResource Fraco}"/>
-                </StackPanel>
-            </DockPanel>
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+ <DockPanel Margin="0,0,12,0">
+  <StackPanel DockPanel.Dock="Top">
+   <TextBlock Text="Otimização" Style="{StaticResource Titulo}" Margin="0,0,0,4"/>
+   <TextBlock Text="Escolha o que analisar. A limpeza sempre pede sua confirmação." Style="{StaticResource Fraco}" Margin="0,0,0,16"/>
+   <WrapPanel x:Name="Filtros">
+    <Button Content="Windows" Click="Filtrar_Click" Style="{StaticResource BotaoPrincipal}"/>
+    <Button Content="Projetos" Click="Filtrar_Click"/>
+    <Button Content="Caches" Click="Filtrar_Click"/>
+    <Button Content="Navegadores" Click="Filtrar_Click"/>
+    <Button Content="Maiores pastas" Click="Filtrar_Click"/>
+   </WrapPanel>
+   <WrapPanel Margin="0,12,0,0">
+    <ComboBox x:Name="Discos" Width="210" Visibility="Collapsed" SelectionChanged="Discos_SelectionChanged" Margin="0,0,12,0"/>
+    <Button x:Name="BtnAnalisar" Content="Analisar" Click="Analisar_Click"/>
+    <Button x:Name="BtnCancelar" Content="Cancelar" Click="Cancelar_Click" IsEnabled="False"/>
+    <Button x:Name="BtnLimpar" Content="Limpar selecionados" Style="{StaticResource BotaoPrincipal}" Click="Limpar_Click"/>
+   </WrapPanel>
+   <TextBlock x:Name="TxtResultadoLimpeza" Style="{StaticResource Fraco}" Margin="0,8,0,8" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+  </StackPanel>
+  <StackPanel DockPanel.Dock="Bottom" Margin="0,8,0,0">
+   <TextBlock x:Name="TxtTotal" FontWeight="SemiBold"/>
+   <TextBlock x:Name="TxtHistorico" Style="{StaticResource Fraco}" Margin="0,6,0,0"/>
+  </StackPanel>
+  <Grid>
+   <ScrollViewer x:Name="Rolagem" VerticalScrollBarVisibility="Auto">
+    <ItemsControl x:Name="ListaLimpeza">
+     <ItemsControl.ItemTemplate><DataTemplate>
+      <Border Style="{StaticResource CartaoBorda}" Padding="16,12">
+       <DockPanel>
+        <TextBlock DockPanel.Dock="Right" Text="{Binding Tamanho}" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center" Margin="12,0,4,0"/>
+        <CheckBox IsChecked="{Binding Marcado}" IsEnabled="{Binding Disponivel}" Margin="0,0,14,0"/>
+        <StackPanel>
+         <TextBlock Text="{Binding Nome}" FontWeight="SemiBold"/>
+         <TextBlock Text="{Binding Descricao}" Style="{StaticResource Fraco}" Margin="0,3,0,0"/>
         </StackPanel>
-        <TextBlock x:Name="TxtResultadoLimpeza" DockPanel.Dock="Bottom" Style="{StaticResource Fraco}" FontSize="13" Margin="2,6,0,0"/>
-        <ScrollViewer VerticalScrollBarVisibility="Auto">
-            <ItemsControl x:Name="ListaLimpeza">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Border Style="{StaticResource CartaoBorda}" Padding="16,14">
-                            <DockPanel>
-                                <TextBlock DockPanel.Dock="Right" Text="{Binding Tamanho}" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center" Margin="12,0,4,0"/>
-                                <CheckBox IsChecked="{Binding Marcado}" Margin="0,0,14,0"/>
-                                <StackPanel>
-                                    <TextBlock Text="{Binding Nome}" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding Descricao}" Style="{StaticResource Fraco}" Margin="0,3,0,0"/>
-                                </StackPanel>
-                            </DockPanel>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </ScrollViewer>
-    </DockPanel>
+       </DockPanel>
+      </Border>
+     </DataTemplate></ItemsControl.ItemTemplate>
+    </ItemsControl>
+   </ScrollViewer>
+   <DataGrid x:Name="GradePastas" Visibility="Collapsed">
+    <DataGrid.Columns>
+     <DataGridTextColumn Header="Pasta" Binding="{Binding Nome}" Width="*"/>
+     <DataGridTextColumn Header="Tamanho" Binding="{Binding Tamanho}" Width="100"/>
+     <DataGridTextColumn Header="% das subpastas" Binding="{Binding Porcentagem}" Width="125"/>
+     <DataGridTemplateColumn Width="155"><DataGridTemplateColumn.CellTemplate><DataTemplate>
+      <Button Content="Abrir no Explorer" Click="Abrir_Click"/>
+     </DataTemplate></DataGridTemplateColumn.CellTemplate></DataGridTemplateColumn>
+    </DataGrid.Columns>
+   </DataGrid>
+  </Grid>
+ </DockPanel>
 </UserControl>

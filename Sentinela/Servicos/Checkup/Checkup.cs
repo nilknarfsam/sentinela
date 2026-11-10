@@ -16,7 +16,7 @@ public interface IVerificacao
 public static class Checkup
 {
     public static IReadOnlyList<IVerificacao> Padrao { get; } = Array.AsReadOnly<IVerificacao>(
-        [new VerificacaoReinicio(), new VerificacaoEspaco(), new VerificacaoDrivers(), new VerificacaoEnergia(), new VerificacaoInicializacao()]);
+        [new VerificacaoReinicio(), new VerificacaoEspaco(), new VerificacaoDrivers(), new VerificacaoEnergia(), new VerificacaoInicializacao(), new VerificacaoLiberavel()]);
 
     // Inclusive a enumeração e o diário ficam fora da thread da tela.
     public static Task<ResultadoCheckup> Executar(IEnumerable<IVerificacao>? verificacoes = null,

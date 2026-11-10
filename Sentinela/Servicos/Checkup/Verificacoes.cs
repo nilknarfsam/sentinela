@@ -135,3 +135,22 @@ public sealed class VerificacaoInicializacao : Verificacao
             + $" {semAssinatura} programa(s) ativo(s) sem assinatura ou com assinatura inválida.",
         new("Ver a lista", "pagina", "inicializacao"));
 }
+
+public sealed class VerificacaoLiberavel : Verificacao
+{
+    public override string Nome => "Espaço que dá para liberar";
+    public override int Peso => 2;
+    protected override Task<ResultadoVerificacao> Ler(CancellationToken ct)
+    {
+        var (bytes, projetos) = ResumoOtimizacao.Ler();
+        // Limite próprio: a medição rápida do Windows não ocupa o orçamento de 8 s.
+        using var limite = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        limite.CancelAfter(TimeSpan.FromSeconds(2));
+        foreach (var item in Limpeza.Itens().Where(i => !i.EhLixeira))
+            foreach (var pasta in item.Pastas)
+                bytes += ArvoreDescartavel.Percorrer(pasta, false, limite.Token, f => Limpeza.Velho(f, item));
+        return Task.FromResult(new ResultadoVerificacao(Nome, "\uEDA2", bytes > 5L * 1024 * 1024 * 1024 ? NivelVerificacao.Atencao : NivelVerificacao.Ok,
+            $"Dá para liberar {Limpeza.Formatar(bytes)}" + (projetos ? "" : ". Analise seus projetos na Otimização"),
+            "Estimativa do Windows e da última análise da Otimização nesta execução." + (limite.IsCancellationRequested ? " Medição parcial." : ""), new("Abrir a Otimização", "pagina", "limpeza")));
+    }
+}

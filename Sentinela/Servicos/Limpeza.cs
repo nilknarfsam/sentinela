@@ -8,8 +8,10 @@ namespace Sentinela.Servicos;
 public sealed class ItemLimpeza : INotifyPropertyChanged
 {
     public required string Nome { get; init; }
-    public required string Descricao { get; init; }
+    public required string Descricao { get; set; }
     public string[] Pastas { get; init; } = [];
+    public string? Processo { get; init; }
+    public bool Disponivel { get; set; } = true;
     public bool EhLixeira { get; init; }
     public bool PrecisaAdmin { get; init; }
     /// <summary>Só apaga arquivos sem alteração há pelo menos estas horas (protege instaladores em andamento).</summary>
@@ -39,7 +41,7 @@ public static class Limpeza
         return
         [
             new() { Nome = "Temporários do usuário", Descricao = "Arquivos que os programas deixam para trás (%TEMP%).",
-                    Pastas = [Path.GetTempPath()], HorasMinimas = 24 },
+                    Pastas = [Path.Combine(local, "Temp")], HorasMinimas = 24 },
             new() { Nome = "Temporários do Windows", Descricao = "Pasta C:\\Windows\\Temp.",
                     Pastas = [Path.Combine(win, "Temp")], PrecisaAdmin = true, HorasMinimas = 24 },
             new() { Nome = "Downloads do Windows Update", Descricao = "Atualizações já instaladas. O Windows baixa de novo se precisar.",
@@ -56,60 +58,27 @@ public static class Limpeza
         if (item.EhLixeira)
         {
             var info = new SHQUERYRBINFO { cbSize = Marshal.SizeOf<SHQUERYRBINFO>() };
-            return SHQueryRecycleBin(null, ref info) == 0 ? info.i64Size : 0;
+            try { return SHQueryRecycleBin(null, ref info) == 0 ? info.i64Size : 0; } catch { return 0; }
         }
-        long total = 0;
-        foreach (var pasta in item.Pastas.Where(Directory.Exists))
-            foreach (var f in Arquivos(pasta))
-                try
-                {
-                    var fi = new FileInfo(f);
-                    if (Velho(fi, item)) total += fi.Length;
-                }
-                catch { }
-        return total;
+        return item.Pastas.Sum(p => ArvoreDescartavel.Percorrer(p, false, aceitar: f => Velho(f, item)));
     }
 
-    /// <summary>Apaga o conteúdo das pastas do item. Devolve quantos bytes saíram.</summary>
-    public static long Limpar(ItemLimpeza item)
+    public static long Limpar(ItemLimpeza item, CancellationToken ct = default, ResultadoLimpeza? resultado = null)
     {
-        if (item.EhLixeira)
+        try
         {
-            var antes = Medir(item);
-            // SHERB_NOCONFIRMATION | SHERB_NOPROGRESSUI | SHERB_NOSOUND (o painel já confirmou)
-            SHEmptyRecycleBin(IntPtr.Zero, null, 0x1 | 0x2 | 0x4);
-            return antes - Medir(item);
-        }
-
-        long liberado = 0;
-        foreach (var pasta in item.Pastas.Where(Directory.Exists))
-        {
-            foreach (var f in Arquivos(pasta))
+            if (ct.IsCancellationRequested || item.Pastas.Any(ArvoreDescartavel.PastaProibidaParaApagar)) return 0;
+            if (item.Processo != null && !CachesNavegadores.Fechado(item.Processo)) return 0;
+            if (item.EhLixeira)
             {
-                try
-                {
-                    var fi = new FileInfo(f);
-                    if (!Velho(fi, item)) continue;
-                    long tam = fi.Length;
-                    if (fi.IsReadOnly) fi.IsReadOnly = false;
-                    fi.Delete();
-                    liberado += tam;
-                }
-                catch { /* em uso ou sem permissão: pula */ }
+                var antes = Medir(item);
+                SHEmptyRecycleBin(IntPtr.Zero, null, 0x1 | 0x2 | 0x4);
+                return Math.Max(0, antes - Medir(item));
             }
-            // Subpastas que ficaram vazias (de baixo para cima). A pasta raiz fica.
-            try
-            {
-                foreach (var d in Directory.EnumerateDirectories(pasta, "*", new EnumerationOptions
-                         { RecurseSubdirectories = true, IgnoreInaccessible = true, AttributesToSkip = FileAttributes.ReparsePoint })
-                         .OrderByDescending(d => d.Length))
-                    try { if (!Directory.EnumerateFileSystemEntries(d).Any()) Directory.Delete(d); } catch { }
-            }
-            catch { }
+            return item.Pastas.Sum(p => ArvoreDescartavel.Percorrer(p, true, ct, aceitar: f => Velho(f, item), resultado: resultado));
         }
-        return liberado;
+        catch { return 0; }
     }
-
     public static string Formatar(long bytes) => bytes switch
     {
         >= 1L << 30 => $"{bytes / (double)(1L << 30):0.##} GB",
@@ -120,20 +89,6 @@ public static class Limpeza
 
     internal static bool Velho(FileInfo fi, ItemLimpeza item)
         => item.HorasMinimas <= 0 || (DateTime.Now - fi.LastWriteTime).TotalHours >= item.HorasMinimas;
-
-    private static IEnumerable<string> Arquivos(string pasta)
-    {
-        try
-        {
-            // Não segue atalhos de pasta (junctions), para nunca sair da pasta.
-            return Directory.EnumerateFiles(pasta, "*", new EnumerationOptions
-            {
-                RecurseSubdirectories = true, IgnoreInaccessible = true,
-                AttributesToSkip = FileAttributes.ReparsePoint,
-            }).ToList();
-        }
-        catch { return []; }
-    }
 
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
     private struct SHQUERYRBINFO { public int cbSize; public long i64Size; public long i64NumItems; }

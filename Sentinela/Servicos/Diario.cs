@@ -36,6 +36,10 @@ public static class Diario
         }
     }
 
+    internal static long SomarLiberado(IEnumerable<EntradaDiario> entradas, DateTime agora) => entradas
+        .Where(e => e.Tipo == "limpeza" && e.Data >= agora.AddDays(-30) && e.Data <= agora && e.Bytes > 0)
+        .Sum(e => e.Bytes ?? 0);
+
     public static List<EntradaDiario> Ler(int dias)
     {
         var entradas = new List<EntradaDiario>();
