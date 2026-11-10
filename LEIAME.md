@@ -5,13 +5,19 @@ Antes se chamava Painel do PC. O instalador remove a versão antiga sozinho.
 Sentinela é um painel leve para Windows que usa o **Windows Defender** como motor. Ele não é um antivírus próprio: mostra o estado do Defender e pede a ele as ações.
 
 ## O que faz
-- **Início:** mostra se o PC está protegido, as proteções do Defender, a data das assinaturas, a última varredura, o uso de CPU e memória ao vivo e o espaço dos discos.
-- **Varredura:** faz a varredura rápida ou completa, com tempo decorrido e opção de cancelar. Avisa na bandeja quando termina.
-- **Ameaças e quarentena:** mostra o histórico de detecções e o que está na quarentena, e pede ao Defender para tratar as ameaças ativas.
+- **Início:** se o PC está protegido, as proteções do Defender, a data das assinaturas, a última varredura, CPU e memória ao vivo e o espaço dos discos. O escudo da bandeja fica verde, âmbar ou vermelho.
+- **Aviso na hora:** escuta o próprio Windows Defender e avisa em segundos (mesmo com a janela fechada) quando uma ameaça é encontrada, quando a proteção em tempo real é desligada ou quando aparece uma exclusão ou um desligamento suspeito.
+- **Varredura:** rápida, completa, de uma pasta ou arquivo escolhido, e offline (reinicia e verifica antes do Windows carregar). Mostra o tempo e uma estimativa baseada nas últimas varreduras.
+- **Clique direito:** "Verificar com o Sentinela" no Explorer (no Windows 11, em "Mostrar mais opções").
+- **Ameaças e quarentena:** histórico de detecções, quarentena em lista, **Restaurar** com dupla confirmação e atalho para excluir na Segurança do Windows.
+- **Histórico:** eventos do Defender e do Sentinela dos últimos 30 dias, com filtros.
 - **Otimização:** limpa temporários (só arquivos com mais de 24 h), o cache do Windows Update, os relatórios de erro e a Lixeira, sempre com confirmação.
-- **Inicialização:** mostra o que abre com o Windows. Para ligar ou desligar, abre o Gerenciador de Tarefas.
+- **Inicialização:** mostra o que abre com o Windows. Para ligar ou desligar, abre o Gerenciador de Tarefas (o liga/desliga direto chega na Fase 3).
+- **Ajustes:** iniciar com o Windows, manter na bandeja ao fechar, avisos de rotina, diário e versão.
 
 O Sentinela **nunca desliga nem muda** configurações de segurança do Defender.
+
+Em desenvolvimento: **Checkup de desempenho** (Fase 3), veja `PLANO-MELHORIAS.md`. Histórico de versões em `CHANGELOG.md`.
 
 ## Verificar uma pasta ou arquivo
 

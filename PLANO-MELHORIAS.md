@@ -100,42 +100,60 @@ o botão "Como resolver" abrindo a página certa do Windows.
 **Aceite:** a página carrega em menos de 2 segundos e cada item tem o botão de
 solução. Com o firewall desligado num perfil, a nota cai e o item fica vermelho.
 
-## Fase 3: Vigia de inicialização
-Programas que se instalam para abrir com o Windows são o jeito mais comum de
-vírus e programas inúteis ficarem no PC.
+## Fase 3: Checkup de desempenho
+Pedido do Franklin em 10/11/2026: um "modo deixar o PC mais rápido", no lugar de
+programas como Driver Booster e CCleaner, só com o que funciona de verdade.
+Esta fase junta as antigas Fases 3 (vigia de inicialização), 4 (otimização) e
+5 (desempenho).
 
-| # | Item | Motor | Tamanho |
+**O que fica de fora**, por ser marketing ou arriscado:
+- atualizador automático de drivers;
+- limpador de registro;
+- "turbo de RAM";
+- desfragmentar SSD;
+- desligar serviços do Windows sem saber o que fazem.
+
+### Como fica para o Franklin
+Uma aba nova, **Desempenho**, com o botão **Verificar o PC**. Em até 1 minuto ela mostra:
+- uma **nota de 0 a 100**;
+- uma lista de cartões, um para cada verificação. Cada cartão traz o estado (ok,
+  atenção ou problema) e uma explicação em português simples.
+
+Quando dá para resolver, o cartão tem o botão **Resolver**, que sempre pede
+confirmação. Nada muda sozinho.
+
+### Arquitetura
+- **`Servicos/Checkup/`:**
+  - a interface `IVerificacao` (Nome, Peso, `Verificar(CancellationToken)`);
+  - o record `ResultadoVerificacao` (Nome, Nivel Ok/Atencao/Problema, Resumo,
+    Detalhe e uma ação opcional de resolver).
+- **`Checkup.Executar()`:**
+  - roda as verificações em paralelo, com tempo limite por item, para uma lenta
+    não travar as outras;
+  - calcula a nota;
+  - grava no diário (tipo `checkup`).
+- **Regras:**
+  - as regras de cada verificação são funções puras e testáveis;
+  - a leitura do sistema fica separada e nunca lança exceção;
+  - as ações de "Resolver" ficam à parte e sempre confirmam antes.
+
+### Etapas
+| Etapa | O que entra | Motor | Aceite |
 | :--- | :--- | :--- | :--- |
-| 3.1 | **Ligar e desligar** direto na lista (o mesmo `StartupApproved` que o Gerenciador de Tarefas usa) | Codex | P |
-| 3.2 | Mostrar também **tarefas agendadas** e **serviços** que não são da Microsoft | Codex | M |
-| 3.3 | **Aviso de item novo:** guardar um retrato da inicialização. Se aparecer algo novo, avisar "Programa X passou a abrir com o Windows" com os botões Manter e Desligar | Codex | M |
-| 3.4 | Mostrar quem assinou o programa (editora), e marcar "sem assinatura" em âmbar | Codex | P |
+| **3A Base** | Aba Desempenho, `IVerificacao`, nota e cartões. Verificações leves: **reinício pendente** e dias ligado, **espaço livre** nos discos, **drivers com problema** (dispositivo com erro no Gerenciador de Dispositivos), **plano de energia** ativo (só leitura), **quantos programas** abrem com o Windows | Codex | Checkup completo em menos de 10 s. Testes das regras e da nota |
+| **3B Inicialização** | **Ligar e desligar** pelo `StartupApproved`, **tarefas agendadas** e **serviços** de terceiros, **editora e assinatura** de cada programa, **aviso de item novo** (retrato da inicialização). Cartão: "N programas abrem com o Windows" → Resolver abre a lista | Codex | Desligar pelo Sentinela = desligar pelo Gerenciador de Tarefas. Aviso de item novo em até 1 minuto |
+| **3C Espaço** | **Limpeza de desenvolvedor** por projeto em `C:\PROJETOS` (`build`, `.dart_tool`, `node_modules`, `bin/obj`), caches (Gradle, npm, NuGet, Pub), cache de navegadores fechados, **maiores pastas** do disco, histórico do espaço liberado. Cartão: "Dá para liberar X GB" | Codex | Análise de `C:\PROJETOS` em menos de 30 s. `flutter build` continua funcionando depois de limpar. Nunca segue junctions |
+| **3D Processos** | **Top 10 processos** por CPU e memória (amostra de 2 s), **Finalizar** com confirmação e nunca em processo do sistema. Gráfico da última hora só com a janela aberta. Cartão: "Programa X está usando 40% da CPU" | Codex | Lista em menos de 3 s. Finalizar recusa processos protegidos |
+| **3E Disco** | **Saúde do SSD/HD**: estado, desgaste, temperatura e erros (precisa de admin). Limpeza de componentes do Windows (`DISM /StartComponentCleanup`) como ação opcional, com aviso de que demora | Codex | Mostra desgaste e temperatura do SSD deste PC. Sem admin, explica o que falta |
+| **3F Entrega** | Nota do Checkup no Início, "Verificar desempenho" no menu da bandeja, filtro **Desempenho** no Histórico, lembrete de reinício, CHANGELOG, LEIAME, versão **1.3.0** | Haiku + Codex | Build, testes, capturas, GitHub Actions verde, merge na `main` |
 
-**Aceite:** ao instalar um programa que abre com o Windows, o aviso aparece em até 1
-minuto. Desligar pelo Sentinela tem o mesmo efeito que pelo Gerenciador de Tarefas.
+Cada etapa segue o fluxo do projeto:
+1. A branch `fase-3` recebe o pedido detalhado.
+2. O **Codex** escreve o código.
+3. O **Sonnet** revisa.
+4. O **Opus** compila, roda os testes, confere as capturas e faz o commit.
 
-## Fase 4: Otimização 2.0 (feita para quem programa)
-As maiores sobras no PC do Franklin são de desenvolvimento, não temporários do Windows.
-
-| # | Item | Motor | Tamanho |
-| :--- | :--- | :--- | :--- |
-| 4.1 | **Limpeza de desenvolvedor:** procurar em `C:\PROJETOS` as pastas `build/`, `.dart_tool/`, `node_modules/` e `bin/obj` de .NET, com tamanho **por projeto**. Marcar o que limpar. Tudo é recriado no próximo build | Codex | M |
-| 4.2 | Caches grandes: Gradle (`~\.gradle\caches`), npm, NuGet e Pub, com explicação do custo de apagar (baixa de novo) | Codex | P |
-| 4.3 | Cache do Chrome e do Edge, só com o navegador fechado | Codex | P |
-| 4.4 | **Maiores pastas do disco:** top 20 de um disco escolhido, para achar o que ocupa espaço | Codex | M |
-| 4.5 | Limpeza de componentes do Windows (`DISM /StartComponentCleanup`), com aviso de que demora | Haiku | P |
-| 4.6 | Histórico do espaço liberado, vindo do diário | Haiku | P |
-
-**Aceite:** a análise de `C:\PROJETOS` leva menos de 30 segundos. Depois de limpar, o
-`flutter build` de um projeto volta a funcionar normalmente.
-
-## Fase 5: Desempenho
-| # | Item | Motor | Tamanho |
-| :--- | :--- | :--- | :--- |
-| 5.1 | Gráfico de CPU e memória da **última hora**, coletado só com a janela aberta ou em baixa frequência | Codex | M |
-| 5.2 | **Top 10 processos** por CPU e memória, com o botão Finalizar (confirma, e nunca em processos do sistema) | Codex | M |
-| 5.3 | **Saúde dos discos:** estado (`MSFT_PhysicalDisk`), desgaste do SSD e temperatura (`Get-StorageReliabilityCounter`, precisa de admin) | Codex | M |
-| 5.4 | Lembrete **"Reinicie o PC"** quando ele estiver ligado há mais de 7 dias com atualização pendente | Haiku | P |
+O lançamento da 1.3.0 acontece no fim da 3F.
 
 ## Fase 6: Rotinas e relatórios
 | # | Item | Motor | Tamanho |
@@ -155,12 +173,11 @@ As maiores sobras no PC do Franklin são de desenvolvimento, não temporários d
 ---
 
 ## Ordem recomendada
-1. **Instalar a v1.0 e usar uns dias.** O uso real mostra o que incomoda mais.
-2. **Fase 0:** sem ela, as outras ficam frágeis.
-3. **Fase 1:** maior ganho de segurança, porque é o aviso na hora.
-4. **Fase 3:** segurança e leveza ao mesmo tempo.
-5. **Fase 4:** libera gigas de espaço no seu caso.
-6. **Fase 2**, depois **5**, **6** e **7**.
+1. ✅ **Fase 0:** fundação (v1.1.0).
+2. ✅ **Fase 1:** aviso na hora (v1.2.0).
+3. 🔜 **Fase 3:** Checkup de desempenho, etapas 3A a 3F (v1.3.0).
+4. **Fase 2:** saúde da segurança.
+5. **Fases 6 e 7:** rotinas, relatórios e acabamento.
 
 Tamanhos: **P** cabe numa tarefa, **M** em 2 ou 3 tarefas com revisão entre elas, **G** pede plano do Codex (`modo="plan"`) antes.
 
@@ -171,5 +188,13 @@ Tamanhos: **P** cabe numa tarefa, **M** em 2 ou 3 tarefas com revisão entre ela
   plano geral (`../PLANO-PERFORMANCE-E-IA.md`, Passo 8).
 
 ## Pendências fora do Sentinela
-- ⏸ **Bitwarden:** avaliar e migrar o cofre do Norton. Pendente, sem data. Passo a passo no
-  plano geral, Passo 8.
+Os detalhes de cada uma estão no plano geral, `../PLANO-PERFORMANCE-E-IA.md`.
+- ⏸ **Bitwarden:** avaliar e migrar o cofre do Norton (Passo 8).
+- ⏸ **Driver Booster (IObit):** está instalado e não é necessário, porque nenhum
+  dispositivo tem problema de driver. Recomendação: o Franklin desinstalar
+  (Passo 6).
+- ⏸ **NVIDIA:** rever o driver e as configurações para jogos e IA local, depois
+  da Fase 3 (Passo 9).
+- ⏸ **Post para Instagram** (IA sem Lábia ou perfil de tecnologia) sobre "o que é
+  marketing nos otimizadores de PC", para o ChatGPT fazer depois da Fase 3
+  (Passo 10).
