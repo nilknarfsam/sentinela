@@ -231,6 +231,9 @@ public partial class MainWindow : Window
     // ================================================================ Admin, bandeja, captura
 
     private void AbrirComoAdmin_Click(object sender, RoutedEventArgs e)
+        => AbrirComoAdmin();
+
+    internal void AbrirComoAdmin()
     {
         try
         {
@@ -282,6 +285,7 @@ public partial class MainWindow : Window
             case "ameacas": MenuAmeacas.IsChecked = true; break;
             case "historico": MenuHistorico.IsChecked = true; await PaginaHistorico.Carregar(); break;
             case "limpeza": MenuLimpeza.IsChecked = true; await PaginaLimpeza.Analisar(); break;
+            case "limpeza-windows": MenuLimpeza.IsChecked = true; await PaginaLimpeza.Analisar(); break;
             case "inicializacao": MenuInicializacao.IsChecked = true; await PaginaInicializacao.Carregar(); break;
             case "ajustes": MenuAjustes.IsChecked = true; break;
         }
@@ -293,7 +297,7 @@ public partial class MainWindow : Window
         if (App.CapturaAba?.Equals("desempenho", StringComparison.OrdinalIgnoreCase) == true)
         {
             // Renderizar todo o painel, inclusive em monitores com pouca altura.
-            var tamanho = new Size(conteudo.ActualWidth, 1550);
+            var tamanho = new Size(conteudo.ActualWidth, 2050);
             Content = null;
             var painelCaptura = new System.Windows.Controls.Grid { Width = tamanho.Width, Height = tamanho.Height };
             painelCaptura.Children.Add(conteudo);

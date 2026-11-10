@@ -25,6 +25,15 @@
   </StackPanel>
   <Grid>
    <ScrollViewer x:Name="Rolagem" VerticalScrollBarVisibility="Auto">
+    <StackPanel>
+     <Border x:Name="CartaoComponentes" Style="{StaticResource CartaoBorda}" Padding="16,12">
+      <StackPanel>
+       <TextBlock Text="Componentes antigos do Windows (avançado)" FontWeight="SemiBold"/>
+       <TextBlock Text="Remove versões antigas de atualizações já instaladas. Pode levar de 10 a 30 minutos e não dá para cancelar no meio." Style="{StaticResource Fraco}" Margin="0,6,0,8"/>
+       <Button x:Name="BtnComponentes" Content="Limpar componentes" Click="Componentes_Click" HorizontalAlignment="Left"/>
+       <TextBlock x:Name="TxtComponentes" Style="{StaticResource Fraco}" Margin="0,6,0,0"/>
+      </StackPanel>
+     </Border>
     <ItemsControl x:Name="ListaLimpeza">
      <ItemsControl.ItemTemplate><DataTemplate>
       <Border Style="{StaticResource CartaoBorda}" Padding="16,12">
@@ -39,6 +48,7 @@
       </Border>
      </DataTemplate></ItemsControl.ItemTemplate>
     </ItemsControl>
+    </StackPanel>
    </ScrollViewer>
    <DataGrid x:Name="GradePastas" Visibility="Collapsed">
     <DataGrid.Columns>

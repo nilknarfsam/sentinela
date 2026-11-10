@@ -13,11 +13,14 @@ public partial class PaginaLimpeza : UserControl
     private readonly Dictionary<ItemLimpeza, SobraProjeto> _sobras = [];
     private CancellationTokenSource? _cancelamento;
     private string? _pastaEscolhida;
+    private bool _limpandoComponentes;
     public event Action? EspacoMudou;
 
     public PaginaLimpeza()
     {
         InitializeComponent();
+        BtnComponentes.IsEnabled = Sistema.EhAdmin();
+        if (!BtnComponentes.IsEnabled) TxtComponentes.Text = "Abra como administrador para limpar componentes.";
         Discos.ItemsSource = DriveInfo.GetDrives().Select(d => d.Name).Append("Escolher pasta").ToArray();
         Discos.SelectedIndex = 0;
         Mostrar(Limpeza.Itens());
@@ -41,6 +44,7 @@ public partial class PaginaLimpeza : UserControl
     private void Secao(string secao)
     {
         _secao = secao;
+        CartaoComponentes.Visibility = secao == "Windows" ? Visibility.Visible : Visibility.Collapsed;
         foreach (var b in Filtros.Children.OfType<Button>()) b.Style = (Style)FindResource((string)b.Content == secao ? "BotaoPrincipal" : "BotaoBase");
         bool maiores = secao == "Maiores pastas";
         Discos.Visibility = GradePastas.Visibility = maiores ? Visibility.Visible : Visibility.Collapsed;
@@ -65,6 +69,7 @@ public partial class PaginaLimpeza : UserControl
     {
         if (_cancelamento != null) return;
         if (App.CapturaArquivo != null) Secao("Projetos");
+        if (App.CapturaArquivo != null && App.CapturaAba?.Equals("limpeza-windows", StringComparison.OrdinalIgnoreCase) == true) Secao("Windows");
         using var cancelamento = new CancellationTokenSource();
         _cancelamento = cancelamento;
         var ct = cancelamento.Token;
@@ -149,5 +154,31 @@ public partial class PaginaLimpeza : UserControl
     {
         if (((Button)sender).DataContext is not PastaGrande pasta) return;
         await Task.Run(() => { try { Process.Start(new ProcessStartInfo(CaminhosSistema.Explorer) { UseShellExecute = true, ArgumentList = { pasta.Pasta } }); } catch { } });
+    }
+
+    private async void Componentes_Click(object sender, RoutedEventArgs e)
+    {
+        if (_limpandoComponentes || !Sistema.EhAdmin()) return;
+        if (MessageBox.Show(Window.GetWindow(this), "Limpar componentes antigos do Windows?\n\nRemove versões antigas de atualizações já instaladas. Pode levar de 10 a 30 minutos e não dá para cancelar no meio.",
+            "Confirmar limpeza de componentes", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) != MessageBoxResult.Yes) return;
+        _limpandoComponentes = true;
+        BtnComponentes.IsEnabled = false;
+        var relogio = Stopwatch.StartNew();
+        var timer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        void MostrarTempo() => TxtComponentes.Text = $"Em andamento... {Formatos.Duracao(relogio.Elapsed)}";
+        timer.Tick += (_, _) => MostrarTempo();
+        MostrarTempo();
+        timer.Start();
+        try
+        {
+            var resultado = await LimpezaComponentes.Executar();
+            TxtComponentes.Text = $"Concluído em {Formatos.Duracao(relogio.Elapsed)} · código: {resultado.Codigo?.ToString() ?? "indisponível"}\n{resultado.Saida}";
+        }
+        finally
+        {
+            timer.Stop();
+            _limpandoComponentes = false;
+            BtnComponentes.IsEnabled = Sistema.EhAdmin();
+        }
     }
 }

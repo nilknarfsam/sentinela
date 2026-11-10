@@ -12,6 +12,7 @@ public partial class PaginaDesempenho : UserControl
 {
     private ResultadoCheckup? _ultimo;
     private Task? _execucao;
+    private Task? _leituraDiscos;
 
     private readonly HistoricoDesempenho _historico;
     private IReadOnlyList<InfoProcesso> _processos = Array.Empty<InfoProcesso>();
@@ -125,7 +126,24 @@ public partial class PaginaDesempenho : UserControl
     {
         if (_ultimo != null) Mostrar(_ultimo);
         AtualizarGrafico();
+        _leituraDiscos ??= CarregarDiscos();
     }
+
+    private async Task CarregarDiscos()
+    {
+        try
+        {
+            TxtDiscos.Text = "Lendo discos físicos...";
+            var discos = await SaudeDisco.Ler();
+            ListaDiscos.ItemsSource = discos.Select(d => new CartaoDisco(d)).ToArray();
+            TxtDiscos.Text = discos.Count == 0 ? "Não consegui ler os discos agora." :
+                Sistema.EhAdmin() && discos.Any(d => !d.DadosAvancados) ? "Alguns discos não disponibilizaram os contadores avançados." : "";
+            AvisoAdminDiscos.Visibility = Sistema.EhAdmin() ? Visibility.Collapsed : Visibility.Visible;
+        }
+        catch (Exception ex) { TxtDiscos.Text = $"Não consegui ler os discos: {ex.Message}"; }
+    }
+
+    private void AdminDiscos_Click(object sender, RoutedEventArgs e) => (Window.GetWindow(this) as MainWindow)?.AbrirComoAdmin();
 
     public Task Verificar() => _execucao ??= Executar();
 
@@ -137,6 +155,9 @@ public partial class PaginaDesempenho : UserControl
         {
             _ultimo = await Checkup.Executar();
             Mostrar(_ultimo);
+            if (_leituraDiscos != null) await _leituraDiscos;
+            _leituraDiscos = CarregarDiscos();
+            await _leituraDiscos;
         }
         finally
         {
@@ -182,6 +203,7 @@ public partial class PaginaDesempenho : UserControl
                 SecaoAgora.BringIntoView();
                 await Amostrar();
             }
+            else if (acao.Tipo == "rolar" && acao.Alvo == "discos") SecaoDiscos.BringIntoView();
             else if (acao.Tipo == "abrir" && AlvoPermitido(acao.Alvo))
             {
                 // Abrir somente atalhos fixos de configuração; nunca interpretar comandos recebidos.
@@ -214,5 +236,17 @@ public partial class PaginaDesempenho : UserControl
         public ResultadoVerificacao Item { get; } = item;
         public Brush CorNivel => Cor(Item.Nivel == NivelVerificacao.Problema ? "Vermelho" : Item.Nivel == NivelVerificacao.Atencao ? "Ambar" : "Verde");
         public Visibility VisibilidadeAcao => Item.Acao == null ? Visibility.Collapsed : Visibility.Visible;
+    }
+
+    public sealed class CartaoDisco(DiscoFisico disco)
+    {
+        public DiscoFisico Disco { get; } = disco;
+        public Brush CorNivel => Cor(SaudeDisco.Avaliar(Disco).nivel switch { NivelVerificacao.Problema => "Vermelho", NivelVerificacao.Atencao => "Ambar", _ => "Verde" });
+        public string Resumo => $"{Disco.Tipo} · {Limpeza.Formatar(Disco.TamanhoBytes)} · {SaudeDisco.EstadoTexto(Disco)}";
+        public string DetalheOperacional => Disco.Operacional == "Funcionando" ? "" : $"({Disco.Operacional})";
+        public Visibility Avancados => Disco.DadosAvancados ? Visibility.Visible : Visibility.Collapsed;
+        public string DesgasteTexto => $"Desgaste: {Disco.DesgastePercent?.ToString() ?? "indisponível"}" + (Disco.DesgastePercent.HasValue ? "%" : "");
+        public string TemperaturaTexto => $"Temperatura: {Disco.Temperatura?.ToString() ?? "—"} °C · máxima: {Disco.TemperaturaMax?.ToString() ?? "—"} °C";
+        public string ContadoresTexto => $"Ligado: {(Disco.HorasLigado.HasValue ? $"{Disco.HorasLigado.Value / 24.0:0.#} dias" : "—")} · erros de leitura: {Disco.ErrosLeitura?.ToString() ?? "—"} · escrita: {Disco.ErrosEscrita?.ToString() ?? "—"}";
     }
 }

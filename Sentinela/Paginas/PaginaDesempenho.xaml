@@ -97,6 +97,35 @@
                         </DataGrid>
                     </StackPanel>
                 </Border>
+                <StackPanel x:Name="SecaoDiscos" Margin="0,4,12,0">
+                    <TextBlock Text="Discos" Style="{StaticResource Subtitulo}" Margin="0,0,0,8"/>
+                    <StackPanel x:Name="AvisoAdminDiscos" Margin="0,0,0,10" Visibility="Collapsed">
+                        <TextBlock Text="Abra como administrador para ver desgaste e temperatura." Style="{StaticResource Fraco}"/>
+                        <Button Content="Abrir como administrador" Click="AdminDiscos_Click" HorizontalAlignment="Left" Margin="0,6,0,0"/>
+                    </StackPanel>
+                    <TextBlock x:Name="TxtDiscos" Style="{StaticResource Fraco}"/>
+                    <ItemsControl x:Name="ListaDiscos">
+                        <ItemsControl.ItemTemplate><DataTemplate>
+                            <Border Style="{StaticResource CartaoBorda}" Padding="12" Margin="0,0,0,8">
+                                <StackPanel>
+                                    <DockPanel>
+                                        <Ellipse DockPanel.Dock="Right" Width="9" Height="9" Fill="{Binding CorNivel}" Margin="8,0,0,0"/>
+                                        <TextBlock Text="{Binding Disco.Nome}" FontWeight="SemiBold"/>
+                                    </DockPanel>
+                                    <TextBlock Text="{Binding Resumo}" Style="{StaticResource Fraco}" Margin="0,4,0,0"/>
+                                    <TextBlock Text="{Binding DetalheOperacional}" Style="{StaticResource Fraco}"/>
+                                    <StackPanel Visibility="{Binding Avancados}" Margin="0,6,0,0">
+                                        <TextBlock Text="{Binding DesgasteTexto}"/>
+                                        <ProgressBar Maximum="100" Value="{Binding Disco.DesgastePercent, TargetNullValue=0}" Foreground="{Binding CorNivel}" Margin="0,4,0,6"/>
+                                        <TextBlock Text="{Binding TemperaturaTexto}"/>
+                                        <ProgressBar Maximum="100" Value="{Binding Disco.Temperatura, TargetNullValue=0}" Foreground="{Binding CorNivel}" Margin="0,4,0,6"/>
+                                        <TextBlock Text="{Binding ContadoresTexto}" Style="{StaticResource Fraco}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate></ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
             </StackPanel>
         </ScrollViewer>
     </DockPanel>

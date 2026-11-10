@@ -5,6 +5,25 @@ using Microsoft.Win32;
 
 namespace Sentinela.Servicos.Checkup;
 
+public sealed class VerificacaoSaudeDiscos : Verificacao
+{
+    public override string Nome => "Saúde dos discos";
+    public override int Peso => 3;
+    protected override async Task<ResultadoVerificacao> Ler(CancellationToken ct) => Avaliar(await SaudeDisco.Ler(ct).ConfigureAwait(false), Sistema.EhAdmin());
+    internal static ResultadoVerificacao Avaliar(IEnumerable<DiscoFisico> discos, bool admin)
+    {
+        var lista = discos.Select(d => (disco: d, avaliacao: SaudeDisco.Avaliar(d))).OrderByDescending(d => d.avaliacao.nivel).ToArray();
+        if (lista.Length == 0) return Checkup.Indisponivel("Saúde dos discos");
+        var pior = lista[0];
+        var desconhecidos = lista.All(d => d.disco.Saude == "Desconhecida");
+        return new("Saúde dos discos", "\uEDA2", desconhecidos ? NivelVerificacao.Atencao : pior.avaliacao.nivel,
+            desconhecidos ? "Não consegui ler a saúde dos discos" :
+            pior.avaliacao.nivel == NivelVerificacao.Ok ? lista.Length == 1 ? "Disco saudável" : $"Todos os {lista.Length} discos saudáveis" : $"{pior.disco.Nome}: {pior.avaliacao.motivo}",
+            string.Join("\n", lista.Select(d => SaudeDisco.Descrever(d.disco)))
+                + (admin ? "" : "\nAbra como administrador para ver desgaste e temperatura."), new("Ver discos", "rolar", "discos"));
+    }
+}
+
 public sealed class VerificacaoPeso : Verificacao
 {
     public override string Nome => "O que está pesando";
