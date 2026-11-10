@@ -22,6 +22,7 @@
                 <Button Content="Ameaças" Tag="ameacas" Click="Filtrar_Click"/>
                 <Button Content="Varreduras" Tag="varreduras" Click="Filtrar_Click"/>
                 <Button Content="Proteção e ajustes" Tag="protecao" Click="Filtrar_Click"/>
+                <Button Content="Desempenho" Tag="desempenho" Click="Filtrar_Click"/>
                 <Button Content="Limpeza" Tag="limpeza" Click="Filtrar_Click"/>
             </WrapPanel>
         </StackPanel>

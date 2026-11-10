@@ -12,11 +12,13 @@ public sealed class CheckupTestes : IDisposable
     public CheckupTestes()
     {
         Diario.PastaTeste = _pasta;
+        Checkup.PastaTeste = _pasta;
         Diario.Desligado = false;
     }
     public void Dispose()
     {
         Diario.PastaTeste = null;
+        Checkup.PastaTeste = null;
         Diario.Desligado = _desligado;
         if (Directory.Exists(_pasta)) Directory.Delete(_pasta, true);
     }

@@ -101,6 +101,16 @@ o botão "Como resolver" abrindo a página certa do Windows.
 solução. Com o firewall desligado num perfil, a nota cai e o item fica vermelho.
 
 ## Fase 3: Checkup de desempenho
+**✅ Feita em 10/11/2026 (v1.3.0).** As seis etapas, 3A a 3F, foram entregues e revisadas.
+
+Mudou em relação ao plano:
+- A revisão de segurança levou a três proteções novas:
+  - `ArquivosSeguros`: o app, rodando como admin, nunca segue links nas pastas do usuário;
+  - `CaminhosSistema`: executáveis do Windows sempre pelo caminho completo;
+  - uma trava contra apagar pastas importantes.
+- A limpeza de temporários deixou de usar a variável TEMP, um risco que existia desde a 1.0.
+- O checkup completo leva cerca de 2 segundos.
+
 Pedido do Franklin em 10/11/2026: um "modo deixar o PC mais rápido", no lugar de
 programas como Driver Booster e CCleaner, só com o que funciona de verdade.
 Esta fase junta as antigas Fases 3 (vigia de inicialização), 4 (otimização) e
@@ -209,7 +219,7 @@ no PC do Franklin sem problemas.
 ## Ordem recomendada
 1. ✅ **Fase 0:** fundação (v1.1.0).
 2. ✅ **Fase 1:** aviso na hora (v1.2.0).
-3. 🔜 **Fase 3:** Checkup de desempenho, etapas 3A a 3F (v1.3.0).
+3. ✅ **Fase 3:** Checkup de desempenho (v1.3.0).
 4. **Fase 2:** saúde da segurança.
 5. **Fases 6 e 7:** rotinas, relatórios e acabamento.
 6. **Fase 8:** produto e distribuição para a comunidade (MSI, GitHub, site).

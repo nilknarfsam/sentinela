@@ -37,11 +37,10 @@ public static class SaudeDisco
                         {
                             try
                             {
-                                using var resultados = LerContadores(item, scope);
-                                foreach (ManagementObject contador in resultados)
+                                var resultados = LerContadores(item, scope);
+                                try
                                 {
-                                    using (contador)
-                                    {
+                                    if (resultados.FirstOrDefault() is { } contador)
                                         disco = disco with
                                         {
                                             DesgastePercent = Desgaste(contador["Wear"]), Temperatura = Temperatura(contador["Temperature"]),
@@ -49,9 +48,8 @@ public static class SaudeDisco
                                             ErrosLeitura = Longo(contador["ReadErrorsTotal"]), ErrosEscrita = Longo(contador["WriteErrorsTotal"]),
                                             DadosAvancados = true
                                         };
-                                    }
-                                    break;
                                 }
+                                finally { foreach (var contador in resultados) contador.Dispose(); }
                             }
                             catch { /* O estado básico continua disponível mesmo sem contadores. */ }
                         }
@@ -66,18 +64,34 @@ public static class SaudeDisco
     });
 
     private static System.Management.EnumerationOptions Opcoes() => new() { Timeout = TimeSpan.FromSeconds(2), ReturnImmediately = false };
-    private static ManagementObjectCollection LerContadores(ManagementObject item, ManagementScope scope)
+    private static List<ManagementObject> LerContadores(ManagementObject item, ManagementScope scope)
     {
         try
         {
-            return item.GetRelated("MSFT_StorageReliabilityCounter", null, null, null, null, null, false, Opcoes());
+            using var relacionados = item.GetRelated("MSFT_StorageReliabilityCounter", null, null, null, null, null, false, Opcoes());
+            return Materializar(relacionados);
         }
         catch (ManagementException)
         {
             // Alguns provedores não suportam GetRelated. A chave continua escapada no fallback.
             using var busca = new ManagementObjectSearcher(scope,
                 new ObjectQuery(ConsultaContadores(item["ObjectId"]?.ToString() ?? "")), Opcoes());
-            return busca.Get();
+            using var resultados = busca.Get();
+            return Materializar(resultados);
+        }
+    }
+    private static List<ManagementObject> Materializar(ManagementObjectCollection colecao)
+    {
+        var objetos = new List<ManagementObject>();
+        try
+        {
+            foreach (ManagementObject objeto in colecao) objetos.Add(objeto);
+            return objetos;
+        }
+        catch
+        {
+            foreach (var objeto in objetos) objeto.Dispose();
+            throw; // A fronteira Ler trata falhas; ManagementException permite tentar o fallback.
         }
     }
     private static long? Longo(object? valor) { try { return valor == null ? null : Convert.ToInt64(valor); } catch { return null; } }

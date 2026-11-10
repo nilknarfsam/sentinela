@@ -57,6 +57,7 @@ public partial class PaginaHistorico : UserControl
     {
         "ameaca" => "Ameaça", "tratar" => "Tratamento de ameaças", "alerta" => "Alerta", "varredura" => "Varredura",
         "assinaturas" => "Atualização de assinaturas", "ajuste" => "Ajuste do Sentinela",
+        "checkup" => "Checkup de desempenho", "processo" => "Processo", "inicializacao" => "Inicialização",
         "limpeza" => "Limpeza", "inicio" => "Sentinela iniciado", "status" => "Status do Defender",
         _ => "Registro do Sentinela",
     };
@@ -70,16 +71,19 @@ public partial class PaginaHistorico : UserControl
         AplicarFiltro();
     }
 
+    internal static bool SelecionaFiltro(string filtro, string tipo) => filtro switch
+        {
+            "ameacas" => tipo is "Ameaca" or "AmeacaTratada" or "ameaca" or "tratar",
+            "varreduras" => tipo is "Varredura" or "varredura",
+            "protecao" => tipo is "Protecao" or "Configuracao" or "Assinaturas" or "assinaturas" or "ajuste" or "alerta" or "status",
+            "desempenho" => tipo is "checkup" or "processo" or "inicializacao" or "limpeza",
+            "limpeza" => tipo == "limpeza",
+            _ => true,
+        };
+
     private void AplicarFiltro()
     {
-        var filtrados = _itens.Where(e => _filtro switch
-        {
-            "ameacas" => e.Tipo is "Ameaca" or "AmeacaTratada" or "ameaca" or "tratar",
-            "varreduras" => e.Tipo is "Varredura" or "varredura",
-            "protecao" => e.Tipo is "Protecao" or "Configuracao" or "Assinaturas" or "assinaturas" or "ajuste" or "alerta" or "status",
-            "limpeza" => e.Tipo == "limpeza",
-            _ => true,
-        }).ToList();
+        var filtrados = _itens.Where(e => SelecionaFiltro(_filtro, e.Tipo)).ToList();
         GradeHistorico.ItemsSource = filtrados;
         TxtResumo.Text = $"{filtrados.Count} eventos nos últimos 30 dias";
     }

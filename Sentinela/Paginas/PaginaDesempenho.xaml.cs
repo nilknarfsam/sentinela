@@ -124,6 +124,7 @@ public partial class PaginaDesempenho : UserControl
     // A página é mantida pela janela; navegar nunca dispara uma nova leitura.
     public void Carregar()
     {
+        _ultimo ??= Checkup.Ultimo;
         if (_ultimo != null) Mostrar(_ultimo);
         AtualizarGrafico();
         _leituraDiscos ??= CarregarDiscos();

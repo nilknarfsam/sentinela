@@ -17,6 +17,8 @@ public partial class App : Application
     private VigiaDefender? _vigia;
     private VigiaInicializacao? _vigiaInicializacao;
     private bool _balaoInicializacao;
+    private System.Threading.Timer? _timerReinicio;
+    private int _checandoReinicio;
     private CaixaDePedidos? _pedidos;
     private Pedido? _verificarPendente;
     private int _mostrarPendente;
@@ -114,6 +116,7 @@ public partial class App : Application
                     Dispatcher.BeginInvoke(new Action(() => { if (!Saindo) Avisar("Sentinela", texto, inicializacao: true); }));
             };
             _vigiaInicializacao.Iniciar();
+            _timerReinicio = new System.Threading.Timer(_ => ChecarReinicio(), null, TimeSpan.Zero, TimeSpan.FromHours(6));
         }
         Diario.Registrar("inicio", IniciarNaBandeja ? "Sentinela iniciado na bandeja" : "Sentinela iniciado");
         _ = _janela.Iniciar();
@@ -188,11 +191,45 @@ public partial class App : Application
         }
     }
 
+    private void ChecarReinicio()
+    {
+        if (Interlocked.Exchange(ref _checandoReinicio, 1) != 0) return;
+        try
+        {
+            if (Saindo || CapturaArquivo != null) return;
+            var config = Configuracoes.Atual;
+            var agora = DateTime.Now;
+            var leitura = LembreteReinicio.Ler();
+            if (!config.AvisosDeRotina || !LembreteReinicio.DeveLembrar(leitura.Pendente, leitura.TempoLigado, config.UltimoLembreteReinicio, agora)) return;
+            if (!Dispatcher.HasShutdownStarted)
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    // Na thread da tela: mostra e só então grava a data, para não
+                    // perder o lembrete do dia nem disputar o Salvar com os Ajustes.
+                    try
+                    {
+                        if (Saindo || _bandeja == null) return;
+                        Avisar("Sentinela", $"Há atualização esperando e o PC está ligado há {(int)leitura.TempoLigado.TotalDays} dias. Reinicie quando puder.", rotina: true);
+                        config.UltimoLembreteReinicio = agora.Date;
+                        config.Salvar();
+                    }
+                    catch { /* O lembrete não interrompe o aplicativo. */ }
+                }));
+        }
+        catch { /* O lembrete não interrompe o aplicativo. */ }
+        finally { Volatile.Write(ref _checandoReinicio, 0); }
+    }
+
     private void CriarBandeja()
     {
         var menu = new WinForms.ContextMenuStrip();
         menu.Items.Add("Abrir o Sentinela", null, (_, _) => MostrarJanela());
         menu.Items.Add("Varredura rápida", null, (_, _) => { MostrarJanela(); _janela?.IniciarVarredura(Servicos.TipoVarredura.Rapida); });
+        menu.Items.Add("Verificar desempenho", null, async (_, _) =>
+        {
+            try { MostrarJanela(); if (_janela != null) await _janela.VerificarDesempenho(); }
+            catch { Avisar("Sentinela", "Não consegui verificar o desempenho agora. Tente novamente."); }
+        });
         menu.Items.Add(new WinForms.ToolStripSeparator());
         menu.Items.Add("Sair", null, (_, _) => Sair());
 
@@ -375,6 +412,7 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        _timerReinicio?.Dispose();
         _pedidos?.Dispose();
         _vigia?.Dispose();
         _vigiaInicializacao?.Dispose();

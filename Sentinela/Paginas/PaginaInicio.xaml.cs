@@ -10,6 +10,23 @@ public partial class PaginaInicio : UserControl
 {
     public event Action<TipoVarredura>? PediuVarredura;
     public event Action? PediuAtualizarStatus;
+    public event Action? PediuDesempenho;
+    private void Desempenho_Click(object sender, RoutedEventArgs e) => PediuDesempenho?.Invoke();
+    public void AtualizarCheckup()
+    {
+        var cartao = TextoCheckup(Sentinela.Servicos.Checkup.Checkup.Ultimo, DateTime.Now);
+        TxtDesempenho.Text = cartao.Texto;
+        TxtDesempenho.Foreground = Cor(cartao.Cor);
+        TxtNovoCheckup.Visibility = cartao.Antigo ? Visibility.Visible : Visibility.Collapsed;
+    }
+    internal static (string Texto, string Cor, bool Antigo) TextoCheckup(Sentinela.Servicos.Checkup.ResultadoCheckup? ultimo, DateTime agora)
+    {
+        if (ultimo == null) return ("Ainda não verificado", "TextoFraco", false);
+        var data = ultimo.Data;
+        var quando = data.Date == agora.Date ? "hoje" : data.Date == agora.Date.AddDays(-1) ? "ontem" : $"em {data:dd/MM/yyyy}";
+        return ($"{ultimo.Nota} de 100 · verificado {quando} às {data:HH:mm}",
+            ultimo.Nota >= 85 ? "Verde" : ultimo.Nota >= 60 ? "Ambar" : "Vermelho", agora - data > TimeSpan.FromDays(7));
+    }
 
     private App App => (App)Application.Current;
 
@@ -22,6 +39,7 @@ public partial class PaginaInicio : UserControl
     private bool _lendoSistema;
     public async void AtualizarSistema()
     {
+        try { AtualizarCheckup(); } catch { /* o cartão do Checkup não derruba o Início */ }
         if (_lendoSistema) return;
         _lendoSistema = true;
         try

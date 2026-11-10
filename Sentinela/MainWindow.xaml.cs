@@ -37,6 +37,7 @@ public partial class MainWindow : Window
         TxtAdminMenu.Text = _admin ? "Rodando como administrador" : "Rodando sem administrador";
         TxtVersaoMenu.Text = $"versão {Versao}";
 
+        PaginaInicio.PediuDesempenho += () => IrPara("desempenho");
         PaginaInicio.PediuVarredura += tipo => IniciarVarredura(tipo);
         PaginaInicio.PediuAtualizarStatus += AtualizarStatusAposOperacao;
         PaginaVarredura.VarreduraTerminou += AtualizarStatusAposOperacao;
@@ -105,6 +106,8 @@ public partial class MainWindow : Window
 
     private async Task IniciarMonitoramento()
     {
+        await Servicos.Checkup.Checkup.CarregarUltimo();
+        PaginaInicio.AtualizarCheckup();
         AjustarTimers();
         if (ColetarDesempenho)
         {
@@ -134,6 +137,7 @@ public partial class MainWindow : Window
     {
         if (PaginaInicio == null) return; // ainda montando a janela
         PaginaInicio.Visibility = Vis(MenuInicio.IsChecked);
+        if (MenuInicio.IsChecked == true) PaginaInicio.AtualizarCheckup();
         ConteudoDesempenho.Visibility = Vis(MenuDesempenho.IsChecked);
         if (MenuDesempenho.IsChecked == true)
         {
@@ -208,6 +212,14 @@ public partial class MainWindow : Window
     {
         MenuVarredura.IsChecked = true;
         PaginaVarredura.Iniciar(tipo, caminho);
+    }
+
+    public async Task VerificarDesempenho()
+    {
+        IrPara("desempenho");
+        if (_paginaDesempenho != null) await _paginaDesempenho.Verificar();
+        PaginaInicio.AtualizarCheckup();
+        PaginaHistorico.Invalidar();
     }
 
     public bool VarreduraEmAndamento => PaginaVarredura.EmAndamento;

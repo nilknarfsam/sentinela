@@ -68,6 +68,7 @@ public sealed class Configuracoes
 
     public List<string> PastasProjetos { get; set; } = Directory.Exists(@"C:\PROJETOS") ? [@"C:\PROJETOS"] : [];
     public bool FecharParaBandeja { get; set; } = true;
+    public DateTime? UltimoLembreteReinicio { get; set; }
     public bool AvisosDeRotina { get; set; } = true;
     public DayOfWeek DiaVarreduraSemanal { get; set; } = DayOfWeek.Sunday;
     public int HoraVarreduraSemanal { get; set; } = 12;

@@ -15,6 +15,41 @@ public interface IVerificacao
 
 public static class Checkup
 {
+    private static ResultadoCheckup? _ultimo;
+    public static ResultadoCheckup? Ultimo => Volatile.Read(ref _ultimo);
+    internal static string? PastaTeste;
+    private static string Caminho => Path.Combine(PastaTeste ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sentinela"), "checkup.json");
+    public static Task CarregarUltimo() => Task.Run(() =>
+    {
+        var salvo = LerSalvo(Caminho);
+        if (salvo != null) Interlocked.CompareExchange(ref _ultimo, salvo, null);
+    });
+
+    private sealed record ItemSalvo(string Nome, NivelVerificacao Nivel, string Resumo);
+    private sealed record CheckupSalvo(DateTime Data, int Nota, ItemSalvo[] Itens);
+    internal static ResultadoCheckup? LerSalvo(string caminho)
+    {
+        try
+        {
+            var salvo = System.Text.Json.JsonSerializer.Deserialize<CheckupSalvo>(ArquivosSeguros.LerTexto(caminho, 64 * 1024) ?? "");
+            if (salvo == null || salvo.Data == default || salvo.Nota is < 0 or > 100 || salvo.Itens == null
+                || salvo.Itens.Any(i => i == null || string.IsNullOrWhiteSpace(i.Nome) || i.Resumo == null || !Enum.IsDefined(i.Nivel))) return null;
+            return new(salvo.Data, salvo.Nota, Array.AsReadOnly(salvo.Itens.Select(i =>
+                new ResultadoVerificacao(i.Nome, "\uE9D9", i.Nivel, i.Resumo, "Resultado da última verificação salva.", null)).ToArray()), TimeSpan.Zero);
+        }
+        catch { return null; }
+    }
+    internal static bool GravarSalvo(string caminho, ResultadoCheckup resultado)
+    {
+        try
+        {
+            var texto = System.Text.Json.JsonSerializer.Serialize(new CheckupSalvo(resultado.Data, resultado.Nota,
+                resultado.Itens.Select(i => new ItemSalvo(i.Nome, i.Nivel, i.Resumo)).ToArray()));
+            return System.Text.Encoding.UTF8.GetByteCount(texto) <= 64 * 1024 && ArquivosSeguros.GravarTexto(caminho, texto);
+        }
+        catch { return false; }
+    }
+
     public static IReadOnlyList<IVerificacao> Padrao { get; } = Array.AsReadOnly<IVerificacao>(
         [new VerificacaoReinicio(), new VerificacaoEspaco(), new VerificacaoDrivers(), new VerificacaoEnergia(), new VerificacaoInicializacao(), new VerificacaoLiberavel(), new VerificacaoPeso(), new VerificacaoSaudeDiscos()]);
 
@@ -50,7 +85,10 @@ public static class Checkup
         catch { resultados.Add((Indisponivel("Checkup de desempenho"), 1)); }
         var nota = CalcularNota(resultados.Select(r => (r.item.Nivel, r.peso)));
         Diario.Registrar("checkup", $"Checkup de desempenho: nota {nota}");
-        return new ResultadoCheckup(DateTime.Now, nota, Array.AsReadOnly(resultados.Select(r => r.item).ToArray()), relogio.Elapsed);
+        var resultado = new ResultadoCheckup(DateTime.Now, nota, Array.AsReadOnly(resultados.Select(r => r.item).ToArray()), relogio.Elapsed);
+        Volatile.Write(ref _ultimo, resultado);
+        if (App.CapturaArquivo == null) GravarSalvo(Caminho, resultado);
+        return resultado;
     });
 
     internal static ResultadoVerificacao Indisponivel(string nome) => new(nome, "\uE9D9", NivelVerificacao.Atencao,

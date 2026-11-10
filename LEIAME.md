@@ -12,12 +12,12 @@ Sentinela é um painel leve para Windows que usa o **Windows Defender** como mot
 - **Ameaças e quarentena:** histórico de detecções, quarentena em lista, **Restaurar** com dupla confirmação e atalho para excluir na Segurança do Windows.
 - **Histórico:** eventos do Defender e do Sentinela dos últimos 30 dias, com filtros.
 - **Otimização:** limpa temporários (só arquivos com mais de 24 h), o cache do Windows Update, os relatórios de erro e a Lixeira, sempre com confirmação.
-- **Inicialização:** mostra o que abre com o Windows. Para ligar ou desligar, abre o Gerenciador de Tarefas (o liga/desliga direto chega na Fase 3).
+- **Inicialização:** mostra o que abre com o Windows. Permite ligar ou desligar itens compatíveis com confirmação, mostra tarefas e serviços de terceiros e avisa quando surge um item novo.
 - **Ajustes:** iniciar com o Windows, manter na bandeja ao fechar, avisos de rotina, diário e versão.
 
 O Sentinela **nunca desliga nem muda** configurações de segurança do Defender.
 
-Em desenvolvimento: **Checkup de desempenho** (Fase 3), veja `PLANO-MELHORIAS.md`. Histórico de versões em `CHANGELOG.md`.
+**Desempenho:** checkup com nota de 0 a 100, último resultado salvo e cartão no Início. Também pode ser iniciado pela bandeja. O Histórico tem filtro de desempenho e os avisos de rotina incluem lembrete diário de reinício após 7 dias ligado com atualização pendente. Veja `PLANO-MELHORIAS.md`. Histórico de versões em `CHANGELOG.md`.
 
 ## Verificar uma pasta ou arquivo
 
@@ -39,7 +39,7 @@ Para remover, execute `desinstalar-sentinela.bat` como administrador.
 
 ## Teste sem abrir a janela
 ```
-Sentinela.exe --captura tela.png --aba inicio|varredura|ameacas|limpeza|inicializacao
+Sentinela.exe --captura tela.png --aba inicio|desempenho|varredura|ameacas|historico|limpeza|limpeza-windows|inicializacao|ajustes
 ```
 Salva uma imagem da aba escolhida e fecha.
 
@@ -55,6 +55,6 @@ dotnet test
 - `Sentinela/Servicos/Defender.cs`: lê o status pelo WMI e roda varredura, atualização e quarentena pelo `MpCmdRun.exe`.
 - `Sentinela/Servicos/Sistema.cs`: CPU, memória, discos e tempo ligado.
 - `Sentinela/Servicos/Limpeza.cs`: medição e limpeza de arquivos descartáveis.
-- `Sentinela/Servicos/Inicializacao.cs`: programas que abrem com o Windows (só leitura).
+- `Sentinela/Servicos/Inicializacao.cs`: programas que abrem com o Windows.
 - `Sentinela/MainWindow.xaml`: a interface.
 - `Sentinela/App.xaml.cs`: instância única e ícone na bandeja.
