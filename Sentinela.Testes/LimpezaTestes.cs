@@ -56,7 +56,7 @@ public class LimpezaTestes(ITestOutputHelper saida) : IDisposable
         var juncao = Path.Combine(origem, "juncao");
         try
         {
-            using var processo = Process.Start(new ProcessStartInfo("cmd.exe", $"/c mklink /J \"{juncao}\" \"{destino}\"")
+            using var processo = Process.Start(new ProcessStartInfo(CaminhosSistema.Cmd, $"/c mklink /J \"{juncao}\" \"{destino}\"")
             {
                 UseShellExecute = false, CreateNoWindow = true,
                 RedirectStandardOutput = true, RedirectStandardError = true,

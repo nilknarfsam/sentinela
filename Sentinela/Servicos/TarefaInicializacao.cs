@@ -51,7 +51,7 @@ public static class TarefaInicializacao
     private static (int codigo, string saida, string erro) Executar(string argumentos)
     {
         using var processo = Process.Start(new ProcessStartInfo(
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "schtasks.exe"), argumentos)
+            CaminhosSistema.SchTasks, argumentos)
         {
             UseShellExecute = false,
             CreateNoWindow = true,

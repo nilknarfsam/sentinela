@@ -21,6 +21,7 @@ public partial class MainWindow : Window
     private bool _avisouBandeja;
     private Task? _inicializacao;
     private Task? _leituraDefender;
+    private Paginas.PaginaDesempenho? _paginaDesempenho;
 
     private App App => (App)Application.Current;
 
@@ -103,6 +104,12 @@ public partial class MainWindow : Window
     {
         if (PaginaInicio == null) return; // ainda montando a janela
         PaginaInicio.Visibility = Vis(MenuInicio.IsChecked);
+        ConteudoDesempenho.Visibility = Vis(MenuDesempenho.IsChecked);
+        if (MenuDesempenho.IsChecked == true)
+        {
+            if (_paginaDesempenho == null) ConteudoDesempenho.Content = _paginaDesempenho = new Paginas.PaginaDesempenho();
+            _paginaDesempenho.Carregar();
+        }
         PaginaVarredura.Visibility = Vis(MenuVarredura.IsChecked);
         PaginaAmeacas.Visibility = Vis(MenuAmeacas.IsChecked);
         PaginaHistorico.Visibility = Vis(MenuHistorico.IsChecked);
@@ -117,6 +124,23 @@ public partial class MainWindow : Window
     }
 
     private static Visibility Vis(bool? b) => b == true ? Visibility.Visible : Visibility.Collapsed;
+
+    public void IrPara(string aba)
+    {
+        var menu = aba.ToLowerInvariant() switch
+        {
+            "inicio" => MenuInicio,
+            "desempenho" => MenuDesempenho,
+            "varredura" => MenuVarredura,
+            "ameacas" => MenuAmeacas,
+            "historico" => MenuHistorico,
+            "limpeza" => MenuLimpeza,
+            "inicializacao" => MenuInicializacao,
+            "ajustes" => MenuAjustes,
+            _ => null
+        };
+        if (menu != null) menu.IsChecked = true;
+    }
 
     private int _contadorDiscos;
     private async Task AtualizarDefender()
@@ -215,8 +239,10 @@ public partial class MainWindow : Window
 
     private async Task Capturar()
     {
+        IrPara(App.CapturaAba ?? "inicio");
         switch (App.CapturaAba?.ToLowerInvariant())
         {
+            case "desempenho": await _paginaDesempenho!.Verificar(); break;
             case "varredura": MenuVarredura.IsChecked = true; break;
             case "ameacas": MenuAmeacas.IsChecked = true; break;
             case "historico": MenuHistorico.IsChecked = true; await PaginaHistorico.Carregar(); break;

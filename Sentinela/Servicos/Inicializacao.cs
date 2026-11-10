@@ -29,7 +29,7 @@ public static class Inicializacao
     }
 
     public static void AbrirGerenciadorDeTarefas()
-        => Process.Start(new ProcessStartInfo("taskmgr.exe", "/0 /startup") { UseShellExecute = true });
+        => Process.Start(new ProcessStartInfo(CaminhosSistema.TaskMgr, "/0 /startup") { UseShellExecute = true });
 
     private static void LerRun(List<ProgramaInicial> lista, RegistryKey raiz, string caminho, string origem, string aprovado)
     {

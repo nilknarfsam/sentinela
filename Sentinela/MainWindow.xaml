@@ -31,6 +31,7 @@
 
                 <StackPanel>
                     <RadioButton x:Name="MenuInicio" Style="{StaticResource ItemMenu}" Tag="&#xE80F;" Content="Início" IsChecked="True" Checked="Menu_Checked"/>
+                    <RadioButton x:Name="MenuDesempenho" Style="{StaticResource ItemMenu}" Tag="&#xEC4A;" Content="Desempenho" Checked="Menu_Checked"/>
                     <RadioButton x:Name="MenuVarredura" Style="{StaticResource ItemMenu}" Tag="&#xE721;" Content="Varredura" Checked="Menu_Checked"/>
                     <RadioButton x:Name="MenuAmeacas" Style="{StaticResource ItemMenu}" Tag="&#xE7BA;" Content="Ameaças e quarentena" Checked="Menu_Checked"/>
                     <RadioButton x:Name="MenuHistorico" Style="{StaticResource ItemMenu}" Tag="&#xE81C;" Content="Histórico" Checked="Menu_Checked"/>
@@ -56,6 +57,7 @@
 
             <Grid Margin="28,24,16,16">
                 <p:PaginaInicio x:Name="PaginaInicio"/>
+                <ContentControl x:Name="ConteudoDesempenho" Visibility="Collapsed"/>
                 <p:PaginaVarredura x:Name="PaginaVarredura" Visibility="Collapsed"/>
                 <p:PaginaAmeacas x:Name="PaginaAmeacas" Visibility="Collapsed"/>
                 <p:PaginaHistorico x:Name="PaginaHistorico" Visibility="Collapsed"/>

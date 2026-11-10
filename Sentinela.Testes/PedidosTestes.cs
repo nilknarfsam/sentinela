@@ -178,7 +178,7 @@ public class PedidosTestes : IDisposable
         Directory.CreateDirectory(alvo);
         var arquivo = Path.Combine(alvo, "preservar.json");
         File.WriteAllText(arquivo, JsonSerializer.Serialize(new Pedido("mostrar", null)));
-        using var processo = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("cmd.exe",
+        using var processo = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(CaminhosSistema.Cmd,
             $"/c mklink /J \"{link}\" \"{alvo}\"")
         { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true });
         if (processo == null) return;

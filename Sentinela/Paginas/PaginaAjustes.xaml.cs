@@ -60,6 +60,6 @@ public partial class PaginaAjustes : UserControl
     {
         var pasta = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sentinela");
         Directory.CreateDirectory(pasta);
-        Process.Start(new ProcessStartInfo("explorer.exe", $"\"{pasta}\"") { UseShellExecute = true });
+        Process.Start(new ProcessStartInfo(CaminhosSistema.Explorer, $"\"{pasta}\"") { UseShellExecute = true });
     });
 }
