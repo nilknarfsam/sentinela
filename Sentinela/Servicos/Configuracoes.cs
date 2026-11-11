@@ -72,6 +72,9 @@ public sealed class Configuracoes
     public bool AvisosDeRotina { get; set; } = true;
     public DayOfWeek DiaVarreduraSemanal { get; set; } = DayOfWeek.Sunday;
     public int HoraVarreduraSemanal { get; set; } = 12;
+    public bool VarreduraSemanalLigada { get; set; } = true;
+    public DateTime? UltimaTentativaVarreduraSemanal { get; set; }
+    public DateTime? UltimoRelatorioAvisado { get; set; }
 
     public static Configuracoes Atual { get; } = Carregar();
 
@@ -95,14 +98,49 @@ public sealed class Configuracoes
         return new Configuracoes();
     }
 
-    public void Salvar()
+    // Uma única gravação por vez, incluindo a serialização.
+    private static readonly object TravaGravacao = new();
+
+    internal bool PrepararRotinaSemanal(DateTime agora)
     {
-        if (App.CapturaArquivo != null) return;
-        try
+        if (UltimaTentativaVarreduraSemanal != null) return false;
+        UltimaTentativaVarreduraSemanal = agora;
+        return true;
+    }
+
+    internal void AlterarRotinaSemanal(bool ligada, DayOfWeek dia, int hora, DateTime agora)
+    {
+        if ((!VarreduraSemanalLigada && ligada) || dia != DiaVarreduraSemanal || hora != HoraVarreduraSemanal)
+            UltimaTentativaVarreduraSemanal = agora;
+        VarreduraSemanalLigada = ligada;
+        DiaVarreduraSemanal = dia;
+        HoraVarreduraSemanal = hora;
+    }
+
+    internal bool MarcarRelatorioAvisado(DateTime semana, bool temBandeja, Func<bool> salvar)
+    {
+        if (!temBandeja) return false;
+        var anterior = UltimoRelatorioAvisado;
+        UltimoRelatorioAvisado = semana;
+        if (salvar()) return true;
+        UltimoRelatorioAvisado = anterior;
+        return false;
+    }
+
+    public void Salvar() => TentarSalvar();
+
+    internal bool TentarSalvar()
+    {
+        lock (TravaGravacao)
+        lock (_travaPastas)
         {
-            var caminho = Caminho;
-            ArquivosSeguros.GravarTexto(caminho, JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true }));
+            if (App.CapturaArquivo != null) return false;
+            try
+            {
+                var caminho = Caminho;
+                return ArquivosSeguros.GravarTexto(caminho, JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true }));
+            }
+            catch { return false; /* As configurações não podem interromper o aplicativo. */ }
         }
-        catch { /* As configurações não podem interromper o aplicativo. */ }
     }
 }

@@ -2,7 +2,8 @@ using System.Text.Json;
 
 namespace Sentinela.Servicos;
 
-public sealed record EntradaDiario(DateTime Data, string Tipo, string Mensagem, long? Bytes = null);
+public sealed record EntradaDiario(DateTime Data, string Tipo, string Mensagem, long? Bytes = null, string? ResultadoVarredura = null,
+    TipoVarredura? TipoVarreduraExecutada = null, string? NomeAmeaca = null);
 
 public static class Diario
 {
@@ -20,7 +21,8 @@ public static class Diario
     private static string Caminho => Path.Combine(PastaTeste ?? Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sentinela"), "diario.jsonl");
 
-    public static void Registrar(string tipo, string mensagem, long? bytes = null)
+    public static void Registrar(string tipo, string mensagem, long? bytes = null, string? resultadoVarredura = null,
+        TipoVarredura? tipoVarredura = null, string? nomeAmeaca = null, DateTime? data = null)
     {
         lock (Trava)
         {
@@ -29,7 +31,7 @@ public static class Diario
             {
                 var caminho = Caminho;
                 ArquivosSeguros.Acrescentar(caminho,
-                    JsonSerializer.Serialize(new EntradaDiario(DateTime.Now, tipo, mensagem, bytes)) + Environment.NewLine,
+                    JsonSerializer.Serialize(new EntradaDiario(data ?? DateTime.Now, tipo, mensagem, bytes, resultadoVarredura, tipoVarredura, nomeAmeaca)) + Environment.NewLine,
                     5 * 1024 * 1024);
             }
             catch { /* O diário não pode interromper o aplicativo. */ }

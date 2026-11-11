@@ -16,6 +16,25 @@
     <DockPanel Margin="0,0,12,0">
         <StackPanel DockPanel.Dock="Top" Margin="0,0,0,18">
             <TextBlock Text="Histórico" Style="{StaticResource Titulo}" Margin="0,0,0,4"/>
+            <Border Style="{StaticResource CartaoBorda}" Margin="0,12,0,12">
+                <StackPanel>
+                    <TextBlock Text="Relatório da semana" Style="{StaticResource Subtitulo}" Margin="0,0,0,8"/>
+                    <ComboBox x:Name="PeriodoRelatorio" Width="190" HorizontalAlignment="Left" SelectedIndex="0" SelectionChanged="PeriodoRelatorio_Changed">
+                        <ComboBoxItem Content="Semana passada"/>
+                        <ComboBoxItem Content="Últimos 7 dias"/>
+                    </ComboBox>
+                    <TextBlock x:Name="TxtResumoRelatorio" Text="Preparando o relatório..." Margin="0,10,0,10"/>
+                    <TextBlock x:Name="TxtPeriodoRelatorio" Style="{StaticResource Fraco}" Margin="0,0,0,10"/>
+                    <WrapPanel>
+                        <Button x:Name="BtnVerRelatorio" Content="Ver relatório" Click="VerRelatorio_Click" IsEnabled="False"/>
+                        <Button x:Name="BtnExportarRelatorio" Content="Exportar em HTML" Click="ExportarRelatorio_Click" IsEnabled="False"/>
+                    </WrapPanel>
+                    <TextBlock Text="Abra o HTML no navegador para imprimir ou salvar como PDF." Style="{StaticResource Fraco}" Margin="0,8,0,0"/>
+                    <ScrollViewer x:Name="DetalheRelatorio" Visibility="Collapsed" MaxHeight="260" VerticalScrollBarVisibility="Auto" Margin="0,12,0,0">
+                        <TextBlock x:Name="TxtDetalheRelatorio"/>
+                    </ScrollViewer>
+                </StackPanel>
+            </Border>
             <TextBlock x:Name="TxtResumo" Text="Carregando eventos..." Style="{StaticResource Fraco}" Margin="0,0,0,16"/>
             <WrapPanel x:Name="Filtros">
                 <Button Content="Tudo" Tag="tudo" Click="Filtrar_Click" Style="{StaticResource BotaoPrincipal}"/>

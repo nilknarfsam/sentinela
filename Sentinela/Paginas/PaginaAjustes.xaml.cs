@@ -9,20 +9,49 @@ namespace Sentinela.Paginas;
 public partial class PaginaAjustes : UserControl
 {
     public bool Carregada { get; private set; }
+    private bool _preparandoSemanal;
 
     public PaginaAjustes() => InitializeComponent();
 
     public async Task Carregar()
     {
         Carregada = true;
+        _preparandoSemanal = true;
+        DiaSemanal.ItemsSource = new[] { "Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado" };
+        HoraSemanal.ItemsSource = Enumerable.Range(0, 24).Select(h => $"{h:00}:00");
+        ChkSemanal.IsChecked = Configuracoes.Atual.VarreduraSemanalLigada;
+        DiaSemanal.SelectedIndex = (int)Configuracoes.Atual.DiaVarreduraSemanal;
+        HoraSemanal.SelectedIndex = Configuracoes.Atual.HoraVarreduraSemanal;
+        _preparandoSemanal = false;
+        AjustarControlesSemanais();
+        await AtualizarUltimaCompleta();
         ListaProjetos.ItemsSource = Configuracoes.Atual.ListarPastasProjetos();
         // schtasks pode demorar: roda fora da thread da tela.
         MostrarInicializacao(await Task.Run(TarefaInicializacao.EstaLigada));
         ChkBandeja.IsChecked = Configuracoes.Atual.FecharParaBandeja;
         ChkAvisos.IsChecked = Configuracoes.Atual.AvisosDeRotina;
-        TxtDiario.Text = $"{Diario.Ler(30).Count} entrada(s) nos últimos 30 dias.";
+        TxtDiario.Text = $"{await Task.Run(() => Diario.Ler(30).Count)} entrada(s) nos últimos 30 dias.";
         TxtVersao.Text = $"Sentinela versão {Versao}";
         TxtExecutavel.Text = Environment.ProcessPath;
+    }
+
+    public async Task AtualizarUltimaCompleta()
+    {
+        var status = await Task.Run(() => { try { return Defender.LerStatus(); } catch { return null; } });
+        TxtUltimaCompleta.Text = "Última varredura completa: " + (status == null ? "não consegui consultar" :
+            status.UltimaVarreduraCompleta is { } data ? data.ToString("dd/MM/yyyy HH:mm") : "nunca feita");
+    }
+
+    private void AjustarControlesSemanais() => DiaSemanal.IsEnabled = HoraSemanal.IsEnabled = ChkSemanal.IsChecked == true;
+
+    private async void Semanal_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_preparandoSemanal || DiaSemanal == null || HoraSemanal == null || DiaSemanal.SelectedIndex < 0 || HoraSemanal.SelectedIndex < 0) return;
+        var config = Configuracoes.Atual;
+        config.AlterarRotinaSemanal(ChkSemanal.IsChecked == true,
+            (DayOfWeek)DiaSemanal.SelectedIndex, HoraSemanal.SelectedIndex, DateTime.Now);
+        AjustarControlesSemanais();
+        await Task.Run(config.Salvar);
     }
 
     private void MostrarInicializacao(bool? ligada)

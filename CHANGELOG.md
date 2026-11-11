@@ -1,5 +1,17 @@
 # Histórico de mudanças
 
+## [1.5.0] - 2026-11-11
+### Novo
+- Varredura completa semanal, com dia, hora e liga/desliga nos Ajustes. Se perder o horário, espera o PC ficar parado por 10 minutos. Usa o mesmo andamento e botão Cancelar da aba Varredura.
+- Relatório da semana no Histórico: varreduras, ameaças e tratamentos, espaço liberado, notas de desempenho e segurança e outros eventos. Escolha a semana passada ou os últimos 7 dias.
+- Aviso semanal na bandeja a partir de segunda-feira às 9h, respeitando a opção de avisos de rotina.
+- Exportação do relatório em HTML para abrir, imprimir ou salvar como PDF pelo navegador.
+### Melhorado
+- A rotina semanal começa a contar na instalação ou ao ligar/mudar o horário, evitando uma varredura inesperada.
+- Exportação restrita a HTML em pastas locais permitidas, com mensagens específicas e suporte a pastas de nuvem sem aceitar links ou junções.
+- Relatório concilia ameaças do diário e do Defender, distingue varreduras concluídas, canceladas e com falha, e inclui tratamentos e restaurações no resumo. O vigia continua sem copiar eventos para o diário.
+- A ausência de TPM, que depende da placa-mãe, não reduz mais a nota de segurança.
+
 ## [1.4.0] - 2026-11-11
 ### Novo
 - Aba **Segurança** com oito verificações e nota de 0 a 100: firewall, atualizações do Windows, UAC, SmartScreen e apps indesejados, ransomware, segurança do dispositivo, exclusões do Defender e contas locais.

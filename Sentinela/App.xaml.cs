@@ -17,6 +17,10 @@ public partial class App : Application
     private VigiaDefender? _vigia;
     private VigiaInicializacao? _vigiaInicializacao;
     private bool _balaoInicializacao;
+    private bool _balaoRelatorio;
+    private readonly DispatcherTimer _timerSemanal = new() { Interval = TimeSpan.FromMinutes(5) };
+    private bool _checandoSemana;
+    private DateTime? _semanaRelatorioDecidida;
     private System.Threading.Timer? _timerReinicio;
     private int _checandoReinicio;
     private CaixaDePedidos? _pedidos;
@@ -26,7 +30,7 @@ public partial class App : Application
     private long _ultimoMostrar;
     private readonly DispatcherTimer _timerAvisos = new() { Interval = TimeSpan.FromSeconds(5) };
     private readonly System.Diagnostics.Stopwatch _desdeAviso = new();
-    private readonly List<(string Texto, bool Erro, bool Inicializacao)> _avisosPendentes = [];
+    private readonly List<(string Texto, bool Erro, bool Inicializacao, bool Relatorio)> _avisosPendentes = [];
 
     /// <summary>Iniciado pelo Windows: fica só na bandeja, sem abrir a janela.</summary>
     public static bool IniciarNaBandeja { get; private set; }
@@ -117,9 +121,12 @@ public partial class App : Application
             };
             _vigiaInicializacao.Iniciar();
             _timerReinicio = new System.Threading.Timer(_ => ChecarReinicio(), null, TimeSpan.Zero, TimeSpan.FromHours(6));
+            _timerSemanal.Tick += async (_, _) => await ChecarSemana();
+            _timerSemanal.Start();
         }
         Diario.Registrar("inicio", IniciarNaBandeja ? "Sentinela iniciado na bandeja" : "Sentinela iniciado");
         _ = _janela.Iniciar();
+        if (CapturaArquivo == null) _ = ChecarSemana();
         if (!IniciarNaBandeja || CapturaArquivo != null) _janela.Show();
         if (CapturaArquivo == null && caminhoVerificar != null)
             AtenderPedido(new Pedido("verificar", caminhoVerificar));
@@ -220,6 +227,52 @@ public partial class App : Application
         finally { Volatile.Write(ref _checandoReinicio, 0); }
     }
 
+    private async Task ChecarSemana()
+    {
+        if (_checandoSemana || Saindo || CapturaArquivo != null) return;
+        _checandoSemana = true;
+        try
+        {
+            if (_janela != null) await _janela.Iniciar();
+            var config = Configuracoes.Atual;
+            if (config.PrepararRotinaSemanal(DateTime.Now)) await Task.Run(config.Salvar);
+            var leitura = await Task.Run(() => (Ocioso: RotinaSemanal.LerTempoOcioso(), Status: LerStatusSemFalhar()));
+            var agora = DateTime.Now;
+            if (Saindo || _janela == null) return;
+            var semana = Relatorio.Periodo(agora, true).Fim;
+            if (_semanaRelatorioDecidida != semana && _bandeja != null
+                && Relatorio.DeveAvisar(agora, config.UltimoRelatorioAvisado, config.AvisosDeRotina, true))
+            {
+                var relatorio = await Task.Run(() => Relatorio.Ler(agora, true));
+                if (Saindo) return;
+                if (relatorio.TotalEntradas == 0) _semanaRelatorioDecidida = semana;
+                else if (Avisar("Relatório da semana", relatorio.Resumo, rotina: true, relatorio: true))
+                {
+                    if (await Task.Run(() => config.MarcarRelatorioAvisado(semana, true, config.TentarSalvar)))
+                        _semanaRelatorioDecidida = semana;
+                }
+            }
+            if (leitura.Status != null && RotinaSemanal.DeveVarrer(agora, config.DiaVarreduraSemanal,
+                config.HoraVarreduraSemanal, leitura.Status.UltimaVarreduraCompleta, config.UltimaTentativaVarreduraSemanal,
+                leitura.Ocioso, _janela.VarreduraEmAndamento, config.VarreduraSemanalLigada))
+            {
+                config.UltimaTentativaVarreduraSemanal = agora;
+                await Task.Run(config.TentarSalvar);
+                if (Saindo || _janela.VarreduraEmAndamento || !config.VarreduraSemanalLigada) return;
+                _janela.IniciarVarredura(TipoVarredura.Completa);
+                Avisar("Sentinela", "Varredura completa semanal começou. Você pode continuar usando o PC.");
+            }
+        }
+        catch { /* As rotinas nunca interrompem o aplicativo. */ }
+        finally { _checandoSemana = false; }
+    }
+
+    private static StatusDefender? LerStatusSemFalhar()
+    {
+        try { return Defender.LerStatus(); }
+        catch { return null; }
+    }
+
     private void CriarBandeja()
     {
         var menu = new WinForms.ContextMenuStrip();
@@ -249,7 +302,8 @@ public partial class App : Application
         _bandeja.BalloonTipClicked += (_, _) =>
         {
             MostrarJanela();
-            if (_balaoInicializacao) _janela?.IrPara("inicializacao");
+            if (_balaoRelatorio) _janela?.IrPara("historico");
+            else if (_balaoInicializacao) _janela?.IrPara("inicializacao");
         };
     }
 
@@ -265,28 +319,30 @@ public partial class App : Application
         _janela.Activate();
     }
 
-    public void Avisar(string titulo, string texto, bool erro = false, bool rotina = false, bool inicializacao = false)
+    public bool Avisar(string titulo, string texto, bool erro = false, bool rotina = false, bool inicializacao = false, bool relatorio = false)
     {
-        if (_bandeja == null || (rotina && !Configuracoes.Atual.AvisosDeRotina)) return;
+        if (_bandeja == null || (rotina && !Configuracoes.Atual.AvisosDeRotina)) return false;
         if (_desdeAviso.IsRunning && _desdeAviso.Elapsed < TimeSpan.FromSeconds(5))
         {
-            _avisosPendentes.Add((texto, erro, inicializacao));
+            _avisosPendentes.Add((texto, erro, inicializacao, relatorio));
             if (!_timerAvisos.IsEnabled)
             {
                 _timerAvisos.Interval = TimeSpan.FromSeconds(5) - _desdeAviso.Elapsed;
                 _timerAvisos.Start();
             }
-            return;
+            return true;
         }
         if (_avisosPendentes.Count > 0)
         {
-            _avisosPendentes.Add((texto, erro, inicializacao));
+            _avisosPendentes.Add((texto, erro, inicializacao, relatorio));
             MostrarAvisosPendentes();
-            return;
+            return true;
         }
         _balaoInicializacao = inicializacao;
+        _balaoRelatorio = relatorio;
         _bandeja.ShowBalloonTip(5000, titulo, texto, erro ? WinForms.ToolTipIcon.Warning : WinForms.ToolTipIcon.Info);
         _desdeAviso.Restart();
+        return true;
     }
 
     private void MostrarAvisosPendentes()
@@ -302,6 +358,7 @@ public partial class App : Application
         }
         var erro = _avisosPendentes.Any(a => a.Erro);
         _balaoInicializacao = _avisosPendentes.Any(a => a.Inicializacao);
+        _balaoRelatorio = _avisosPendentes.Any(a => a.Relatorio);
         var texto = erro ? _avisosPendentes.First(a => a.Erro).Texto : _avisosPendentes[^1].Texto;
         if (texto.Length > 150) texto = texto[..149] + "…";
         var outros = _avisosPendentes.Count - 1;
@@ -417,6 +474,7 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        _timerSemanal.Stop();
         _timerReinicio?.Dispose();
         _pedidos?.Dispose();
         _vigia?.Dispose();

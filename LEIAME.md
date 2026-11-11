@@ -20,6 +20,14 @@ O Sentinela **nunca desliga nem muda** configurações de segurança do Defender
 
 **Desempenho:** checkup com nota de 0 a 100, último resultado salvo e cartão no Início. Também pode ser iniciado pela bandeja. O Histórico tem filtro de desempenho e os avisos de rotina incluem lembrete diário de reinício após 7 dias ligado com atualização pendente. Veja `PLANO-MELHORIAS.md`. Histórico de versões em `CHANGELOG.md`.
 
+## Rotina e relatório semanal (v1.5.0)
+
+Em **Ajustes → Varredura completa semanal**, ligue ou desligue a rotina e escolha o dia e a hora (padrão: domingo às 12h). O Sentinela precisa estar aberto, inclusive só na bandeja. Ele confere a cada 5 minutos, sem criar tarefa no Agendador nem mudar a configuração do Defender. Na primeira hora após o horário, pode começar enquanto você usa o PC; depois disso, espera 10 minutos sem uso. Se a varredura falhar ou for cancelada, não tenta novamente no mesmo ciclo semanal. Na primeira execução da versão 1.5.0 e ao ligar ou alterar o dia/hora, a rotina passa a considerar o momento da alteração, sem recuperar um horário anterior. O progresso e o botão Cancelar ficam na aba **Varredura**.
+
+No topo do **Histórico**, **Relatório da semana** permite escolher **Semana passada** (segunda a domingo) ou **Últimos 7 dias**, abrir os detalhes e **Exportar em HTML** (até 2 MB; somente .html/.htm em unidade local, fora da raiz e de pastas protegidas do Windows e dos programas; aceita pastas de nuvem, mas recusa links e junções). O relatório reúne o diário e as detecções do Defender no período, conciliadas por nome e proximidade de até dois minutos, além do estado atual da proteção, com as datas das últimas notas. Abra o arquivo no navegador para imprimir ou salvar como PDF; não há exportação nativa para PDF.
+
+Na segunda-feira, a partir das 9h, ou quando o Sentinela voltar a rodar naquela semana, um aviso mostra o resumo da semana anterior. Clicar abre o Histórico. O aviso só aparece se houver registros no período e se **Avisos de rotina** estiver ligado; o relatório continua disponível com os avisos desligados.
+
 ## Verificar uma pasta ou arquivo
 
 Na aba **Varredura**, use **Escolher pasta** ou **Escolher arquivo**, ou arraste um único item para a página quando o app estiver sem elevação. Como administrador, o Windows bloqueia arrastar do Explorer: use os botões ou o clique direito. O Sentinela mostra o caminho em andamento e registra o resultado no histórico.

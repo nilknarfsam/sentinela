@@ -160,8 +160,10 @@ public partial class MainWindow : Window
         PaginaAjustes.Visibility = Vis(MenuAjustes.IsChecked);
 
         if (MenuAjustes.IsChecked == true && !PaginaAjustes.Carregada) _ = PaginaAjustes.Carregar();
+        else if (MenuAjustes.IsChecked == true) _ = PaginaAjustes.AtualizarUltimaCompleta();
         if (MenuAmeacas.IsChecked == true && !PaginaAmeacas.Carregada) _ = PaginaAmeacas.Carregar();
         if (MenuHistorico.IsChecked == true && !PaginaHistorico.Carregada) _ = PaginaHistorico.Carregar();
+        else if (MenuHistorico.IsChecked == true) _ = PaginaHistorico.AtualizarRelatorio();
         if (MenuInicializacao.IsChecked == true && !PaginaInicializacao.Carregada) _ = PaginaInicializacao.Carregar();
     }
 
@@ -319,17 +321,18 @@ public partial class MainWindow : Window
             case "limpeza": MenuLimpeza.IsChecked = true; await PaginaLimpeza.Analisar(); break;
             case "limpeza-windows": MenuLimpeza.IsChecked = true; await PaginaLimpeza.Analisar(); break;
             case "inicializacao": MenuInicializacao.IsChecked = true; await PaginaInicializacao.Carregar(); break;
-            case "ajustes": MenuAjustes.IsChecked = true; break;
+            case "ajustes": MenuAjustes.IsChecked = true; await PaginaAjustes.Carregar(); break;
         }
         await Task.Delay(App.CapturaAba?.Equals("desempenho", StringComparison.OrdinalIgnoreCase) == true ? 5500 : 2500);
         PaginaInicio.AtualizarSistema();
         await Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ApplicationIdle);
 
         var conteudo = (FrameworkElement)Content;
-        if (App.CapturaAba?.ToLowerInvariant() is "desempenho" or "seguranca")
+        if (App.CapturaAba?.ToLowerInvariant() is "desempenho" or "seguranca" or "ajustes")
         {
             // Renderizar todo o painel, inclusive em monitores com pouca altura.
-            var tamanho = new Size(conteudo.ActualWidth, App.CapturaAba?.ToLowerInvariant() == "seguranca" ? 1400 : 2050);
+            var altura = App.CapturaAba?.ToLowerInvariant() switch { "seguranca" => 1400, "ajustes" => 1100, _ => 2050 };
+            var tamanho = new Size(conteudo.ActualWidth, altura);
             Content = null;
             var painelCaptura = new System.Windows.Controls.Grid { Width = tamanho.Width, Height = tamanho.Height };
             painelCaptura.Children.Add(conteudo);

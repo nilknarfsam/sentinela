@@ -146,6 +146,7 @@ public partial class PaginaVarredura : UserControl
         App.AtualizarAndamentoVarredura($"Sentinela: {nome.ToLower()} em andamento");
 
         string resumo;
+        var resultadoDiario = "falhou";
         bool achou = false;
         bool encontrouAmeaca = false;
         bool limpa = false;
@@ -168,6 +169,7 @@ public partial class PaginaVarredura : UserControl
             // MpCmdRun devolve 2 tanto para "achou ameaça" quanto para erro: o texto decide.
             bool falhou = saida.Contains("[Failed]", StringComparison.OrdinalIgnoreCase)
                        || saida.Contains("Failed with hr", StringComparison.OrdinalIgnoreCase);
+            resultadoDiario = falhou ? "falhou" : "concluida";
             achou = !falhou && codigo != 0;
             limpa = !falhou && codigo == 0;
             encontrouAmeaca = achou;
@@ -181,6 +183,7 @@ public partial class PaginaVarredura : UserControl
         }
         catch (OperationCanceledException)
         {
+            resultadoDiario = "cancelada";
             resumo = $"{nome} cancelada.";
             LogVarredura.Text += Environment.NewLine + resumo;
         }
@@ -189,6 +192,14 @@ public partial class PaginaVarredura : UserControl
             resumo = $"{nome}: não foi possível fazer a varredura: " + ex.Message;
             LogVarredura.Text += Environment.NewLine + resumo;
         }
+
+        // Mantém a varredura ocupada até terminar a leitura dos nomes e horários reais.
+        var inicio = _inicioVarredura;
+        var fim = DateTime.Now;
+        var deteccoes = encontrouAmeaca
+            ? await Task.Run(() => VigiaDefender.LerRecentes(1)
+                .Where(e => e.Id == 1116 && e.Data >= inicio && e.Data <= fim).ToArray())
+            : Array.Empty<EventoDefender>();
 
         _timerTempo.Stop();
         _ctsVarredura.Dispose();
@@ -199,8 +210,10 @@ public partial class PaginaVarredura : UserControl
         BarraVarredura.IsIndeterminate = false;
         BarraVarredura.Value = 100;
         TxtAndamento.Text = resumo;
-        Diario.Registrar("varredura", resumo);
-        if (encontrouAmeaca) Diario.Registrar("ameaca", resumo);
+        Diario.Registrar("varredura", resumo, resultadoVarredura: resultadoDiario, tipoVarredura: tipo);
+        if (encontrouAmeaca && deteccoes.Length == 0) Diario.Registrar("ameaca", resumo);
+        foreach (var evento in deteccoes)
+            Diario.Registrar("ameaca", evento.Detalhe, nomeAmeaca: Relatorio.NomeAmeaca(evento.Detalhe), data: evento.Data);
         TxtTempo.Text = "";
         BtnCancelar.IsEnabled = false;
         App.Avisar("Sentinela", resumo, achou, rotina: limpa);

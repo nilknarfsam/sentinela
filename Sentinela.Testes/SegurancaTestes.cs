@@ -104,7 +104,7 @@ public sealed class SegurancaTestes : IDisposable
     [InlineData(true, true, true, true, NivelVerificacao.Ok)]
     [InlineData(true, true, false, true, NivelVerificacao.Ok)]
     [InlineData(false, true, true, true, NivelVerificacao.Atencao)]
-    [InlineData(true, false, true, true, NivelVerificacao.Atencao)]
+    [InlineData(true, false, true, true, NivelVerificacao.Ok)]
     [InlineData(null, null, null, true, NivelVerificacao.Ok)]
     [InlineData(true, true, null, true, NivelVerificacao.Ok)]
     [InlineData(true, null, true, true, NivelVerificacao.Ok)]
@@ -115,8 +115,18 @@ public sealed class SegurancaTestes : IDisposable
     {
         var resultado = VerificacaoDispositivo.Avaliar(seguro, tpm, bitlocker, admin);
         Assert.Equal(nivel, resultado.Nivel);
+        if (tpm == false) Assert.Contains("Este PC não tem TPM (limite da placa-mãe)", resultado.Detalhe);
         if (!admin && tpm == null) Assert.Contains("precisa de administrador", resultado.Detalhe);
         if (bitlocker == false) Assert.Contains("opcional", resultado.Detalhe);
+    }
+
+    [Fact]
+    public void TpmPresenteDesativadoNaoEConfundidoComLimiteDaPlaca()
+    {
+        var resultado = VerificacaoDispositivo.Avaliar(true, false, true, true, tpmPresente: true);
+        Assert.Equal(NivelVerificacao.Ok, resultado.Nivel);
+        Assert.Contains("TPM presente, mas desativado", resultado.Detalhe);
+        Assert.DoesNotContain("não tem TPM", resultado.Detalhe);
     }
 
     [Fact]

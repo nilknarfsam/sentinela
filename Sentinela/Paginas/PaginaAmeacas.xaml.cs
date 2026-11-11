@@ -111,7 +111,7 @@ public partial class PaginaAmeacas : UserControl
             try
             {
                 var (codigo, saida) = await Defender.Restaurar(ameaca.Nome, ameaca.Local);
-                resultado = $"Restauração de {ameaca.Nome} em {ameaca.Local}: código {codigo}. {saida.Trim()}";
+                resultado = (codigo == 0 ? "" : "Falha ao restaurar: ") + $"Restauração de {ameaca.Nome} em {ameaca.Local}: código {codigo}. {saida.Trim()}";
             }
             catch (Exception ex) { resultado = "Não foi possível restaurar: " + ex.Message; }
             TxtResultadoQuarentena.Text = resultado;

@@ -236,16 +236,16 @@ public sealed class VerificacaoDispositivo : Verificacao
         var dadosTpm = await tpm.WaitAsync(ct).ConfigureAwait(false);
         var dadosBitlocker = await bitlocker.WaitAsync(ct).ConfigureAwait(false);
         return Avaliar(seguro, dadosTpm == null ? null : dadosTpm.Length > 0 && dadosTpm.All(v => v),
-            dadosBitlocker?.FirstOrDefault() is int protecao ? protecao == 1 : null, admin, chaveAusente);
+            dadosBitlocker?.FirstOrDefault() is int protecao ? protecao == 1 : null, admin, chaveAusente, dadosTpm?.Length > 0);
     }
-    internal static ResultadoVerificacao Avaliar(bool? seguro, bool? tpm, bool? bitlocker, bool admin, bool chaveSecureBootAusente = false)
+    internal static ResultadoVerificacao Avaliar(bool? seguro, bool? tpm, bool? bitlocker, bool admin, bool chaveSecureBootAusente = false, bool tpmPresente = false)
     {
         var faltam = seguro == null || tpm == null || bitlocker == null;
-        var nivel = seguro == false || tpm == false || chaveSecureBootAusente ? NivelVerificacao.Atencao : NivelVerificacao.Ok;
+        var nivel = seguro == false || chaveSecureBootAusente ? NivelVerificacao.Atencao : NivelVerificacao.Ok;
         string Estado(bool? valor) => valor == true ? "ligado" : valor == false ? "desligado ou ausente" : admin ? "não consegui ler" : "precisa de administrador";
         return Leituras.Resultado("Inicialização segura, TPM e BitLocker", "\uE950", nivel,
-            chaveSecureBootAusente ? "Inicialização segura não suportada (BIOS antigo)" : seguro == false ? "Inicialização segura desligada" : tpm == false ? "TPM ausente ou desativado" : faltam ? admin ? "Leitura parcial da segurança do dispositivo" : "Alguns dados precisam de administrador" : "Proteções do dispositivo verificadas",
-            $"Inicialização segura: {Estado(seguro)}. TPM: {Estado(tpm)}. BitLocker do C:: {(bitlocker == null && admin ? "BitLocker não disponível" : Estado(bitlocker))}. Criptografar o disco é opcional para um PC de mesa em casa.", "windowsdefender://devicesecurity");
+            chaveSecureBootAusente ? "Inicialização segura não suportada (BIOS antigo)" : seguro == false ? "Inicialização segura desligada" : tpm == false ? tpmPresente ? "TPM desativado" : "TPM ausente (limite da placa-mãe)" : faltam ? admin ? "Leitura parcial da segurança do dispositivo" : "Alguns dados precisam de administrador" : "Proteções do dispositivo verificadas",
+            $"Inicialização segura: {Estado(seguro)}. {(tpm == false ? tpmPresente ? "TPM presente, mas desativado" : "Este PC não tem TPM (limite da placa-mãe)" : "TPM: " + Estado(tpm))}. BitLocker do C:: {(bitlocker == null && admin ? "BitLocker não disponível" : Estado(bitlocker))}. Criptografar o disco é opcional para um PC de mesa em casa.", "windowsdefender://devicesecurity");
     }
 }
 

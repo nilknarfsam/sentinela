@@ -17,6 +17,7 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <Border Style="{StaticResource CartaoBorda}" Grid.ColumnSpan="2">
                     <StackPanel>
@@ -58,6 +59,20 @@
                     </StackPanel>
                 </Border>
                 <Border Grid.Row="3" Grid.ColumnSpan="2" Style="{StaticResource CartaoBorda}">
+                    <StackPanel>
+                        <TextBlock Text="Varredura completa semanal" Style="{StaticResource Subtitulo}" Margin="0,0,0,10"/>
+                        <CheckBox x:Name="ChkSemanal" Content="Fazer uma varredura completa toda semana" Click="Semanal_Changed"/>
+                        <WrapPanel Margin="0,10,0,10">
+                            <TextBlock Text="Dia: " VerticalAlignment="Center"/>
+                            <ComboBox x:Name="DiaSemanal" Width="170" SelectionChanged="Semanal_Changed"/>
+                            <TextBlock Text="Hora: " Margin="16,0,0,0" VerticalAlignment="Center"/>
+                            <ComboBox x:Name="HoraSemanal" Width="85" SelectionChanged="Semanal_Changed"/>
+                        </WrapPanel>
+                        <TextBlock Text="Se o PC estiver desligado na hora marcada, o Sentinela faz a varredura quando você voltar e o PC ficar parado por 10 minutos." Style="{StaticResource Fraco}"/>
+                        <TextBlock x:Name="TxtUltimaCompleta" Text="Última varredura completa: consultando..." Margin="0,8,0,0"/>
+                    </StackPanel>
+                </Border>
+                <Border Grid.Row="4" Grid.ColumnSpan="2" Style="{StaticResource CartaoBorda}">
                     <StackPanel>
                         <TextBlock Text="Pastas dos seus projetos" Style="{StaticResource Subtitulo}" Margin="0,0,0,10"/>
                         <TextBlock Text="Analisa até 3 níveis. SDKs do Flutter e links são ignorados." Style="{StaticResource Fraco}"/>

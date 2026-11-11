@@ -173,11 +173,19 @@ Cada etapa segue o fluxo do projeto:
 O lançamento da 1.3.0 acontece no fim da 3F.
 
 ## Fase 6: Rotinas e relatórios
+**✅ Feita em 11/11/2026 (v1.5.0).** Rotina semanal nos Ajustes, relatório no Histórico, aviso semanal e exportação em HTML. Ausência de TPM não reduz a nota.
+
+Mudou em relação ao plano original:
+- A rotina roda dentro do Sentinela, inclusive na bandeja, a cada 5 minutos. Não cria tarefa agendada; recupera o horário perdido após 10 minutos de ociosidade. Na primeira execução e ao ligar/mudar o horário, usa o momento atual como referência.
+- Relatório combina o diário com detecções do Defender no período, deduplicadas por nome em até dois minutos, sem gravar os eventos do vigia no diário. Resultados novos de varreduras têm campos estruturados, com leitura compatível do diário antigo.
+- Exportação aceita somente .html/.htm em unidade local, fora da raiz e das pastas protegidas. Identifica tags de nuvem e recusa links/junções.
+- Exporta HTML autocontido para imprimir ou salvar como PDF pelo navegador. PDF nativo fica fora para não adicionar pacote NuGet.
+
 | # | Item | Motor | Tamanho |
 | :--- | :--- | :--- | :--- |
-| 6.1 | **Varredura completa semanal** por tarefa agendada própria, no dia e hora dos Ajustes. Não usa o agendador do Defender, para não mexer na configuração dele | Codex | P |
+| 6.1 | **Varredura completa semanal** dentro do Sentinela, no dia e hora dos Ajustes, com andamento e cancelamento na aba Varredura | Codex | P |
 | 6.2 | **Relatório semanal:** aviso com o resumo da semana (varreduras, ameaças, espaço liberado, nota de saúde) e uma página com o detalhe | Codex | M |
-| 6.3 | Exportar o relatório em HTML ou PDF | Codex | P |
+| 6.3 | Exportar o relatório em HTML; impressão e PDF pelo navegador | Codex | P |
 
 ## Fase 7: Acabamento e distribuição
 | # | Item | Motor | Tamanho |
