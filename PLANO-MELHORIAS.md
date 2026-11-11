@@ -200,6 +200,8 @@ Mudou em relação ao plano original:
 **Pendente:** validar interativamente teclado, foco e seleção, além das escalas nativas de DPI de 125% e 150%. A Fase 7 continua em andamento; esta entrega não conclui todos os itens da fase. Não foram feitos instalação, publicação ou merge.
 
 ## Fase 8: Produto e distribuição (para a comunidade)
+> **11/11/2026: o plano detalhado para o Codex está em `PLANO-FASE-8.md`.** Decidido: código privado, repositório público só de releases (`nilknarfsam/sentinela-releases`), MSI com WiX, .NET embutido, grátis, sem assinatura na 2.0.0 (certificado depois), tela "Sobre e ajuda" com os links do Franklin e anúncios só no futuro. A tabela abaixo fica como histórico das opções.
+
 Ideia do Franklin em 10/11/2026: quando o Sentinela estiver maduro, distribuí-lo
 de graça pelo GitHub e pelo site dele. Junto, explicar o raciocínio: por que o
 Defender basta e o que é marketing nos "otimizadores" de PC.

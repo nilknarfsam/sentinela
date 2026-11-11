@@ -59,7 +59,9 @@ O Sentinela roda como administrador. Um erro aqui vira uma brecha no PC inteiro.
    única conexão permitida é a do sistema de atualização (seção 6), só para
    consultar e baixar versões.
 9. **Nenhum segredo no código** nem no repositório: token, senha, chave,
-   certificado. O e-mail e os dados pessoais do Franklin também não entram.
+   certificado. O e-mail do Franklin não entra. A única exceção para dados
+   dele é a tela "Sobre e ajuda": nome, GitHub, site, Instagram e LinkedIn
+   (`PLANO-FASE-8.md`, etapa 8.2).
 10. Scripts que mudam o sistema (`.bat` + `.ps1`) são entregues para o Franklin
     **executar como administrador**. O Codex cria e testa com `-Simular`, mas não
     executa a parte que altera. O `.ps1` vai **sem acentos**, porque o PowerShell
@@ -136,10 +138,11 @@ como administrador" ou "não testei num PC limpo").
 
 ## 6. Fase 8: instalador e atualização (regras extras)
 
-O plano completo está em `PLANO-MELHORIAS.md`, Fase 8. Antes de começar, o
-Franklin precisa decidir os pontos da tabela "Decisões antes de começar",
-principalmente: **repositório público ou privado** e **assinatura digital**.
-Pergunte se ainda não estiver decidido.
+**Siga o `PLANO-FASE-8.md`**: ele tem as etapas, a ordem e o aceite de cada uma.
+Decisões do Franklin em 11/11/2026: o código continua **privado**; os instaladores
+e as atualizações saem de um repositório **público só de releases**,
+`nilknarfsam/sentinela-releases`; a primeira versão pública é a 2.0.0, **sem
+assinatura digital** (o certificado vem depois, etapa 8.10).
 
 ### Instalador (MSI com WiX)
 - Instala **por máquina** em `C:\Program Files\Sentinela`, com o .NET embutido
@@ -164,9 +167,8 @@ atualizador mal feito instala vírus com privilégio máximo.
   `User-Agent: Sentinela/<versão>` e nenhum dado do usuário. Uma vez por dia no
   máximo, e com a opção "Procurar atualizações" nos Ajustes, que pode ser
   desligada.
-- **Nunca** guarde token no app. Se o repositório continuar privado, a consulta
-  não funciona sem token: pare e peça a decisão do Franklin. Ele pode abrir o
-  código ou criar um repositório público só para os instaladores.
+- **Nunca** guarde token no app. A consulta é no repositório **público**
+  `nilknarfsam/sentinela-releases`, que não precisa de token.
 - **Mostra** a versão nova e o que mudou, tirado do CHANGELOG. **Só instala
   depois do clique do usuário.** Nada de atualização silenciosa nesta primeira
   versão.
@@ -247,4 +249,6 @@ aponta o que corrigir antes do merge.
 - Botões que mudam a configuração do Defender, do firewall ou do UAC.
 - "Limpador de registro", "turbo de RAM", atualizador de drivers, VPN, cofre de
   senhas (o cofre é o Bitwarden).
-- Telemetria, anúncios ou coleta de dados.
+- Telemetria ou coleta de dados.
+- Anúncios: **não agora.** Ficam para uma decisão futura do Franklin, com as
+  regras da etapa 8.11 do `PLANO-FASE-8.md`.
