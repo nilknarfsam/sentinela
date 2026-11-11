@@ -55,13 +55,18 @@ public static class Checkup
 
     // Inclusive a enumeração e o diário ficam fora da thread da tela.
     public static Task<ResultadoCheckup> Executar(IEnumerable<IVerificacao>? verificacoes = null,
-        TimeSpan? limitePorItem = null, CancellationToken ct = default) => Task.Run(async () =>
+        TimeSpan? limitePorItem = null, CancellationToken ct = default) => ExecutarConjunto(() => verificacoes ?? Padrao,
+            limitePorItem, ct, "checkup", "Checkup de desempenho", Caminho, r => Volatile.Write(ref _ultimo, r));
+
+    internal static Task<ResultadoCheckup> ExecutarConjunto(Func<IEnumerable<IVerificacao>> obterVerificacoes,
+        TimeSpan? limitePorItem, CancellationToken ct, string categoria, string texto, string caminho,
+        Action<ResultadoCheckup> publicar) => Task.Run(async () =>
     {
         var relogio = Stopwatch.StartNew();
         var resultados = new List<(ResultadoVerificacao item, int peso)>();
         try
         {
-            var tarefas = (verificacoes ?? Padrao).Select(async v =>
+            var tarefas = obterVerificacoes().Select(async v =>
             {
                 var nome = "Verificação";
                 var peso = 1;
@@ -82,12 +87,12 @@ public static class Checkup
             }).ToArray();
             resultados.AddRange(await Task.WhenAll(tarefas).ConfigureAwait(false));
         }
-        catch { resultados.Add((Indisponivel("Checkup de desempenho"), 1)); }
+        catch { resultados.Add((Indisponivel(texto), 1)); }
         var nota = CalcularNota(resultados.Select(r => (r.item.Nivel, r.peso)));
-        Diario.Registrar("checkup", $"Checkup de desempenho: nota {nota}");
+        Diario.Registrar(categoria, $"{texto}: nota {nota}");
         var resultado = new ResultadoCheckup(DateTime.Now, nota, Array.AsReadOnly(resultados.Select(r => r.item).ToArray()), relogio.Elapsed);
-        Volatile.Write(ref _ultimo, resultado);
-        if (App.CapturaArquivo == null) GravarSalvo(Caminho, resultado);
+        publicar(resultado);
+        if (App.CapturaArquivo == null) GravarSalvo(caminho, resultado);
         return resultado;
     });
 

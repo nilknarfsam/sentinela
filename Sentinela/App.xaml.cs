@@ -230,6 +230,11 @@ public partial class App : Application
             try { MostrarJanela(); if (_janela != null) await _janela.VerificarDesempenho(); }
             catch { Avisar("Sentinela", "Não consegui verificar o desempenho agora. Tente novamente."); }
         });
+        menu.Items.Add("Verificar segurança", null, async (_, _) =>
+        {
+            try { MostrarJanela(); if (_janela != null) await _janela.VerificarSeguranca(); }
+            catch { Avisar("Sentinela", "Não consegui verificar a segurança agora. Tente novamente."); }
+        });
         menu.Items.Add(new WinForms.ToolStripSeparator());
         menu.Items.Add("Sair", null, (_, _) => Sair());
 

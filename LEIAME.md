@@ -6,6 +6,7 @@ Sentinela é um painel leve para Windows que usa o **Windows Defender** como mot
 
 ## O que faz
 - **Início:** se o PC está protegido, as proteções do Defender, a data das assinaturas, a última varredura, CPU e memória ao vivo e o espaço dos discos. O escudo da bandeja fica verde, âmbar ou vermelho.
+- **Segurança:** oito verificações da configuração do Windows, nota de 0 a 100 e atalhos para resolver. Só leitura, com alerta para exclusões novas do Defender e reconhecimento após confirmação. Último resultado no Início e verificação pela bandeja. A lista de referência das exclusões fica na pasta do usuário; o alerta é um aviso a mais, não uma garantia.
 - **Aviso na hora:** escuta o próprio Windows Defender e avisa em segundos (mesmo com a janela fechada) quando uma ameaça é encontrada, quando a proteção em tempo real é desligada ou quando aparece uma exclusão ou um desligamento suspeito.
 - **Varredura:** rápida, completa, de uma pasta ou arquivo escolhido, e offline (reinicia e verifica antes do Windows carregar). Mostra o tempo e uma estimativa baseada nas últimas varreduras.
 - **Clique direito:** "Verificar com o Sentinela" no Explorer (no Windows 11, em "Mostrar mais opções").
@@ -39,7 +40,7 @@ Para remover, execute `desinstalar-sentinela.bat` como administrador.
 
 ## Teste sem abrir a janela
 ```
-Sentinela.exe --captura tela.png --aba inicio|desempenho|varredura|ameacas|historico|limpeza|limpeza-windows|inicializacao|ajustes
+Sentinela.exe --captura tela.png --aba inicio|seguranca|desempenho|varredura|ameacas|historico|limpeza|limpeza-windows|inicializacao|ajustes
 ```
 Salva uma imagem da aba escolhida e fecha.
 

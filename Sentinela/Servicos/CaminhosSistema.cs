@@ -2,6 +2,7 @@ namespace Sentinela.Servicos;
 
 internal static class CaminhosSistema
 {
+    public static string ConfiguracoesUac => Path.Combine(Environment.SystemDirectory, "UserAccountControlSettings.exe");
     public static string Dism => Path.Combine(Environment.SystemDirectory, "Dism.exe");
     public static string PowerCfg => Path.Combine(Environment.SystemDirectory, "powercfg.exe");
     public static string Mmc => Path.Combine(Environment.SystemDirectory, "mmc.exe");

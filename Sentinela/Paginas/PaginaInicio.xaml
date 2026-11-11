@@ -34,6 +34,16 @@
 
             <Border Style="{StaticResource CartaoBorda}">
                 <DockPanel>
+                    <Button DockPanel.Dock="Right" Content="Ver" Click="Seguranca_Click" VerticalAlignment="Center" Margin="16,0,0,0"/>
+                    <StackPanel>
+                        <TextBlock Text="Saúde da segurança" Style="{StaticResource Subtitulo}"/>
+                        <TextBlock x:Name="TxtSeguranca" Text="Ainda não verificado" Margin="0,6,0,0" FontSize="16" FontWeight="SemiBold"/>
+                        <TextBlock x:Name="TxtNovaSeguranca" Text="Faça uma verificação nova" Foreground="{StaticResource Ambar}" Margin="0,4,0,0" Visibility="Collapsed"/>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+            <Border Style="{StaticResource CartaoBorda}">
+                <DockPanel>
                     <Button DockPanel.Dock="Right" Content="Ver" Click="Desempenho_Click" VerticalAlignment="Center" Margin="16,0,0,0"/>
                     <StackPanel>
                         <TextBlock Text="Desempenho" Style="{StaticResource Subtitulo}"/>

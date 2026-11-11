@@ -80,6 +80,13 @@ antivírus), o aviso aparece em menos de 5 segundos, mesmo com a janela fechada.
 Ele entra na linha do tempo e na quarentena e pode ser excluído por ali.
 
 ## Fase 2: Saúde da segurança (nota de 0 a 100)
+**✅ Feita em 11/11/2026 (v1.4.0).** Oito verificações, nota, referência de exclusões com confirmação, cartão no Início e comando na bandeja.
+
+Mudou em relação ao plano original:
+- Firewall usa o estado efetivo por COM, com registro como alternativa.
+- Inicialização segura usa o registro; TPM e BitLocker usam WMI, sem PowerShell.
+- O serviço se chama `Servicos/Seguranca/Seguranca.cs` e compartilha o motor do Checkup.
+
 Uma página que responde: "meu PC está bem configurado?". Tudo **só leitura**, com
 o botão "Como resolver" abrindo a página certa do Windows.
 

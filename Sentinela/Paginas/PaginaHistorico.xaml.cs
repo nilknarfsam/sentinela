@@ -57,7 +57,7 @@ public partial class PaginaHistorico : UserControl
     {
         "ameaca" => "Ameaça", "tratar" => "Tratamento de ameaças", "alerta" => "Alerta", "varredura" => "Varredura",
         "assinaturas" => "Atualização de assinaturas", "ajuste" => "Ajuste do Sentinela",
-        "checkup" => "Checkup de desempenho", "processo" => "Processo", "inicializacao" => "Inicialização",
+        "seguranca" => "Verificação de segurança", "checkup" => "Checkup de desempenho", "processo" => "Processo", "inicializacao" => "Inicialização",
         "limpeza" => "Limpeza", "inicio" => "Sentinela iniciado", "status" => "Status do Defender",
         _ => "Registro do Sentinela",
     };
@@ -75,7 +75,7 @@ public partial class PaginaHistorico : UserControl
         {
             "ameacas" => tipo is "Ameaca" or "AmeacaTratada" or "ameaca" or "tratar",
             "varreduras" => tipo is "Varredura" or "varredura",
-            "protecao" => tipo is "Protecao" or "Configuracao" or "Assinaturas" or "assinaturas" or "ajuste" or "alerta" or "status",
+            "protecao" => tipo is "Protecao" or "Configuracao" or "Assinaturas" or "assinaturas" or "ajuste" or "alerta" or "status" or "seguranca",
             "desempenho" => tipo is "checkup" or "processo" or "inicializacao" or "limpeza",
             "limpeza" => tipo == "limpeza",
             _ => true,

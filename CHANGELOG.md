@@ -1,5 +1,12 @@
 # Histórico de mudanças
 
+## [1.4.0] - 2026-11-11
+### Novo
+- Aba **Segurança** com oito verificações e nota de 0 a 100: firewall, atualizações do Windows, UAC, SmartScreen e apps indesejados, ransomware, segurança do dispositivo, exclusões do Defender e contas locais.
+- Botões **Como resolver** abrem a página certa do Windows. O Sentinela só lê as configurações de segurança.
+- Exclusões novas do Defender recebem um alerta. Você pode reconhecer a lista após confirmar na tela; isso salva apenas uma referência do Sentinela.
+- Cartão **Saúde da segurança** no Início, último resultado salvo e **Verificar segurança** na bandeja.
+
 ## [1.3.0] - 2026-11-10
 ### Novo
 - Aba **Desempenho** com **Checkup**: nota de 0 a 100 e cartões com o que deixa o PC lento, cada um com um botão para resolver (sempre com confirmação). Verifica reinício pendente, espaço livre, drivers com problema, plano de energia, programas que abrem com o Windows, espaço que dá para liberar, o que está pesando agora e a saúde dos discos.

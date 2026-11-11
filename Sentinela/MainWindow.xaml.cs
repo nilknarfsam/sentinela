@@ -25,6 +25,7 @@ public partial class MainWindow : Window
     private bool _avisouBandeja;
     private Task? _inicializacao;
     private Task? _leituraDefender;
+    private Paginas.PaginaSeguranca? _paginaSeguranca;
     private Paginas.PaginaDesempenho? _paginaDesempenho;
 
     private App App => (App)Application.Current;
@@ -37,6 +38,7 @@ public partial class MainWindow : Window
         TxtAdminMenu.Text = _admin ? "Rodando como administrador" : "Rodando sem administrador";
         TxtVersaoMenu.Text = $"versão {Versao}";
 
+        PaginaInicio.PediuSeguranca += () => IrPara("seguranca");
         PaginaInicio.PediuDesempenho += () => IrPara("desempenho");
         PaginaInicio.PediuVarredura += tipo => IniciarVarredura(tipo);
         PaginaInicio.PediuAtualizarStatus += AtualizarStatusAposOperacao;
@@ -106,7 +108,7 @@ public partial class MainWindow : Window
 
     private async Task IniciarMonitoramento()
     {
-        await Servicos.Checkup.Checkup.CarregarUltimo();
+        await Task.WhenAll(Servicos.Checkup.Checkup.CarregarUltimo(), Servicos.Seguranca.Seguranca.CarregarUltimo());
         PaginaInicio.AtualizarCheckup();
         AjustarTimers();
         if (ColetarDesempenho)
@@ -138,6 +140,12 @@ public partial class MainWindow : Window
         if (PaginaInicio == null) return; // ainda montando a janela
         PaginaInicio.Visibility = Vis(MenuInicio.IsChecked);
         if (MenuInicio.IsChecked == true) PaginaInicio.AtualizarCheckup();
+        ConteudoSeguranca.Visibility = Vis(MenuSeguranca.IsChecked);
+        if (MenuSeguranca.IsChecked == true)
+        {
+            if (_paginaSeguranca == null) ConteudoSeguranca.Content = _paginaSeguranca = new Paginas.PaginaSeguranca();
+            _paginaSeguranca.Carregar();
+        }
         ConteudoDesempenho.Visibility = Vis(MenuDesempenho.IsChecked);
         if (MenuDesempenho.IsChecked == true)
         {
@@ -164,6 +172,7 @@ public partial class MainWindow : Window
         var menu = aba.ToLowerInvariant() switch
         {
             "inicio" => MenuInicio,
+            "seguranca" => MenuSeguranca,
             "desempenho" => MenuDesempenho,
             "varredura" => MenuVarredura,
             "ameacas" => MenuAmeacas,
@@ -218,6 +227,14 @@ public partial class MainWindow : Window
     {
         IrPara("desempenho");
         if (_paginaDesempenho != null) await _paginaDesempenho.Verificar();
+        PaginaInicio.AtualizarCheckup();
+        PaginaHistorico.Invalidar();
+    }
+
+    public async Task VerificarSeguranca()
+    {
+        IrPara("seguranca");
+        if (_paginaSeguranca != null) await _paginaSeguranca.Verificar();
         PaginaInicio.AtualizarCheckup();
         PaginaHistorico.Invalidar();
     }
@@ -289,6 +306,9 @@ public partial class MainWindow : Window
         IrPara(App.CapturaAba ?? "inicio");
         switch (App.CapturaAba?.ToLowerInvariant())
         {
+            case "seguranca":
+                await _paginaSeguranca!.Verificar();
+                break;
             case "desempenho":
                 await _paginaDesempenho!.Verificar();
                 await _paginaDesempenho.Amostrar();
@@ -306,10 +326,10 @@ public partial class MainWindow : Window
         await Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ApplicationIdle);
 
         var conteudo = (FrameworkElement)Content;
-        if (App.CapturaAba?.Equals("desempenho", StringComparison.OrdinalIgnoreCase) == true)
+        if (App.CapturaAba?.ToLowerInvariant() is "desempenho" or "seguranca")
         {
             // Renderizar todo o painel, inclusive em monitores com pouca altura.
-            var tamanho = new Size(conteudo.ActualWidth, 2050);
+            var tamanho = new Size(conteudo.ActualWidth, App.CapturaAba?.ToLowerInvariant() == "seguranca" ? 1400 : 2050);
             Content = null;
             var painelCaptura = new System.Windows.Controls.Grid { Width = tamanho.Width, Height = tamanho.Height };
             painelCaptura.Children.Add(conteudo);
@@ -317,7 +337,7 @@ public partial class MainWindow : Window
             painelCaptura.Measure(tamanho);
             painelCaptura.Arrange(new Rect(tamanho));
             painelCaptura.UpdateLayout();
-            _paginaDesempenho!.AtualizarGrafico();
+            _paginaDesempenho?.AtualizarGrafico();
         }
         var dpi = VisualTreeHelper.GetDpi(this);
         var bmp = new RenderTargetBitmap((int)(conteudo.ActualWidth * dpi.DpiScaleX), (int)(conteudo.ActualHeight * dpi.DpiScaleY),

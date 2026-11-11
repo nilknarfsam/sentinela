@@ -10,10 +10,16 @@ public partial class PaginaInicio : UserControl
 {
     public event Action<TipoVarredura>? PediuVarredura;
     public event Action? PediuAtualizarStatus;
+    public event Action? PediuSeguranca;
+    private void Seguranca_Click(object sender, RoutedEventArgs e) => PediuSeguranca?.Invoke();
     public event Action? PediuDesempenho;
     private void Desempenho_Click(object sender, RoutedEventArgs e) => PediuDesempenho?.Invoke();
     public void AtualizarCheckup()
     {
+        var seguranca = TextoCheckup(Sentinela.Servicos.Seguranca.Seguranca.Ultimo, DateTime.Now);
+        TxtSeguranca.Text = seguranca.Texto;
+        TxtSeguranca.Foreground = Cor(seguranca.Cor);
+        TxtNovaSeguranca.Visibility = seguranca.Antigo ? Visibility.Visible : Visibility.Collapsed;
         var cartao = TextoCheckup(Sentinela.Servicos.Checkup.Checkup.Ultimo, DateTime.Now);
         TxtDesempenho.Text = cartao.Texto;
         TxtDesempenho.Foreground = Cor(cartao.Cor);
