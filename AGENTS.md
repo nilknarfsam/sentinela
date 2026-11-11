@@ -62,7 +62,9 @@ O Sentinela roda como administrador. Um erro aqui vira uma brecha no PC inteiro.
    certificado. O e-mail do Franklin não entra. A única exceção para dados
    dele é a tela "Sobre e ajuda": nome, GitHub, site, Instagram e LinkedIn
    (`PLANO-FASE-8.md`, etapa 8.2). O nome "Franklin Carvalho" foi confirmado
-   pelo Franklin em 11/11/2026 e só pode aparecer nessa tela.
+   pelo Franklin em 11/11/2026 e só pode aparecer nessa tela. O LinkedIn
+   informado nessa data é `https://www.linkedin.com/in/franklin-carvalho-45032a164/`
+   e também fica restrito à tela "Sobre e ajuda".
 10. Scripts que mudam o sistema (`.bat` + `.ps1`) são entregues para o Franklin
     **executar como administrador**. O Codex cria e testa com `-Simular`, mas não
     executa a parte que altera. O `.ps1` vai **sem acentos**, porque o PowerShell
