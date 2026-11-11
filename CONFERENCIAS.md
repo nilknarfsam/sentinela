@@ -20,7 +20,7 @@ Verificado pelo Claude em 11/11/2026:
 - nenhum dado pessoal fora da tela "Sobre e ajuda";
 - histórico do repositório sem senhas nem tokens.
 
-### C1.1 — Links abrem o navegador como administrador · **aberto · obrigatório**
+### C1.1 — Links abrem o navegador como administrador · **resolvido no código (11/11/2026, v1.6.2, branch `fase-8/c1-links`) · falta o teste prático do Franklin**
 - **Onde:** `Sentinela/Paginas/PaginaAjustes.xaml.cs`, `AbrirLinkAjuda_Click`.
 - **Problema:** o Sentinela roda elevado (administrador). `Process.Start` com
   `UseShellExecute = true` abre o navegador **também elevado**. Qualquer site
@@ -46,6 +46,13 @@ Verificado pelo Claude em 11/11/2026:
     navegador **não** está elevado.
 
   Registre o resultado aqui.
+- **Resolução (11/11/2026, feita pelo Claude porque o Codex estava sem limite):**
+  `Servicos/NavegadorSeguro.cs` (`UrlValida` + `Abrir`, via `explorer.exe` com
+  `ArgumentList`, sem `UseShellExecute`). `PaginaAjustes` usa o método depois da
+  lista branca. 15 testes novos em `NavegadorSeguroTestes`. Build sem avisos e
+  777 testes verdes. **Falta:** o Franklin instalar a 1.6.2, abrir como
+  administrador, clicar em "GitHub" e conferir na aba Detalhes do Gerenciador de
+  Tarefas que o navegador está com "Elevado = Não".
 
 ### C1.2 — Nome da instância mudou na 8.1 · **informativo, sem ação**
 - `NomeUnico` passou de `Sentinela_Franklin_Instancia` para

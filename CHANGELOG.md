@@ -1,5 +1,9 @@
 # Histórico de mudanças
 
+## [1.6.2] — Em preparação
+### Segurança
+- Os links da tela **Sobre e ajuda** abrem o navegador **sem** o privilégio de administrador do Sentinela. Antes, o navegador herdava a elevação. Agora o endereço passa pelo Explorer da sessão do usuário (`NavegadorSeguro`), só para endereços `https://`, e continua valendo a lista fechada de links.
+
 ## [1.6.1] — Em preparação
 ### Novo
 - Subaba **Sobre e ajuda** em Ajustes, com versão, apresentação do Sentinela, links exatos para os quatro perfis autorizados e uma explicação curta das nove áreas do app.
