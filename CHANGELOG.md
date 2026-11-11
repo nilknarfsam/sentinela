@@ -1,5 +1,10 @@
 # Histórico de mudanças
 
+## [1.6.1] — Em preparação
+### Novo
+- Subaba **Sobre e ajuda** em Ajustes, com versão, apresentação do Sentinela, links exatos para os quatro perfis autorizados e uma explicação curta das nove áreas do app.
+- A tela mantém as informações do diário e do executável. Página do Sentinela, relato de problema e informações detalhadas de privacidade aparecem como recursos em breve.
+
 ## [1.6.0] — Em preparação
 ### Melhorado
 - O Sentinela usa um identificador genérico de instância única. Antes de abrir esta versão, feche a versão anterior que já esteja em execução; a migração entre versões será tratada pelo instalador da etapa 8.3.

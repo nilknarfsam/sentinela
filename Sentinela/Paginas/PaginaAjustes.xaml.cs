@@ -11,7 +11,15 @@ public partial class PaginaAjustes : UserControl
     public bool Carregada { get; private set; }
     private bool _preparandoSemanal;
 
+    internal static bool AlvoAjudaPermitido(string? alvo) => alvo is
+        "https://github.com/nilknarfsam" or
+        "https://samfieldsoak.com.br" or
+        "https://www.instagram.com/samfieldsoak" or
+        "https://www.linkedin.com/in/franklin-carvalho-45032a164/";
+
     public PaginaAjustes() => InitializeComponent();
+
+    internal void SelecionarAbaSobreAjuda() => AbasAjustes.SelectedItem = AbaSobreAjuda;
 
     public async Task Carregar()
     {
@@ -31,7 +39,7 @@ public partial class PaginaAjustes : UserControl
         ChkBandeja.IsChecked = Configuracoes.Atual.FecharParaBandeja;
         ChkAvisos.IsChecked = Configuracoes.Atual.AvisosDeRotina;
         TxtDiario.Text = $"{await Task.Run(() => Diario.Ler(30).Count)} entrada(s) nos últimos 30 dias.";
-        TxtVersao.Text = $"Sentinela versão {Versao}";
+        TxtVersao.Text = $"Versão {Versao}";
         TxtExecutavel.Text = Environment.ProcessPath;
     }
 
@@ -92,6 +100,28 @@ public partial class PaginaAjustes : UserControl
         if (!ArquivosSeguros.PastaSegura(pasta)) return;
         Process.Start(new ProcessStartInfo(CaminhosSistema.Explorer, $"\"{pasta}\"") { UseShellExecute = true });
     });
+
+    private async void AbrirLinkAjuda_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { Tag: string alvo } || !AlvoAjudaPermitido(alvo))
+        {
+            TxtResultadoLinkAjuda.Text = "Este link não está disponível.";
+            return;
+        }
+
+        TxtResultadoLinkAjuda.Text = "";
+        var abriu = await Task.Run(() =>
+        {
+            try
+            {
+                using var processo = Process.Start(new ProcessStartInfo(alvo) { UseShellExecute = true });
+                return true;
+            }
+            catch { return false; }
+        });
+        if (!abriu) TxtResultadoLinkAjuda.Text = "Não foi possível abrir o link. Confira o navegador padrão e tente novamente.";
+    }
+
     private async void AdicionarPasta_Click(object sender, RoutedEventArgs e)
     {
         var dialogo = new Microsoft.Win32.OpenFolderDialog { Title = "Pasta dos seus projetos" };

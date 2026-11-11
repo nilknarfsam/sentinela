@@ -61,7 +61,7 @@ num programa profissional.
 - **Aceite:** busca sem nada pessoal, testes verdes e capturas de todas as abas
   sem dados do Franklin.
 
-**Acompanhamento (11/11/2026):** implementação 8.1 feita na branch `fase-8/generalizacao`. Build Release sem avisos/erros, 738 testes aprovados e 10 capturas revisadas em `../REFERENCIAS-INTERFACE/fase-8-1/capturas/` (fora do repositório). Os testes simulam presença e ausência da pasta padrão com verificadores injetados. A etapa aguarda a conferência do Claude antes do merge; não foi testada em PC novo físico, Sandbox ou instalação em unidade diferente de C:.
+**Acompanhamento (11/11/2026):** etapa 8.1 integrada na `main` pelo commit `3e8a75b`. Build Release sem avisos/erros, 738 testes aprovados e 10 capturas revisadas em `../REFERENCIAS-INTERFACE/fase-8-1/capturas/` (fora do repositório). Os testes simulam presença e ausência da pasta padrão com verificadores injetados. Não foi testada em PC novo físico, Sandbox ou instalação em unidade diferente de C:.
 
 ## 8.2 Tela "Sobre e ajuda"
 Nova aba ou seção nos Ajustes (escolha a mais coerente com a interface nova).
@@ -82,6 +82,8 @@ Conteúdo:
 - Um parágrafo curto de ajuda: o que cada aba faz, em linguagem de leigo.
 - **Aceite:** captura da tela, teste da lista branca e todos os links abrindo
   certo.
+
+**Acompanhamento (11/11/2026):** tela implementada na branch `fase-8/sobre-ajuda`, aguardando revisão e conferência. A tela tem quatro links exatos permitidos (GitHub, site, Instagram e LinkedIn), ajuda curta para as nove áreas e mantém as informações de versão, diário e executável. Página pública, relato de problema e informações detalhadas de privacidade permanecem como itens futuros das etapas 8.7, 8.4 e 8.6. Versão 1.6.1 em preparação.
 
 ## 8.3 Instalador MSI (WiX)
 Siga a seção 6 do `AGENTS.md`. Em resumo:
