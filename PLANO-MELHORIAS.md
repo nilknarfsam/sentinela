@@ -202,6 +202,8 @@ Mudou em relação ao plano original:
 ## Fase 8: Produto e distribuição (para a comunidade)
 > **11/11/2026: o plano detalhado para o Codex está em `PLANO-FASE-8.md`.** Decidido: código privado, repositório público só de releases (`nilknarfsam/sentinela-releases`), MSI com WiX, .NET embutido, grátis, sem assinatura na 2.0.0 (certificado depois), tela "Sobre e ajuda" com os links do Franklin e anúncios só no futuro. A tabela abaixo fica como histórico das opções.
 
+**Acompanhamento (11/11/2026):** etapa 8.1 implementada na branch `fase-8/generalizacao`; build Release com 0 avisos/erros, 738 testes aprovados e 10 capturas revisadas em `../REFERENCIAS-INTERFACE/fase-8-1/capturas/` (fora do repositório). A versão 1.6.0 está em preparação e a etapa aguarda conferência do Claude antes do merge. Não houve validação física em PC novo/Sandbox nem instalação em unidade diferente de C:.
+
 Ideia do Franklin em 10/11/2026: quando o Sentinela estiver maduro, distribuí-lo
 de graça pelo GitHub e pelo site dele. Junto, explicar o raciocínio: por que o
 Defender basta e o que é marketing nos "otimizadores" de PC.

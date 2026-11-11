@@ -61,11 +61,13 @@ num programa profissional.
 - **Aceite:** busca sem nada pessoal, testes verdes e capturas de todas as abas
   sem dados do Franklin.
 
+**Acompanhamento (11/11/2026):** implementação 8.1 feita na branch `fase-8/generalizacao`. Build Release sem avisos/erros, 738 testes aprovados e 10 capturas revisadas em `../REFERENCIAS-INTERFACE/fase-8-1/capturas/` (fora do repositório). Os testes simulam presença e ausência da pasta padrão com verificadores injetados. A etapa aguarda a conferência do Claude antes do merge; não foi testada em PC novo físico, Sandbox ou instalação em unidade diferente de C:.
+
 ## 8.2 Tela "Sobre e ajuda"
 Nova aba ou seção nos Ajustes (escolha a mais coerente com a interface nova).
 Conteúdo:
 - **Sentinela**, versão, "Grátis. Usa o Windows Defender como motor."
-- **Criado por Franklin Carvalho.** Confirme com o Franklin a grafia do nome.
+- **Criado por Franklin Carvalho.** Grafia confirmada pelo Franklin em 11/11/2026.
 - Links, abrindo no navegador padrão:
   - GitHub: `https://github.com/nilknarfsam`
   - Site: `https://samfieldsoak.com.br`

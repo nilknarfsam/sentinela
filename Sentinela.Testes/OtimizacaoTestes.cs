@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Sentinela.Paginas;
 using Sentinela.Servicos;
 
 namespace Sentinela.Testes;
@@ -11,6 +12,57 @@ public class OtimizacaoTestes : IDisposable
     public OtimizacaoTestes() => Configuracoes.Atual.PastasProjetos = [_raiz];
     private string Pasta(string nome) => Directory.CreateDirectory(Path.Combine(_raiz, nome)).FullName;
     private static void Arquivo(string pasta, string nome, int bytes = 1) => File.WriteAllBytes(Path.Combine(pasta, nome), new byte[bytes]);
+
+    [Fact]
+    public void PastaPadraoNaoEntraQuandoNaoExiste()
+    {
+        string? consultada = null;
+        var pastas = Configuracoes.PastasProjetosPadrao(caminho => { consultada = caminho; return false; });
+        Assert.Equal(Configuracoes.CaminhoPastasProjetosPadrao, consultada);
+        Assert.Empty(pastas);
+    }
+
+    [Fact]
+    public void PastaPadraoExistenteEValidaSemConsultarDisco()
+    {
+        string? consultada = null;
+        var padrao = Configuracoes.PastasProjetosPadrao(caminho => { consultada = caminho; return true; });
+        var valida = Configuracoes.ValidarPastaProjeto(Assert.Single(padrao), out var normalizada, out _, _ => true);
+        Assert.Equal(Configuracoes.CaminhoPastasProjetosPadrao, consultada);
+        Assert.True(valida);
+        Assert.Equal(Configuracoes.CaminhoPastasProjetosPadrao, normalizada);
+    }
+
+    [Fact]
+    public void ConfiguracaoExplicitaDePastasSobreviveSerializacao()
+    {
+        var pasta = Pasta("pasta-configurada");
+        var original = new Configuracoes(_ => false) { PastasProjetos = [pasta] };
+        var json = System.Text.Json.JsonSerializer.Serialize(original);
+        using var documento = System.Text.Json.JsonDocument.Parse(json);
+        var pastasSalvas = documento.RootElement.GetProperty(nameof(Configuracoes.PastasProjetos)).EnumerateArray().Select(p => p.GetString()!).ToArray();
+        Assert.Equal([pasta], pastasSalvas);
+    }
+
+    [Fact]
+    public void AssinaturaPublicaPastasValidasContinuaSemArgumentos()
+    {
+        var configuracoes = new Configuracoes(_ => false);
+        Func<string[]> listar = configuracoes.PastasProjetosValidas;
+        Assert.NotNull(listar);
+    }
+
+    [Theory]
+    [InlineData(0, 0, 0, 0, "Nenhuma pasta de projetos configurada")]
+    [InlineData(2, 2, 0, 0, "não estão disponíveis para análise")]
+    [InlineData(2, 1, 1, 0, "Análise parcial: 0 item(ns) encontrado(s); 1 pasta(s) ignorada(s)")]
+    [InlineData(1, 0, 1, 0, null)]
+    public void MensagemDePastasDeProjetosRefleteEstadoReal(int configuradas, int ignoradas, int validas, int itens, string? trecho)
+    {
+        var mensagem = PaginaLimpeza.MensagemEstadoProjetos(configuradas, ignoradas, validas, itens);
+        if (trecho == null) Assert.Null(mensagem);
+        else Assert.Contains(trecho, mensagem);
+    }
 
     [Fact]
     public void PastaTemporariaSemLinksPodeSerTravada()
@@ -153,7 +205,7 @@ public class OtimizacaoTestes : IDisposable
     [Fact]
     public void PastasProtegidasNormalizadasSaoRecusadasAntesDeEnumerar()
     {
-        string[] proibidas = [@"C:\", @"D:\", "", "relativo", @"C:relativo", @"\\?\C:\", @"\\.\C:\"];
+        string[] proibidas = [@"C:\", @"Z:\", "", "relativo", @"C:relativo", @"\\?\C:\", @"\\.\C:\"];
         Environment.SpecialFolder[] especiais = [Environment.SpecialFolder.UserProfile, Environment.SpecialFolder.MyDocuments,
             Environment.SpecialFolder.DesktopDirectory, Environment.SpecialFolder.Windows, Environment.SpecialFolder.System,
             Environment.SpecialFolder.ProgramFiles, Environment.SpecialFolder.ProgramFilesX86, Environment.SpecialFolder.CommonApplicationData,
@@ -178,7 +230,7 @@ public class OtimizacaoTestes : IDisposable
             if (!string.IsNullOrEmpty(pasta) && Path.IsPathFullyQualified(pasta))
                 Assert.True(ArvoreDescartavel.PastaProibidaParaApagar(Path.Combine(pasta, "x", "..") + Path.DirectorySeparatorChar));
         }
-        Assert.False(ArvoreDescartavel.PastaProibidaParaApagar(@"C:\PROJETOS\x\build"));
+        Assert.False(ArvoreDescartavel.PastaProibidaParaApagar(@"C:\ProjetosTeste\x\build"));
         Assert.False(ArvoreDescartavel.PastaProibidaParaApagar(Path.Combine(Path.GetTempPath(), "algo")));
     }
 

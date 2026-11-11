@@ -5,6 +5,11 @@ namespace Sentinela.Servicos;
 
 public sealed class Configuracoes
 {
+    public Configuracoes() : this(Directory.Exists) { }
+
+    internal Configuracoes(Func<string, bool> pastaExiste)
+        => PastasProjetos = PastasProjetosPadrao(pastaExiste);
+
     public sealed record PastaProjeto(string Caminho, string? Motivo)
     {
         public override string ToString() => Motivo == null ? Caminho : $"{Caminho} — Ignorada: {Motivo}";
@@ -13,7 +18,7 @@ public sealed class Configuracoes
     [JsonIgnore]
     public List<PastaProjeto> PastasIgnoradas { get; } = [];
 
-    internal static bool ValidarPastaProjeto(string? pasta, out string normalizada, out string motivo)
+    internal static bool ValidarPastaProjeto(string? pasta, out string normalizada, out string motivo, Func<string, bool>? pastaExiste = null)
     {
         normalizada = "";
         motivo = "Caminho inválido";
@@ -22,7 +27,7 @@ public sealed class Configuracoes
             if (string.IsNullOrWhiteSpace(pasta) || !Path.IsPathFullyQualified(pasta)) { motivo = "Use um caminho totalmente qualificado"; return false; }
             if (ArvoreDescartavel.PastaProibidaParaApagar(pasta)) { motivo = "Pasta protegida"; return false; }
             normalizada = ArvoreDescartavel.Normalizar(pasta);
-            if (!Directory.Exists(normalizada)) { motivo = "Pasta inexistente ou inacessível"; return false; }
+            if (!(pastaExiste ?? Directory.Exists)(normalizada)) { motivo = "Pasta inexistente ou inacessível"; return false; }
             return true;
         }
         catch { return false; }
@@ -30,7 +35,9 @@ public sealed class Configuracoes
 
     private readonly object _travaPastas = new();
 
-    public string[] PastasProjetosValidas()
+    public string[] PastasProjetosValidas() => PastasProjetosValidas(Directory.Exists);
+
+    internal string[] PastasProjetosValidas(Func<string, bool> pastaExiste)
     {
         lock (_travaPastas)
         {
@@ -38,7 +45,7 @@ public sealed class Configuracoes
             PastasIgnoradas.Clear();
             foreach (var pasta in PastasProjetos)
             {
-                if (ValidarPastaProjeto(pasta, out var normalizada, out var motivo)) validas.Add(normalizada);
+                if (ValidarPastaProjeto(pasta, out var normalizada, out var motivo, pastaExiste)) validas.Add(normalizada);
                 else if (!PastasIgnoradas.Any(p => p.Caminho == pasta)) PastasIgnoradas.Add(new(pasta, motivo));
             }
             return validas.Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
@@ -66,7 +73,14 @@ public sealed class Configuracoes
         }
     }
 
-    public List<string> PastasProjetos { get; set; } = Directory.Exists(@"C:\PROJETOS") ? [@"C:\PROJETOS"] : [];
+    internal const string CaminhoPastasProjetosPadrao = @"C:\PROJETOS";
+
+    internal static List<string> PastasProjetosPadrao(Func<string, bool>? pastaExiste = null)
+    {
+        return (pastaExiste ?? Directory.Exists)(CaminhoPastasProjetosPadrao) ? [CaminhoPastasProjetosPadrao] : [];
+    }
+
+    public List<string> PastasProjetos { get; set; }
     public bool FecharParaBandeja { get; set; } = true;
     public DateTime? UltimoLembreteReinicio { get; set; }
     public bool AvisosDeRotina { get; set; } = true;

@@ -42,7 +42,7 @@ public static class Limpeza
         [
             new() { Nome = "Temporários do usuário", Descricao = "Arquivos que os programas deixam para trás (%TEMP%).",
                     Pastas = [Path.Combine(local, "Temp")], HorasMinimas = 24 },
-            new() { Nome = "Temporários do Windows", Descricao = "Pasta C:\\Windows\\Temp.",
+            new() { Nome = "Temporários do Windows", Descricao = $"Pasta {Path.Combine(win, "Temp")}.",
                     Pastas = [Path.Combine(win, "Temp")], PrecisaAdmin = true, HorasMinimas = 24 },
             new() { Nome = "Downloads do Windows Update", Descricao = "Atualizações já instaladas. O Windows baixa de novo se precisar.",
                     Pastas = [Path.Combine(win, "SoftwareDistribution", "Download")], PrecisaAdmin = true },
