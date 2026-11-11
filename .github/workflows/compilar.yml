@@ -10,6 +10,9 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   compilar:
     runs-on: windows-latest
@@ -27,6 +30,16 @@ jobs:
 
       - name: Rodar os testes
         run: dotnet test Sentinela.Testes/Sentinela.Testes.csproj -c Release
+
+      - name: Gerar MSI (Release)
+        run: dotnet build Sentinela.Instalador/Sentinela.Instalador.wixproj -c Release
+
+      - name: Enviar MSI como artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: Sentinela-msi
+          path: Sentinela.Instalador/bin/**/*.msi
+          if-no-files-found: error
 
       - name: Publicar executável único (win-x64)
         run: dotnet publish Sentinela/Sentinela.csproj -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publicado

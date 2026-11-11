@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentinela", "Sentinela\Sent
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentinela.Testes", "Sentinela.Testes\Sentinela.Testes.csproj", "{BF0EF5FD-CFDA-4B2F-95AA-B2D32D61532D}"
 EndProject
+Project("{B7DD6F7E-DEF8-4E67-ADAD-7B57CCFB2A9F}") = "Sentinela.Instalador", "Sentinela.Instalador\Sentinela.Instalador.wixproj", "{C2F19855-9808-4708-B57E-893A62E7737A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,12 +33,15 @@ Global
 		{7C9F4C75-5E44-4616-9544-8E98EFFD06ED}.Release|x86.Build.0 = Release|Any CPU
 		{BF0EF5FD-CFDA-4B2F-95AA-B2D32D61532D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BF0EF5FD-CFDA-4B2F-95AA-B2D32D61532D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C2F19855-9808-4708-B57E-893A62E7737A}.Debug|Any CPU.ActiveCfg = Release|x64
 		{BF0EF5FD-CFDA-4B2F-95AA-B2D32D61532D}.Debug|x64.ActiveCfg = Debug|Any CPU
 		{BF0EF5FD-CFDA-4B2F-95AA-B2D32D61532D}.Debug|x64.Build.0 = Debug|Any CPU
 		{BF0EF5FD-CFDA-4B2F-95AA-B2D32D61532D}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{BF0EF5FD-CFDA-4B2F-95AA-B2D32D61532D}.Debug|x86.Build.0 = Debug|Any CPU
 		{BF0EF5FD-CFDA-4B2F-95AA-B2D32D61532D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BF0EF5FD-CFDA-4B2F-95AA-B2D32D61532D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C2F19855-9808-4708-B57E-893A62E7737A}.Release|Any CPU.ActiveCfg = Release|x64
+		{C2F19855-9808-4708-B57E-893A62E7737A}.Release|Any CPU.Build.0 = Release|x64
 		{BF0EF5FD-CFDA-4B2F-95AA-B2D32D61532D}.Release|x64.ActiveCfg = Release|Any CPU
 		{BF0EF5FD-CFDA-4B2F-95AA-B2D32D61532D}.Release|x64.Build.0 = Release|Any CPU
 		{BF0EF5FD-CFDA-4B2F-95AA-B2D32D61532D}.Release|x86.ActiveCfg = Release|Any CPU

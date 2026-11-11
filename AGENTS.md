@@ -154,6 +154,15 @@ Decisões do Franklin em 11/11/2026:
   para código aberto.
 
 ### Instalador (MSI com WiX)
+- A primeira migração de uma instalação feita pelo script antigo exige executar
+  `desinstalar-sentinela.bat` antes do MSI. O rollback que remove tarefas deve
+  atuar apenas na primeira instalação, para preservar tarefas durante upgrade.
+- O MSI não usa extensões do WiX. O próprio `Sentinela.exe` cria e remove as
+  tarefas via `--instalar-tarefas --sid <SID>` e `--remover-tarefas`; as operações só aceitam chamadas executadas
+  como SYSTEM. O aviso sobre dados em `%LOCALAPPDATA%\Sentinela` fica em
+  `ARPCOMMENTS`, sem uma tela de desinstalação própria.
+- O nome "Franklin Carvalho" também está autorizado como fabricante do MSI,
+  conforme o pedido da etapa 8.3 de 11/11/2026.
 - Instala **por máquina** em `C:\Program Files\Sentinela`, com o .NET embutido
   (*self-contained*). Funciona num PC limpo, sem .NET.
 - Faz tudo o que o `instalar-sentinela.ps1` faz hoje:

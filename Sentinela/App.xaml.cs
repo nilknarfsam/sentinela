@@ -41,9 +41,27 @@ public partial class App : Application
     public static int? CapturaAltura { get; private set; }
     public bool Saindo { get; private set; }
 
-    protected override void OnStartup(StartupEventArgs e)
+    protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        if (TarefasDoInstalador.ContemComandoInstalador(e.Args))
+        {
+            if (!TarefasDoInstalador.InterpretarArgumentos(e.Args, out var comando))
+            {
+                Shutdown(2);
+                return;
+            }
+
+            var ok = await Task.Run(() => comando.Acao switch
+            {
+                TarefasDoInstalador.AcaoInstalador.InstalarTarefas => TarefasDoInstalador.Criar(comando.Sid),
+                TarefasDoInstalador.AcaoInstalador.RemoverTarefas => TarefasDoInstalador.Remover(),
+                _ => false,
+            });
+            Shutdown(ok ? 0 : 1);
+            return;
+        }
+
         string? caminhoVerificar = null;
         for (int i = 0; i < e.Args.Length; i++)
         {

@@ -62,13 +62,17 @@ Verificado pelo Claude em 11/11/2026:
   embutida, o navegador ainda pode abrir elevado. Se um dia isso precisar ser
   garantido, use `CreateProcessWithTokenW` com o token do shell.
 
-### C1.2 — Nome da instância mudou na 8.1 · **informativo, sem ação**
+### C1.2 — Nome da instância mudou na 8.1 · **resolvido no código pela 8.3 (11/11/2026, v1.7.0) · falta teste no Sandbox**
 - `NomeUnico` passou de `Sentinela_Franklin_Instancia` para
   `Sentinela_Instancia`. Se uma versão antiga estiver aberta durante a
   atualização, as duas podem rodar ao mesmo tempo por um instante.
 - O instalador (8.3) e o atualizador (8.5) devem **fechar o Sentinela antigo**
-  antes de copiar os arquivos. Não precisa mudar o código agora; só lembre disso
-  na 8.3.
+  antes de copiar os arquivos. O MSI atende esse requisito na etapa 8.3; a
+  integração do atualizador continua prevista para a 8.5.
+- **Resolução na etapa 8.3 (11/11/2026, v1.7.0):** o MSI chama `taskkill.exe`
+  depois de `InstallInitialize` e antes de `RemoveExistingProducts`; o retorno é
+  ignorado quando o processo não está aberto. O teste prático no Sandbox ainda
+  está pendente junto com a conferência da etapa.
 
 ### C1.3 — Ainda não testado na 8.2 · **aberto · fazer junto com C1.1**
 - Clicar de verdade nos 4 links (com o C1.1 aplicado).
@@ -78,3 +82,45 @@ Verificado pelo Claude em 11/11/2026:
 ---
 
 <!-- Próximas conferências entram abaixo, como C2, C3... -->
+
+## C2 — Conferência da etapa 8.3, instalador MSI (11/11/2026)
+
+**Resultado geral:** aprovada no código. Falta o teste prático no Windows
+Sandbox, que fica com o Franklin.
+
+Quem fez: o Codex escreveu a etapa até acabar o limite. O Claude conferiu e
+corrigiu os achados da revisão do Sonnet.
+
+Verificado pelo Claude em 11/11/2026:
+- build Release do app e do MSI sem avisos (WiX 5.0.2, sem extensões);
+- 810 testes passando;
+- captura `--aba ajustes-sobre` mostrando a versão 1.7.0;
+- MSI de cerca de 58 MB, com o .NET embutido.
+
+### C2.1 — Upgrade religava a tarefa desligada nos Ajustes · **resolvido (11/11/2026)**
+- `TarefasDoInstalador.Criar` lê o estado da tarefa `Sentinela` antes de
+  recriar e mantém `Enabled=false` se o usuário tinha desligado.
+
+### C2.2 — Conta Microsoft Entra e instalação por SYSTEM · **resolvido (11/11/2026)**
+- O SID agora aceita `S-1-12-1-...` além de `S-1-5-21-...`.
+- Instalação feita por SYSTEM (`S-1-5-18`) pula as tarefas, em vez de falhar.
+- **Limite conhecido:** se outro administrador elevar a instalação com a
+  senha dele, as tarefas ficam para a conta desse administrador.
+
+### C2.3 — Atalho sem permissão de rodar a tarefa criada por SYSTEM · **resolvido no código · confirmar no Sandbox**
+- As tarefas têm descritor de segurança explícito: SYSTEM e Administradores
+  com controle total; o usuário só lê e executa.
+- **Teste:** no Sandbox, abrir o atalho do menu Iniciar sem elevar.
+
+### C2.4 — Abria o Sentinela em instalação silenciosa e em reparo · **resolvido (11/11/2026)**
+- `AbrirSentinela` só roda com tela (`UILevel > 2`, inclusive `/passive`) e
+  quando não é reparo. Atalho ganhou a descrição "Sentinela".
+
+### C2.5 — Pontos aceitos, sem ação agora · **informativo**
+- Migração de quem instalou pelo `instalar-sentinela.bat`: rodar antes o
+  `desinstalar-sentinela.bat` (está no LEIAME). Só afeta o PC do Franklin.
+- Reinstalar a **mesma** versão é recusado como "versão mais nova"; para
+  testar o upgrade, gere outro MSI com `-p:Version=1.7.1`.
+- `taskkill /IM Sentinela.exe` fecha qualquer processo com esse nome.
+- Se a remoção de tarefas falhar na desinstalação, o MSI não avisa
+  (`Return="ignore"`). Conferir no Sandbox que não sobra tarefa.
