@@ -1,0 +1,36 @@
+name: Relatar um problema
+description: Algo não funcionou como deveria no Sentinela
+labels: ["problema"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Obrigado por avisar! Não cole senhas, dados pessoais nem o diário inteiro.
+        Falha de segurança? Não abra aqui: use a aba Security → Report a vulnerability.
+  - type: input
+    id: versao
+    attributes:
+      label: Versão do Sentinela
+      description: Em Ajustes → Sobre e ajuda
+      placeholder: "ex.: 1.6.2"
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Versão do Windows
+      placeholder: "ex.: Windows 11 Home 24H2"
+    validations:
+      required: true
+  - type: textarea
+    id: oque
+    attributes:
+      label: O que aconteceu?
+      description: O que você fez, o que esperava e o que aconteceu de fato.
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: Capturas ou detalhes extras
+      description: Opcional.

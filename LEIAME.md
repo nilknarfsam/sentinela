@@ -1,8 +1,66 @@
 # Sentinela
 
-Antes se chamava Painel do PC. O instalador remove a versão antiga sozinho.
+**Um painel grátis para Windows que usa o próprio antivírus do Windows (Microsoft
+Defender) como motor, e junta só o que funciona de verdade para manter o PC
+protegido e leve.**
 
-Sentinela é um painel leve para Windows que usa o **Windows Defender** como motor. Ele não é um antivírus próprio: mostra o estado do Defender e pede a ele as ações.
+O Sentinela **não é um antivírus novo** e **não troca o seu antivírus**. Ele
+mostra o estado do Defender, avisa na hora quando aparece uma ameaça e pede ao
+Defender as ações que ele já sabe fazer: varrer, atualizar e tratar ameaças.
+Ele **nunca desliga nem muda** as configurações do Defender, do firewall ou do
+Controle de Conta de Usuário.
+
+## Por que ele existe
+- O antivírus que já vem no Windows está entre os melhores nos testes
+  independentes. Para quem usa o PC em casa, não precisa pagar antivírus.
+- Muito programa de "deixar o PC mais rápido" é marketing: limpador de
+  registro, "turbo de RAM", atualizador automático de drivers.
+- O que funciona é simples: menos programas abrindo com o Windows, espaço livre
+  no disco, reiniciar quando há atualização pendente, saber o que está pesando e
+  ter um disco saudável. O Sentinela junta isso num lugar só, de graça.
+
+## Baixar
+A primeira versão pública (2.0.0, com instalador) ainda está sendo preparada.
+Quando sair, ela estará em
+**[Releases](https://github.com/nilknarfsam/sentinela/releases/latest)**.
+
+Requisitos: Windows 10 ou 11, 64 bits.
+
+> **Aviso do Windows ("O Windows protegeu o computador"):** por ser um programa
+> novo e ainda sem assinatura digital, o SmartScreen pode mostrar esse aviso.
+> Clique em **Mais informações** e depois em **Executar assim mesmo**. O código
+> está todo aqui, aberto, para quem quiser conferir.
+
+## Privacidade
+- **Lê:** o estado do Defender, discos, programas que abrem com o Windows e
+  processos em uso.
+- **Guarda:** configurações, diário e notas, **só no seu PC**, em
+  `%LOCALAPPDATA%\Sentinela`.
+- **Envia:** **nada.** Não tem telemetria, conta nem anúncios.
+
+## Licença
+Sentinela. Copyright (C) 2026 Franklin Carvalho.
+
+Este programa é software livre: você pode redistribuí-lo e/ou modificá-lo sob
+os termos da **GNU General Public License, versão 3 ou posterior**, publicada
+pela Free Software Foundation. Ele é distribuído na esperança de ser útil, mas
+**SEM NENHUMA GARANTIA**, nem mesmo a garantia implícita de COMERCIALIZAÇÃO ou
+ADEQUAÇÃO A UM PROPÓSITO ESPECÍFICO. Veja o arquivo [LICENSE](LICENSE).
+
+## Criador
+Feito por **Franklin Carvalho**, com ajuda de IA (Claude e Codex), para o
+próprio PC, e compartilhado de graça.
+[GitHub](https://github.com/nilknarfsam) ·
+[Site](https://samfieldsoak.com.br) ·
+[Instagram](https://www.instagram.com/samfieldsoak) ·
+[LinkedIn](https://www.linkedin.com/in/franklin-carvalho-45032a164/)
+
+Encontrou um problema? [Relate aqui](https://github.com/nilknarfsam/sentinela/issues/new/choose).
+Quer contribuir? Veja o [CONTRIBUTING.md](CONTRIBUTING.md).
+
+---
+
+# Guia de uso
 
 ## O que faz
 - **Início:** se o PC está protegido, as proteções do Defender, a data das assinaturas, a última varredura, CPU e memória ao vivo e o espaço dos discos. O escudo da bandeja fica verde, âmbar ou vermelho.

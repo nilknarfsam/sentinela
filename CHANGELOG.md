@@ -1,5 +1,12 @@
 # Histórico de mudanças
 
+## Etapa 8.0 — repositório público (em preparação)
+### Novo
+- O código do Sentinela agora é **aberto**, sob a licença **GPL-3.0 ou posterior** (arquivo `LICENSE`).
+- `LEIAME.md` reescrito para quem chega pelo GitHub: o que é, por que existe, privacidade, aviso do SmartScreen, licença e criador.
+- `CONTRIBUTING.md` e modelo de issue "Relatar um problema".
+- A tela **Sobre e ajuda** informa a licença.
+
 ## [1.6.1] — Em preparação
 ### Novo
 - Subaba **Sobre e ajuda** em Ajustes, com versão, apresentação do Sentinela, links exatos para os quatro perfis autorizados e uma explicação curta das nove áreas do app.
