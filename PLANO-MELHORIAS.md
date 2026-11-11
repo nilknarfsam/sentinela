@@ -202,7 +202,9 @@ Mudou em relação ao plano original:
 ## Fase 8: Produto e distribuição (para a comunidade)
 > **11/11/2026: o plano detalhado para o Codex está em `PLANO-FASE-8.md`.** Decidido: **repositório público com licença GPL-3.0** (aberto pelo Franklin na tarde de 11/11; releases no próprio repositório), MSI com WiX, .NET embutido, grátis, sem assinatura na 2.0.0 (certificado depois), tela "Sobre e ajuda" com os links do Franklin e anúncios só no futuro. A tabela abaixo fica como histórico das opções.
 
-**Acompanhamento (11/11/2026):** etapa 8.1 implementada na branch `fase-8/generalizacao`; build Release com 0 avisos/erros, 738 testes aprovados e 10 capturas revisadas em `../REFERENCIAS-INTERFACE/fase-8-1/capturas/` (fora do repositório). A versão 1.6.0 está em preparação e a etapa aguarda conferência do Claude antes do merge. Não houve validação física em PC novo/Sandbox nem instalação em unidade diferente de C:.
+**Acompanhamento (11/11/2026):** etapa 8.1 integrada na `main` pelo commit `3e8a75b`; build Release com 0 avisos/erros, 738 testes aprovados e 10 capturas revisadas em `../REFERENCIAS-INTERFACE/fase-8-1/capturas/` (fora do repositório). Não houve validação física em PC novo/Sandbox nem instalação em unidade diferente de C:.
+
+Etapa 8.2 implementada na branch `fase-8/sobre-ajuda`, aguardando revisão e conferência. A tela tem quatro links exatos permitidos e ajuda curta para as nove áreas; preserva as informações de versão, diário e executável. Site, relato de problema e informações detalhadas de privacidade continuam pendentes das etapas 8.7, 8.4 e 8.6. A versão 1.6.1 está em preparação.
 
 Ideia do Franklin em 10/11/2026: quando o Sentinela estiver maduro, distribuí-lo
 de graça pelo GitHub e pelo site dele. Junto, explicar o raciocínio: por que o

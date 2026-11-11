@@ -187,6 +187,7 @@ public partial class MainWindow : Window
             "historico" => MenuHistorico,
             "limpeza" => MenuLimpeza,
             "inicializacao" => MenuInicializacao,
+            "ajustes-sobre" => MenuAjustes,
             "ajustes" => MenuAjustes,
             _ => null
         };
@@ -328,6 +329,11 @@ public partial class MainWindow : Window
             case "limpeza-windows": MenuLimpeza.IsChecked = true; await PaginaLimpeza.Analisar(); break;
             case "inicializacao": MenuInicializacao.IsChecked = true; await PaginaInicializacao.Carregar(); break;
             case "ajustes": MenuAjustes.IsChecked = true; await PaginaAjustes.Carregar(); break;
+            case "ajustes-sobre":
+                MenuAjustes.IsChecked = true;
+                await PaginaAjustes.Carregar();
+                PaginaAjustes.SelecionarAbaSobreAjuda();
+                break;
         }
         await Task.Delay(App.CapturaAba?.Equals("desempenho", StringComparison.OrdinalIgnoreCase) == true ? 5500 : 2500);
         PaginaInicio.AtualizarSistema();
@@ -336,10 +342,10 @@ public partial class MainWindow : Window
         await Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ApplicationIdle);
 
         var conteudo = (FrameworkElement)Content;
-        if (App.CapturaLargura == null && App.CapturaAba?.ToLowerInvariant() is "desempenho" or "seguranca" or "ajustes")
+        if (App.CapturaLargura == null && App.CapturaAba?.ToLowerInvariant() is "desempenho" or "seguranca" or "ajustes" or "ajustes-sobre")
         {
             // Renderizar todo o painel, inclusive em monitores com pouca altura.
-            var altura = App.CapturaAba?.ToLowerInvariant() switch { "seguranca" => 1400, "ajustes" => 1100, _ => 2050 };
+            var altura = App.CapturaAba?.ToLowerInvariant() switch { "seguranca" => 1400, "ajustes" => 1100, "ajustes-sobre" => 1550, _ => 2050 };
             var tamanho = new Size(conteudo.ActualWidth, altura);
             Content = null;
             var painelCaptura = new System.Windows.Controls.Grid { Width = tamanho.Width, Height = tamanho.Height };
