@@ -53,6 +53,14 @@ Verificado pelo Claude em 11/11/2026:
   777 testes verdes. **Falta:** o Franklin instalar a 1.6.2, abrir como
   administrador, clicar em "GitHub" e conferir na aba Detalhes do Gerenciador de
   Tarefas que o navegador está com "Elevado = Não".
+- **Revisão do Sonnet (11/11/2026):** sem injeção de argumento possível (a URL
+  validada sempre começa com `https:`, nunca com `/` ou `,`). Ajustes feitos:
+  passa `uri.AbsoluteUri` normalizado; recusa espaços nas pontas e caracteres de
+  formatação invisíveis; `Montar` testável; testes novos. **Limite conhecido:** a
+  descida da elevação depende do Explorer da sessão. Com "Iniciar janelas de
+  pasta em processo separado" ligado, UAC desligado ou a conta Administrador
+  embutida, o navegador ainda pode abrir elevado. Se um dia isso precisar ser
+  garantido, use `CreateProcessWithTokenW` com o token do shell.
 
 ### C1.2 — Nome da instância mudou na 8.1 · **informativo, sem ação**
 - `NomeUnico` passou de `Sentinela_Franklin_Instancia` para

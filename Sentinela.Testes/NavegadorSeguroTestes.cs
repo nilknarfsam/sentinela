@@ -23,9 +23,37 @@ public sealed class NavegadorSeguroTestes
     [InlineData("https://usuario:senha@github.com/")]
     [InlineData("https://github.com/\"--outro")]
     [InlineData("https://github.com/\nlinha")]
+    [InlineData(" https://github.com/nilknarfsam")]
+    [InlineData("https://github.com/nilknarfsam ")]
+    [InlineData("https:///x")]
+    [InlineData("/select,C:\\")]
+    [InlineData(",/e,C:\\")]
+    [InlineData("-https://github.com")]
+    [InlineData("https://github.com/\u202Eabc")]
     public void RecusaOQueNaoForHttpsSeguro(string? url)
     {
         Assert.False(NavegadorSeguro.UrlValida(url));
+        Assert.Null(NavegadorSeguro.Montar(url));
         Assert.False(NavegadorSeguro.Abrir(url));
+    }
+
+    [Fact]
+    public void MontaExplorerSemShellComUmUnicoArgumentoNormalizado()
+    {
+        var inicio = NavegadorSeguro.Montar("https://github.com/nilknarfsam");
+        Assert.NotNull(inicio);
+        Assert.EndsWith("explorer.exe", inicio!.FileName, StringComparison.OrdinalIgnoreCase);
+        Assert.True(Path.IsPathFullyQualified(inicio.FileName));
+        Assert.False(inicio.UseShellExecute);
+        Assert.Equal(["https://github.com/nilknarfsam"], inicio.ArgumentList);
+        Assert.Equal("", inicio.Arguments);
+    }
+
+    [Fact]
+    public void EspacoNoMeioViraEscapado()
+    {
+        var inicio = NavegadorSeguro.Montar("https://github.com/a b");
+        Assert.NotNull(inicio);
+        Assert.Equal("https://github.com/a%20b", inicio!.ArgumentList.Single());
     }
 }

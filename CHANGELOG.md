@@ -2,7 +2,7 @@
 
 ## [1.6.2] — Em preparação
 ### Segurança
-- Os links da tela **Sobre e ajuda** abrem o navegador **sem** o privilégio de administrador do Sentinela. Antes, o navegador herdava a elevação. Agora o endereço passa pelo Explorer da sessão do usuário (`NavegadorSeguro`), só para endereços `https://`, e continua valendo a lista fechada de links.
+- Os links da tela **Sobre e ajuda** passam a ser abertos pelo Explorer da sessão do usuário (`NavegadorSeguro`), para o navegador **não** herdar o privilégio de administrador do Sentinela. No padrão do Windows isso evita a elevação. Com "Iniciar janelas de pasta em processo separado" ligado, UAC desligado ou a conta Administrador embutida, o navegador ainda pode abrir elevado, como antes. Só endereços `https://` são aceitos, e continua valendo a lista fechada de links.
 
 ## [1.6.1] — Em preparação
 ### Novo
