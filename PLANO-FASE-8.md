@@ -11,12 +11,19 @@ num programa profissional.
 
 ---
 
+> **Mudança de 11/11/2026, à tarde:** o Franklin deixou o repositório
+> `nilknarfsam/sentinela` **público** e escolheu a licença **GPL-3.0**. Com isso,
+> **não existe mais o repositório separado de releases**. Os releases saem no
+> próprio `nilknarfsam/sentinela`, sem token pessoal. As etapas abaixo já estão
+> atualizadas. Comece pela etapa **8.0** e pelas correções **C1**.
+
 ## Decisões já tomadas pelo Franklin (11/11/2026)
 
 | Assunto | Decisão |
 | :--- | :--- |
-| Código-fonte | Continua **privado** em `nilknarfsam/sentinela` |
-| Downloads e atualizações | Um repositório **público só com os releases**: `nilknarfsam/sentinela-releases`. Ele tem o instalador, o `SHA256SUMS`, as notas de versão e um LEIAME. **Nenhum código-fonte** |
+| Código-fonte | **Público** em `nilknarfsam/sentinela` (desde 11/11/2026) |
+| Licença | **GPL-3.0 ou posterior** (`GPL-3.0-or-later`). Quem copiar ou modificar precisa manter o código aberto, com a mesma licença e os créditos |
+| Downloads e atualizações | **Releases do próprio `nilknarfsam/sentinela`**: o instalador, o `SHA256SUMS` e as notas de versão |
 | Assinatura digital | **Depois.** A primeira versão pública sai sem assinatura, e o aviso do SmartScreen é explicado na página. O passo a passo do certificado está na etapa 8.10 |
 | Preço | **Grátis** para baixar e usar |
 | Anúncios | **Só no futuro**, numa decisão separada (etapa 8.11). Nada de anúncio, rastreio ou coleta de dados agora |
@@ -35,10 +42,12 @@ num programa profissional.
 
 | # | Etapa | Quem | Depende de |
 | :--- | :--- | :--- | :--- |
-| 8.1 | Generalizar o que é do PC do Franklin | Codex | — |
+| 8.0 | Licença GPL-3.0 e arrumação para o repositório público | Codex | — |
+| **C1** | **Correções da conferência do Claude** (`CONFERENCIAS.md`) | Codex | antes de qualquer merge |
+| 8.1 | Generalizar o que é do PC do Franklin ✅ (v1.6.0) | Codex | — |
 | 8.2 | Tela "Sobre e ajuda" | Codex | 8.1 |
 | 8.3 | Instalador MSI (WiX) | Codex | sim do Franklin para o WiX |
-| 8.4 | Repositório público de releases + publicação automática | Codex e Franklin (token) | 8.3 |
+| 8.4 | Publicação automática de releases (no próprio repositório) | Codex | 8.3 |
 | 8.5 | Sistema de atualização dentro do app | Codex | 8.4 |
 | 8.6 | Privacidade e LEIAME público | Codex | 8.5 |
 | 8.7 | Página do Sentinela no site | Codex, no repositório do site | 8.4 |
@@ -49,6 +58,34 @@ num programa profissional.
 | 8.12 | winget (opcional) | Codex | 8.4 |
 
 ---
+
+## 8.0 Licença GPL-3.0 e arrumação para o repositório público
+- `LICENSE` na raiz com o **texto oficial e completo da GPL-3.0**, sem alterar
+  nada. Pegue de `https://www.gnu.org/licenses/gpl-3.0.txt`, ou com
+  `gh api licenses/gpl-3.0 --jq .body`.
+- Seção "Licença" no `LEIAME.md`: "Sentinela. Copyright (C) 2026 Franklin
+  Carvalho. Este programa é software livre: você pode redistribuí-lo e/ou
+  modificá-lo sob os termos da GNU General Public License, versão 3 ou
+  posterior. Ele é distribuído SEM NENHUMA GARANTIA. Veja o arquivo LICENSE."
+- No `.csproj`: `<Copyright>Copyright (C) 2026 Franklin Carvalho</Copyright>`.
+  Na tela "Sobre e ajuda": "Software livre sob a licença GPL-3.0. Sem garantia."
+- `LEIAME.md` para quem chega pelo GitHub:
+  - o que é o Sentinela e as capturas da interface nova;
+  - como baixar (link do último release, quando existir) e como compilar;
+  - a privacidade em 3 linhas e o aviso do SmartScreen explicado.
+
+  Os bastidores do PC do Franklin (diagnóstico, Norton, Driver Booster) ficam no
+  `PLANO-MELHORIAS.md`, não no LEIAME.
+- `CONTRIBUTING.md` curto em português: como relatar problema e como propor
+  mudança (PR com testes). Crie também um modelo de *issue* "Relatar um
+  problema" em `.github/ISSUE_TEMPLATE/`.
+- **Confira** que nada sensível ficou visível. O Claude já conferiu o histórico
+  em 11/11: não achou senhas nem tokens, e os commits usam o e-mail `noreply`.
+  Repita a busca no estado atual (`git grep` por `token`, `senha`, `password`,
+  `@gmail`, `ghp_`, `github_pat_`). Se achar algo, **pare e avise o Franklin**
+  antes de qualquer outro passo.
+- **Aceite:** o GitHub mostra "GPL-3.0" na página do repositório, e o LEIAME
+  explica o projeto para quem nunca ouviu falar dele.
 
 ## 8.1 Generalizar o que é do PC do Franklin
 - Procure no código e nos testes: `C:\PROJETOS`, `nilkn`, `Franklin`, e-mail,
@@ -74,7 +111,7 @@ Conteúdo:
   - Instagram: `https://www.instagram.com/samfieldsoak`
   - LinkedIn: **[PREENCHER — pedir o endereço ao Franklin]**
   - Página do Sentinela no site (quando a 8.7 estiver no ar)
-  - "Relatar um problema": página de *issues* do `sentinela-releases`
+  - "Relatar um problema": `https://github.com/nilknarfsam/sentinela/issues/new/choose`
   - "Privacidade" (8.6)
 - **Sem e-mail** na tela.
 - Os links abrem só por uma **lista branca fechada** de URLs exatas (o mesmo
@@ -108,43 +145,26 @@ Siga a seção 6 do `AGENTS.md`. Em resumo:
 - **Aceite:** MSI gerado pelo build; instalação, atualização e desinstalação
   testadas no Sandbox, com capturas.
 
-## 8.4 Repositório público de releases e publicação automática
-**Criar o repositório** (o Franklin autorizou; use `gh`):
-- `nilknarfsam/sentinela-releases`, **público**, com:
-  - `README.md` em português: o que é o Sentinela, como baixar (último release),
-    o aviso do SmartScreen explicado, a privacidade em 3 linhas e os links do
-    Franklin. Diga que o código-fonte não está neste repositório;
-  - `LICENSE` de uso gratuito do programa (freeware: pode usar e distribuir de
-    graça, não pode vender nem modificar o binário). Mostre o texto ao Franklin
-    antes de publicar;
-  - *issues* ligadas, para "Relatar um problema", com um modelo simples.
+## 8.4 Publicação automática de releases (no próprio repositório)
+Com o repositório público, **não precisa de token pessoal**. O workflow usa o
+`GITHUB_TOKEN` do próprio Actions, com `permissions: contents: write`.
 
-**Token, que o Franklin faz** (nunca o Codex, e o token nunca vai para arquivo
-nem para o chat). Passos para ele:
-1. GitHub → Settings → Developer settings → **Fine-grained tokens** → Generate
-   new token.
-2. Repositório: **só** `sentinela-releases`. Permissão: **Contents: Read and
-   write**. Nada mais. Validade: 1 ano (anote a data para renovar).
-3. No repositório privado `sentinela` → Settings → Secrets and variables →
-   Actions → **New repository secret**, com o nome `RELEASES_TOKEN`.
-
-**Workflow novo** `.github/workflows/publicar.yml`, no repositório privado:
-- Dispara com uma **tag** `v*.*.*`, criada pelo Franklin ou com o "pode" dele.
-- Confere que a tag bate com a `<Version>` do `.csproj`.
-- Compila, roda os testes, gera o MSI e gera o `SHA256SUMS`.
-- Cria o release **no `sentinela-releases`** com `gh release create` usando o
-  `RELEASES_TOKEN`. Anexa o MSI e o `SHA256SUMS`, e usa como notas a seção da
-  versão no `CHANGELOG.md`.
-- Nada de código-fonte vai para o repositório público. Confira que o release não
-  tem o "Source code" com o código do Sentinela. O GitHub gera esse zip a partir
-  do repositório público, que só tem LEIAME e LICENSE.
-- **Aceite:** um release de teste (`v1.6.0-teste`, marcado como *pre-release*)
-  aparece no `sentinela-releases` com o MSI e o `SHA256SUMS`. Depois o Franklin
-  apaga o release de teste.
+Workflow novo `.github/workflows/publicar.yml`:
+- Dispara com uma **tag** `v*.*.*`. Quem cria a tag é o Franklin, ou o Codex
+  com o "pode" dele naquela vez.
+- Confere que a tag bate com a `<Version>` do `.csproj`. Se não bater, falha.
+- Compila, roda os testes, gera o MSI (8.3) e gera o `SHA256SUMS`.
+- Cria o **Release** em `nilknarfsam/sentinela` com `gh release create`. Anexa o
+  MSI e o `SHA256SUMS`, e usa como notas a seção da versão no `CHANGELOG.md`.
+- Tag com hífen (por exemplo `v1.7.0-teste`) vira *pre-release*.
+- Permissões mínimas: `contents: write` só neste workflow. O `compilar.yml`
+  continua só de leitura.
+- **Aceite:** um release de teste (`v1.7.0-teste`, *pre-release*) aparece com o
+  MSI e o `SHA256SUMS`. Depois o Franklin apaga o release e a tag de teste.
 
 ## 8.5 Sistema de atualização dentro do app
 Siga **todas** as regras da seção 6 do `AGENTS.md`. Resumo técnico:
-- Consulta: `GET https://api.github.com/repos/nilknarfsam/sentinela-releases/releases/latest`.
+- Consulta: `GET https://api.github.com/repos/nilknarfsam/sentinela/releases/latest`.
   Cabeçalhos `User-Agent: Sentinela/<versão>` e `Accept: application/vnd.github+json`.
   Nenhum dado do usuário. Uma vez por dia no máximo, mais o botão "Procurar
   atualizações". Opção nos Ajustes para desligar a consulta automática.
@@ -172,7 +192,7 @@ Siga **todas** as regras da seção 6 do `AGENTS.md`. Resumo técnico:
   recusa.
 
 ## 8.6 Privacidade e LEIAME público
-- Texto curto, na tela "Sobre e ajuda", no LEIAME do `sentinela-releases` e na
+- Texto curto, na tela "Sobre e ajuda", no LEIAME e na
   página do site:
   - o que o Sentinela lê (estado do Defender, discos, programas que abrem com o
     Windows, processos);
@@ -191,7 +211,7 @@ Siga **todas** as regras da seção 6 do `AGENTS.md`. Resumo técnico:
   - o que é, em 3 frases;
   - capturas de tela da interface nova;
   - botão **"Baixar grátis"**, apontando para
-    `https://github.com/nilknarfsam/sentinela-releases/releases/latest`;
+    `https://github.com/nilknarfsam/sentinela/releases/latest`;
   - o que ele faz e o que ele **não** faz (sem limpador de registro, turbo de RAM
     ou atualizador de drivers);
   - o aviso do SmartScreen ("O Windows protegeu o computador" → "Mais
@@ -205,7 +225,7 @@ Siga **todas** as regras da seção 6 do `AGENTS.md`. Resumo técnico:
 
 ## 8.8 Texto "Por que o Sentinela existe"
 - O Claude escreve e entrega para o Codex colocar no site (seção da página 8.7) e
-  no LEIAME do `sentinela-releases`.
+  no LEIAME.
 - Pontos:
   - O antivírus do Windows (Defender) é um dos melhores nos testes
     independentes. Para quem usa o PC em casa, não precisa pagar antivírus.
@@ -234,16 +254,16 @@ poucos, conforme o programa ganha reputação. Opções verificadas em 11/11/202
 
 | Opção | Custo aproximado | Serve para o Franklin? |
 | :--- | :--- | :--- |
-| **Microsoft Artifact Signing** (ex-Trusted Signing, na Azure) | ~US$ 10/mês | **Hoje não.** Para pessoa física, só nos EUA e no Canadá. Rever no futuro |
-| **Certum Open Source Code Signing** | ~€49/ano (nuvem) a €69 (com cartão e leitor) | **Só se o código for aberto** (exige licença open source e repositório público do código). Com o código privado, não serve |
-| **Certificado de pessoa física comum** (Certum Standard, Sectigo, SSL.com...) | ~€100 a US$ 300/ano | **Sim.** Exige validar a identidade (documento) e guardar a chave em token físico ou na nuvem do fornecedor (regra de 2023) |
+| **SignPath Foundation** (assinatura para código aberto) | **grátis** | **Sim, agora que o código é aberto.** Exige licença aprovada pela OSI (a GPL-3.0 é), projeto ativo e build pelo GitHub Actions. O certificado sai no nome da SignPath Foundation, com o produto "Sentinela". Ver `signpath.org` |
+| **Certum Open Source Code Signing** | ~€49/ano (nuvem) a €69 (com cartão e leitor) | **Sim, agora que o código é aberto.** Sai no nome do Franklin ("Open Source Developer"). Exige validar a identidade |
+| **Microsoft Artifact Signing** (ex-Trusted Signing) | ~US$ 10/mês | **Hoje não.** Para pessoa física, só nos EUA e no Canadá |
+| **Certificado comum de pessoa física** | ~€100 a US$ 300/ano | Sim, mas é o mais caro e não compensa com o código aberto |
 | **Sem certificado** | grátis | É o começo: explicar o aviso na página |
 
 **Passos quando o Franklin decidir:**
-1. Escolher a opção. Recomendação: começar sem certificado; quando houver
-   usuários, comprar um certificado comum de pessoa física com assinatura em
-   nuvem (funciona no GitHub Actions sem token físico). Se um dia o código for
-   aberto, o da Certum Open Source fica mais barato.
+1. Escolher a opção. Recomendação: depois da 2.0.0, **pedir o SignPath
+   Foundation**, que é grátis. Se for recusado ou demorar, usar o **Certum Open
+   Source** em nuvem (~€49/ano), que funciona no GitHub Actions.
 2. Validar a identidade com o fornecedor (documento com foto, comprovante de
    endereço e às vezes videochamada). Leva de alguns dias a 2 semanas.
 3. Guardar as credenciais **só** nos *secrets* do GitHub, nunca em arquivo.
@@ -264,7 +284,7 @@ Fica registrado para uma decisão separada do Franklin. Se um dia entrar:
 
 ## 8.12 winget (opcional)
 Depois da 2.0.0 estável: manifesto no `microsoft/winget-pkgs` apontando para o
-MSI do `sentinela-releases`, para instalar com `winget install Sentinela`.
+MSI dos releases do `nilknarfsam/sentinela`, para instalar com `winget install Sentinela`.
 
 ---
 
@@ -276,6 +296,6 @@ MSI do `sentinela-releases`, para instalar com `winget install Sentinela`.
   4. recebe uma atualização;
   5. desinstala sem sobra.
 - A página do site e o LEIAME público explicam o SmartScreen e a privacidade.
-- O código-fonte continua privado. O `sentinela-releases` só tem binários e
-  textos.
+- O repositório público tem a licença GPL-3.0, o LEIAME, o CONTRIBUTING e o
+  modelo de *issue*, e nenhum segredo.
 - O `CHANGELOG`, o `LEIAME`, o `PLANO-MELHORIAS` e este plano estão atualizados.

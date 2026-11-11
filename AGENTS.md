@@ -5,8 +5,10 @@ diretamente, sem o Claude no meio. Ele resume as regras e o jeito de trabalhar q
 usamos desde a versão 1.0. O Claude (Opus) continua fazendo a **conferência
 final** de cada etapa.
 
-Leia este arquivo inteiro antes de qualquer tarefa. Leia também `LEIAME.md`,
-`CHANGELOG.md` e `PLANO-MELHORIAS.md`. Se `../CLAUDE.md` existir (na pasta
+Leia este arquivo inteiro antes de qualquer tarefa. Leia também
+`CONFERENCIAS.md` (correções pedidas pelo Claude: **resolva os itens abertos
+antes de qualquer etapa nova**), `PLANO-FASE-8.md`, `LEIAME.md`, `CHANGELOG.md`
+e `PLANO-MELHORIAS.md`. Se `../CLAUDE.md` existir (na pasta
 `C:\PROJETOS\Meu PC`), ele também vale: as regras técnicas e de segurança são
 as mesmas.
 
@@ -140,10 +142,14 @@ como administrador" ou "não testei num PC limpo").
 ## 6. Fase 8: instalador e atualização (regras extras)
 
 **Siga o `PLANO-FASE-8.md`**: ele tem as etapas, a ordem e o aceite de cada uma.
-Decisões do Franklin em 11/11/2026: o código continua **privado**; os instaladores
-e as atualizações saem de um repositório **público só de releases**,
-`nilknarfsam/sentinela-releases`; a primeira versão pública é a 2.0.0, **sem
-assinatura digital** (o certificado vem depois, etapa 8.10).
+Decisões do Franklin em 11/11/2026:
+- o repositório `nilknarfsam/sentinela` é **público**, com licença **GPL-3.0 ou
+  posterior**;
+- os instaladores e as atualizações saem dos **Releases desse mesmo
+  repositório** (não existe repositório separado de releases);
+- a primeira versão pública é a 2.0.0, **sem assinatura digital**. O certificado
+  vem depois (etapa 8.10), de preferência pelo SignPath Foundation, que é grátis
+  para código aberto.
 
 ### Instalador (MSI com WiX)
 - Instala **por máquina** em `C:\Program Files\Sentinela`, com o .NET embutido
@@ -168,8 +174,8 @@ atualizador mal feito instala vírus com privilégio máximo.
   `User-Agent: Sentinela/<versão>` e nenhum dado do usuário. Uma vez por dia no
   máximo, e com a opção "Procurar atualizações" nos Ajustes, que pode ser
   desligada.
-- **Nunca** guarde token no app. A consulta é no repositório **público**
-  `nilknarfsam/sentinela-releases`, que não precisa de token.
+- **Nunca** guarde token no app. A consulta é nos Releases do repositório
+  **público** `nilknarfsam/sentinela`, que não precisa de token.
 - **Mostra** a versão nova e o que mudou, tirado do CHANGELOG. **Só instala
   depois do clique do usuário.** Nada de atualização silenciosa nesta primeira
   versão.
@@ -225,7 +231,12 @@ O Franklin autorizou em 11/11/2026 o Codex a manter o GitHub atualizado:
   histórico publicado.
 - **Instalar no PC do Franklin, publicar Release e criar tag: só com
   autorização dele em cada vez.**
-- O repositório é **privado** até o Franklin decidir abrir (Fase 8).
+- O repositório é **público** desde 11/11/2026: **tudo o que você commita fica
+  visível para o mundo.** Nunca commite token, senha, log com dados pessoais,
+  capturas com dados do Franklin ou arquivos de `%LOCALAPPDATA%\Sentinela`.
+- Licença **GPL-3.0-or-later**. Código de terceiros só entra com licença
+  compatível com a GPL-3.0, e sempre perguntando ao Franklin antes (a regra do
+  NuGet continua valendo).
 
 ---
 
@@ -238,6 +249,8 @@ Ao fim de cada etapa, deixe no PR (e diga ao Franklin):
    `%TEMP%`).
 4. **O que não foi testado** e os riscos conhecidos.
 5. **Decisões tomadas** diferentes do plano.
+6. **Itens do `CONFERENCIAS.md`** resolvidos nesta etapa, marcados como
+   resolvidos lá.
 
 O Franklin chama o Claude, que lê o PR, roda o build, os testes e as capturas, e
 aponta o que corrigir antes do merge.

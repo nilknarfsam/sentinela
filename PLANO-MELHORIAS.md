@@ -200,7 +200,7 @@ Mudou em relação ao plano original:
 **Pendente:** validar interativamente teclado, foco e seleção, além das escalas nativas de DPI de 125% e 150%. A Fase 7 continua em andamento; esta entrega não conclui todos os itens da fase. Não foram feitos instalação, publicação ou merge.
 
 ## Fase 8: Produto e distribuição (para a comunidade)
-> **11/11/2026: o plano detalhado para o Codex está em `PLANO-FASE-8.md`.** Decidido: código privado, repositório público só de releases (`nilknarfsam/sentinela-releases`), MSI com WiX, .NET embutido, grátis, sem assinatura na 2.0.0 (certificado depois), tela "Sobre e ajuda" com os links do Franklin e anúncios só no futuro. A tabela abaixo fica como histórico das opções.
+> **11/11/2026: o plano detalhado para o Codex está em `PLANO-FASE-8.md`.** Decidido: **repositório público com licença GPL-3.0** (aberto pelo Franklin na tarde de 11/11; releases no próprio repositório), MSI com WiX, .NET embutido, grátis, sem assinatura na 2.0.0 (certificado depois), tela "Sobre e ajuda" com os links do Franklin e anúncios só no futuro. A tabela abaixo fica como histórico das opções.
 
 **Acompanhamento (11/11/2026):** etapa 8.1 implementada na branch `fase-8/generalizacao`; build Release com 0 avisos/erros, 738 testes aprovados e 10 capturas revisadas em `../REFERENCIAS-INTERFACE/fase-8-1/capturas/` (fora do repositório). A versão 1.6.0 está em preparação e a etapa aguarda conferência do Claude antes do merge. Não houve validação física em PC novo/Sandbox nem instalação em unidade diferente de C:.
 
