@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using Sentinela.Servicos;
+using Sentinela.Apresentacao;
 using Sentinela.Servicos.Checkup;
 using static Sentinela.Servicos.Formatos;
 
@@ -31,6 +32,18 @@ public partial class PaginaDesempenho : UserControl
     public void AtualizarGrafico()
     {
         var pontos = _historico.Pontos;
+        if (pontos.LastOrDefault() is { } atual)
+        {
+            TxtCpuAtual.Text = $"{atual.CpuPercent:0}%";
+            TxtMemoriaAtual.Text = $"{atual.MemoriaPercent:0}%";
+            BarraCpuAtual.Value = atual.CpuPercent;
+            BarraMemoriaAtual.Value = atual.MemoriaPercent;
+        }
+        else
+        {
+            TxtCpuAtual.Text = TxtMemoriaAtual.Text = "Aguardando leitura";
+            BarraCpuAtual.Value = BarraMemoriaAtual.Value = 0;
+        }
         var agora = DateTime.Now;
         LinhaCpu.Data = CriarLinha(pontos, agora, p => p.CpuPercent);
         LinhaMemoria.Data = CriarLinha(pontos, agora, p => p.MemoriaPercent);
@@ -174,9 +187,12 @@ public partial class PaginaDesempenho : UserControl
         CartaoNota.Visibility = Visibility.Visible;
         var cor = resultado.Nota >= 85 ? "Verde" : resultado.Nota >= 60 ? "Ambar" : "Vermelho";
         TxtNota.Text = resultado.Nota.ToString();
-        TxtNota.Foreground = Cor(cor);
-        CartaoNota.Background = Cor(cor + "Fundo");
-        TxtFaixa.Text = resultado.Nota >= 85 ? "Seu PC está em ótima forma" : resultado.Nota >= 60 ? "Dá para melhorar algumas coisas" : "Seu PC precisa de atenção";
+        var corApresentacao = EstadoApresentacao.Cor(resultado, cor);
+        TxtNota.Foreground = Cor(corApresentacao);
+        CartaoNota.Background = Cor(corApresentacao + "Fundo");
+        var tituloCompleto = resultado.Nota >= 85 ? "Seu PC está em ótima forma" : resultado.Nota >= 60 ? "Dá para melhorar algumas coisas" : "Seu PC precisa de atenção";
+        TxtFaixa.Text = EstadoApresentacao.Titulo(resultado, tituloCompleto);
+        TxtConfianca.Text = EstadoApresentacao.Mensagem(resultado, "o bom estado geral do PC");
         TxtQuando.Text = $"Verificado às {resultado.Data:HH:mm} em {resultado.Duracao.TotalSeconds:0.0} s";
         ListaVerificacoes.ItemsSource = resultado.Itens.OrderByDescending(i => i.Nivel).Select(i => new CartaoVerificacao(i)).ToArray();
     }

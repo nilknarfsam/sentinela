@@ -1,60 +1,53 @@
 <UserControl x:Class="Sentinela.Paginas.PaginaAmeacas"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <DockPanel>
-        <StackPanel DockPanel.Dock="Top">
-            <DockPanel Margin="0,0,12,18">
-                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button Content="Atualizar" Click="AtualizarAmeacas_Click"/>
-                    <Button x:Name="BtnTratar" Content="Tratar ameaças ativas" Click="TratarAmeacas_Click"/>
-                    <Button Content="Segurança do Windows" Click="AbrirSeguranca_Click" Margin="0"/>
-                </StackPanel>
-                <StackPanel>
-                    <TextBlock Text="Ameaças e quarentena" Style="{StaticResource Titulo}" Margin="0,0,0,4"/>
-                    <TextBlock x:Name="TxtResumoAmeacas" Style="{StaticResource Fraco}"/>
-                </StackPanel>
-            </DockPanel>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="0,0,12,0">
+            <TextBlock Text="Ameaças e quarentena" Style="{StaticResource Titulo}" Margin="0,0,0,4"/>
+            <TextBlock x:Name="TxtResumoAmeacas" Style="{StaticResource Fraco}" Margin="0,0,0,10"/>
+            <WrapPanel Margin="0,0,0,8">
+                <Button Content="Atualizar" Click="AtualizarAmeacas_Click"/>
+                <Button x:Name="BtnTratar" Content="Tratar ameaças ativas" Click="TratarAmeacas_Click"/>
+                <Button Content="Segurança do Windows" Click="AbrirSeguranca_Click"/>
+            </WrapPanel>
+            <Border x:Name="AvisoConsulta" Style="{StaticResource CartaoBorda}" Background="{StaticResource AmbarFundo}"
+                    BorderBrush="{StaticResource Ambar}" Padding="12" Visibility="Collapsed">
+                <TextBlock x:Name="TxtAvisoConsulta" Foreground="{StaticResource Texto}" TextWrapping="Wrap"/>
+            </Border>
             <TextBlock Text="Histórico de ameaças" Style="{StaticResource Subtitulo}" Margin="2,0,0,10"/>
-        </StackPanel>
-        <Grid Margin="0,0,12,0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            <DataGrid x:Name="GradeAmeacas">
+            <DataGrid x:Name="GradeAmeacas" Height="170" MinHeight="140" MaxHeight="210">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Ameaça" Binding="{Binding Nome}" Width="2*"/>
+                    <DataGridTextColumn Header="Ameaça" Binding="{Binding Nome}" Width="2*" MinWidth="90"/>
                     <DataGridTextColumn Header="Gravidade" Binding="{Binding Gravidade}" Width="90"/>
                     <DataGridTextColumn Header="Situação" Binding="{Binding Situacao}" Width="130"/>
                     <DataGridTextColumn Header="Detectada" Binding="{Binding Detectada, StringFormat=dd/MM/yyyy HH:mm}" Width="130"/>
-                    <DataGridTextColumn Header="Local" Binding="{Binding Local}" Width="3*"/>
+                    <DataGridTextColumn Header="Local" Binding="{Binding Local}" Width="3*" MinWidth="110"/>
                 </DataGrid.Columns>
             </DataGrid>
-            <TextBlock Grid.Row="1" Text="Quarentena" Style="{StaticResource Subtitulo}" Margin="2,16,0,10"/>
-            <DockPanel Grid.Row="2">
-                <TextBlock DockPanel.Dock="Top" Text="Lista montada pelo histórico do Defender. Itens já restaurados ou apagados podem continuar aparecendo; confira em 'Ver texto do Defender'." Style="{StaticResource Fraco}" TextWrapping="Wrap" Margin="0,0,0,8"/>
-                <StackPanel DockPanel.Dock="Bottom" Margin="0,10,0,0">
-                    <WrapPanel VerticalAlignment="Center">
-                        <Button x:Name="BtnRestaurar" Content="Restaurar" IsEnabled="False" Click="Restaurar_Click"/>
-                        <TextBlock x:Name="TxtSemArquivoRestauravel" Text="Este item não tem um arquivo restaurável. Use a Segurança do Windows." Style="{StaticResource Fraco}" TextWrapping="Wrap" VerticalAlignment="Center" Visibility="Collapsed"/>
-                        <Button x:Name="BtnExcluir" Content="Excluir de vez…" Click="AbrirSeguranca_Click"/>
-                        <TextBlock Text="A exclusão de itens da quarentena é feita na Segurança do Windows." Style="{StaticResource Fraco}" TextWrapping="Wrap" VerticalAlignment="Center"/>
-                    </WrapPanel>
-                    <TextBlock x:Name="TxtResultadoQuarentena" TextWrapping="Wrap" Margin="0,6,0,6"/>
-                    <Expander x:Name="TextoDefender" Header="Ver texto do Defender">
-                        <TextBox x:Name="TxtQuarentena" Style="{StaticResource Log}" MaxHeight="120"/>
-                    </Expander>
-                </StackPanel>
-                <DataGrid x:Name="GradeQuarentena" SelectionMode="Single" SelectionChanged="Quarentena_SelectionChanged">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Ameaça" Binding="{Binding Nome}" Width="2*"/>
-                        <DataGridTextColumn Header="Arquivo (Local)" Binding="{Binding Local}" Width="3*"/>
-                        <DataGridTextColumn Header="Detectada" Binding="{Binding Detectada, StringFormat=dd/MM/yyyy HH:mm}" Width="130"/>
-                        <DataGridTextColumn Header="Gravidade" Binding="{Binding Gravidade}" Width="90"/>
-                    </DataGrid.Columns>
-                </DataGrid>
-            </DockPanel>
-        </Grid>
-    </DockPanel>
+            <TextBlock Text="Quarentena" Style="{StaticResource Subtitulo}" Margin="2,16,0,4"/>
+            <TextBlock Text="Lista montada pelo histórico do Defender. Itens já restaurados ou apagados podem continuar aparecendo; confira em 'Ver texto do Defender'."
+                       Style="{StaticResource Fraco}" TextWrapping="Wrap" Margin="0,0,0,8"/>
+            <DataGrid x:Name="GradeQuarentena" Height="160" MinHeight="130" MaxHeight="200"
+                      SelectionMode="Single" SelectionChanged="Quarentena_SelectionChanged">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Ameaça" Binding="{Binding Nome}" Width="2*" MinWidth="90"/>
+                    <DataGridTextColumn Header="Arquivo (Local)" Binding="{Binding Local}" Width="3*" MinWidth="110"/>
+                    <DataGridTextColumn Header="Detectada" Binding="{Binding Detectada, StringFormat=dd/MM/yyyy HH:mm}" Width="130"/>
+                    <DataGridTextColumn Header="Gravidade" Binding="{Binding Gravidade}" Width="90"/>
+                </DataGrid.Columns>
+            </DataGrid>
+            <WrapPanel VerticalAlignment="Center" Margin="0,10,0,0">
+                <Button x:Name="BtnRestaurar" Content="Restaurar" IsEnabled="False" Click="Restaurar_Click"/>
+                <TextBlock x:Name="TxtSemArquivoRestauravel" Text="Este item não tem um arquivo restaurável. Use a Segurança do Windows."
+                           Style="{StaticResource Fraco}" TextWrapping="Wrap" VerticalAlignment="Center" Visibility="Collapsed"/>
+                <Button x:Name="BtnExcluir" Content="Excluir de vez…" Click="AbrirSeguranca_Click"/>
+                <TextBlock Text="A exclusão de itens da quarentena é feita na Segurança do Windows."
+                           Style="{StaticResource Fraco}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+            </WrapPanel>
+            <TextBlock x:Name="TxtResultadoQuarentena" TextWrapping="Wrap" Margin="0,6,0,6"/>
+            <Expander x:Name="TextoDefender" Header="Ver texto do Defender" Margin="0,0,0,12">
+                <TextBox x:Name="TxtQuarentena" Style="{StaticResource Log}" MaxHeight="160"/>
+            </Expander>
+        </StackPanel>
+    </ScrollViewer>
 </UserControl>

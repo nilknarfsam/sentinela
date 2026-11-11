@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using Sentinela.Servicos;
+using Sentinela.Apresentacao;
 using Sentinela.Servicos.Checkup;
 using Sentinela.Servicos.Seguranca;
 using static Sentinela.Servicos.Formatos;
@@ -39,11 +40,16 @@ public partial class PaginaSeguranca : UserControl
     {
         Convite.Visibility = Visibility.Collapsed;
         CartaoNota.Visibility = Visibility.Visible;
+        var estado = EstadoApresentacao.Avaliar(resultado);
         var cor = resultado.Nota >= 85 ? "Verde" : resultado.Nota >= 60 ? "Ambar" : "Vermelho";
         TxtNota.Text = resultado.Nota.ToString();
-        TxtNota.Foreground = Cor(cor);
-        CartaoNota.Background = Cor(cor + "Fundo");
-        TxtFaixa.Text = resultado.Nota >= 85 ? "Segurança bem configurada" : resultado.Nota >= 60 ? "Dá para melhorar algumas coisas" : "Sua segurança precisa de atenção";
+        var corApresentacao = EstadoApresentacao.Cor(resultado, cor);
+        TxtNota.Foreground = Cor(corApresentacao);
+        CartaoNota.Background = Cor(corApresentacao + "Fundo");
+        var tituloCompleto = resultado.Nota >= 85 ? "Segurança bem configurada" : resultado.Nota >= 60 ? "Dá para melhorar algumas coisas" : "Sua segurança precisa de atenção";
+        TxtFaixa.Text = EstadoApresentacao.Titulo(resultado, tituloCompleto);
+        TxtConfianca.Text = EstadoApresentacao.Mensagem(resultado, "a proteção completa") +
+            (estado == EstadoApresentacao.Estado.Completo ? "" : " Verificações que não exigem acesso adicional continuam disponíveis.");
         TxtQuando.Text = $"Verificado em {resultado.Data:dd/MM/yyyy} às {resultado.Data:HH:mm} em {resultado.Duracao.TotalSeconds:0.0} s";
         ListaVerificacoes.ItemsSource = resultado.Itens.Select(i => new CartaoVerificacao(i)).ToArray();
     }

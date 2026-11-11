@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -33,6 +34,11 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        if (App.CapturaLargura is { } largura && App.CapturaAltura is { } altura)
+        {
+            Width = largura;
+            Height = altura;
+        }
 
         FaixaAdmin.Visibility = _admin ? Visibility.Collapsed : Visibility.Visible;
         TxtAdminMenu.Text = _admin ? "Rodando como administrador" : "Rodando sem administrador";
@@ -325,10 +331,12 @@ public partial class MainWindow : Window
         }
         await Task.Delay(App.CapturaAba?.Equals("desempenho", StringComparison.OrdinalIgnoreCase) == true ? 5500 : 2500);
         PaginaInicio.AtualizarSistema();
+        RedefinirRolagemCaptura(this);
+        UpdateLayout();
         await Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ApplicationIdle);
 
         var conteudo = (FrameworkElement)Content;
-        if (App.CapturaAba?.ToLowerInvariant() is "desempenho" or "seguranca" or "ajustes")
+        if (App.CapturaLargura == null && App.CapturaAba?.ToLowerInvariant() is "desempenho" or "seguranca" or "ajustes")
         {
             // Renderizar todo o painel, inclusive em monitores com pouca altura.
             var altura = App.CapturaAba?.ToLowerInvariant() switch { "seguranca" => 1400, "ajustes" => 1100, _ => 2050 };
@@ -354,5 +362,16 @@ public partial class MainWindow : Window
         enc.Frames.Add(BitmapFrame.Create(bmp));
         using (var f = File.Create(App.CapturaArquivo!)) enc.Save(f);
         App.Sair();
+    }
+
+    private static void RedefinirRolagemCaptura(DependencyObject elemento)
+    {
+        if (elemento is ScrollViewer rolagem)
+        {
+            rolagem.ScrollToHome();
+            rolagem.ScrollToLeftEnd();
+        }
+        for (int i = 0; i < VisualTreeHelper.GetChildrenCount(elemento); i++)
+            RedefinirRolagemCaptura(VisualTreeHelper.GetChild(elemento, i));
     }
 }

@@ -1,5 +1,13 @@
 # Histórico de mudanças
 
+## Em desenvolvimento
+### Melhorado
+- Nova paleta azul-ardósia, controles com foco de teclado visível, textos auxiliares maiores e navegação lateral rolável.
+- Estados de Segurança e Desempenho identificam resultados parciais quando verificações não ficaram disponíveis, sem alterar as notas calculadas.
+- Início separa falha na consulta do Defender de proteção desligada; Histórico e Ameaças explicam quando uma lista vazia não confirma ausência de ocorrências.
+- Ajustes organizados em abas; Varredura mantém o resultado acessível por rolagem.
+- Captura visual pode usar `--captura-largura` e `--captura-altura` para registrar o tamanho padrão ou mínimo sem alongar o painel.
+
 ## [1.5.0] - 2026-11-11
 ### Novo
 - Varredura completa semanal, com dia, hora e liga/desliga nos Ajustes. Se perder o horário, espera o PC ficar parado por 10 minutos. Usa o mesmo andamento e botão Cancelar da aba Varredura.

@@ -38,8 +38,8 @@
         </StackPanel>
         <DataGrid x:Name="GradeInicializacao">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Nome" Binding="{Binding Nome}" Width="170" ElementStyle="{StaticResource TextoCelula}"/>
-                <DataGridTemplateColumn x:Name="ColunaAtivo" Header="Abre com o Windows" Width="145">
+                <DataGridTextColumn Header="Nome" Binding="{Binding Nome}" Width="1.4*" MinWidth="90" ElementStyle="{StaticResource TextoCelula}"/>
+                <DataGridTemplateColumn x:Name="ColunaAtivo" Header="Abre com o Windows" Width="1.15*" MinWidth="95">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <CheckBox IsChecked="{Binding Ativo, Mode=OneWay}" Click="Ativo_Click" HorizontalAlignment="Center"
@@ -47,10 +47,10 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Header="Editora" Binding="{Binding Editora}" Width="150" ElementStyle="{StaticResource TextoCelula}"/>
-                <DataGridTextColumn Header="Assinatura" Binding="{Binding TextoAssinatura}" Width="145" ElementStyle="{StaticResource TextoAssinatura}"/>
-                <DataGridTextColumn Header="Origem" Binding="{Binding Origem}" Width="135" ElementStyle="{StaticResource TextoCelula}"/>
-                <DataGridTextColumn Header="Comando" Binding="{Binding Comando}" Width="*" MinWidth="100" ElementStyle="{StaticResource TextoCelula}"/>
+                <DataGridTextColumn Header="Editora" Binding="{Binding Editora}" Width="1.2*" MinWidth="85" ElementStyle="{StaticResource TextoCelula}"/>
+                <DataGridTextColumn Header="Assinatura" Binding="{Binding TextoAssinatura}" Width="1.2*" MinWidth="85" ElementStyle="{StaticResource TextoAssinatura}"/>
+                <DataGridTextColumn Header="Origem" Binding="{Binding Origem}" Width="1.15*" MinWidth="80" ElementStyle="{StaticResource TextoCelula}"/>
+                <DataGridTextColumn Header="Comando" Binding="{Binding Comando}" Width="2*" MinWidth="110" ElementStyle="{StaticResource TextoCelula}"/>
             </DataGrid.Columns>
         </DataGrid>
     </DockPanel>

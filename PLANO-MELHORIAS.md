@@ -195,6 +195,10 @@ Mudou em relação ao plano original:
 | 7.3 | *(movido para a Fase 8)* **Releases no GitHub** com o `.exe` pronto, e o Sentinela avisando quando sai versão nova. *O repositório é privado: precisaria de token ou de torná-lo público. Decidir antes* | Codex | M |
 | 7.4 | *(movido para a Fase 8)* Instalador num arquivo só, com desinstalação em Aplicativos do Windows | Codex | M |
 
+**Acompanhamento do acabamento (11/11/2026):** a nova interface foi implementada localmente nas nove áreas, com base nas nove propostas finais. Inclui estilos compartilhados, indicação de resultados parciais, Ajustes em abas e captura visual com dimensões selecionáveis. O build Release passou sem avisos ou erros e os 720 testes passaram; `TEMP` e `TMP` foram definidos apenas no processo de teste, para uma pasta gravável do workspace.
+
+**Pendente:** validar interativamente teclado, foco e seleção, além das escalas nativas de DPI de 125% e 150%. A Fase 7 continua em andamento; esta entrega não conclui todos os itens da fase. Não foram feitos instalação, publicação ou merge.
+
 ## Fase 8: Produto e distribuição (para a comunidade)
 Ideia do Franklin em 10/11/2026: quando o Sentinela estiver maduro, distribuí-lo
 de graça pelo GitHub e pelo site dele. Junto, explicar o raciocínio: por que o

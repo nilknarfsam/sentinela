@@ -50,7 +50,7 @@ Para remover, execute `desinstalar-sentinela.bat` como administrador.
 ```
 Sentinela.exe --captura tela.png --aba inicio|seguranca|desempenho|varredura|ameacas|historico|limpeza|limpeza-windows|inicializacao|ajustes
 ```
-Salva uma imagem da aba escolhida e fecha.
+Salva uma imagem da aba escolhida e fecha. Para registrar o tamanho padrão ou mínimo da janela, passe também `--captura-largura 1100 --captura-altura 720` ou `--captura-largura 900 --captura-altura 600`. As dimensões precisam ser informadas juntas, só são aceitas com `--captura` e ficam limitadas a 900–3000 × 600–2000. Capturas com tamanho explícito mostram a área visível e a rolagem normal; sem essas opções, Segurança, Desempenho e Ajustes continuam sendo capturados por inteiro, como antes. A execução normal mantém o tamanho padrão da janela.
 
 ## Testes
 
