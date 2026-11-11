@@ -67,3 +67,6 @@ dotnet test
 - `Sentinela/Servicos/Inicializacao.cs`: programas que abrem com o Windows.
 - `Sentinela/MainWindow.xaml`: a interface.
 - `Sentinela/App.xaml.cs`: instância única e ícone na bandeja.
+
+## Para quem programa
+As regras de trabalho e de segurança para agentes de IA (Codex) estão em `AGENTS.md`.
