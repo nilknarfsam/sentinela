@@ -72,7 +72,7 @@ Conteúdo:
   - GitHub: `https://github.com/nilknarfsam`
   - Site: `https://samfieldsoak.com.br`
   - Instagram: `https://www.instagram.com/samfieldsoak`
-  - LinkedIn: **[PREENCHER — pedir o endereço ao Franklin]**
+  - LinkedIn: `https://www.linkedin.com/in/franklin-carvalho-45032a164/` (endereço indicado pelo Franklin em 11/11/2026)
   - Página do Sentinela no site (quando a 8.7 estiver no ar)
   - "Relatar um problema": página de *issues* do `sentinela-releases`
   - "Privacidade" (8.6)
