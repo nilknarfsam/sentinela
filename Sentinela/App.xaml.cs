@@ -7,7 +7,7 @@ namespace Sentinela;
 
 public partial class App : Application
 {
-    private const string NomeUnico = "Sentinela_Franklin_Instancia";
+    private const string NomeUnico = "Sentinela_Instancia";
     private Mutex? _mutex;
     private EventWaitHandle? _sinalMostrar;
     private WinForms.NotifyIcon? _bandeja;

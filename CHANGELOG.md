@@ -1,5 +1,11 @@
 # Histórico de mudanças
 
+## [1.6.0] — Em preparação
+### Melhorado
+- O Sentinela usa um identificador genérico de instância única. Antes de abrir esta versão, feche a versão anterior que já esteja em execução; a migração entre versões será tratada pelo instalador da etapa 8.3.
+- A pasta de projetos só entra como padrão quando `C:\PROJETOS` existe. Em uma primeira execução sem pastas configuradas, **Otimização → Projetos** orienta a adicioná-las em Ajustes.
+- A limpeza do temporário do Windows e a leitura do BitLocker usam caminhos derivados da instalação atual do Windows.
+
 ## Em desenvolvimento
 ### Melhorado
 - Nova paleta azul-ardósia, controles com foco de teclado visível, textos auxiliares maiores e navegação lateral rolável.

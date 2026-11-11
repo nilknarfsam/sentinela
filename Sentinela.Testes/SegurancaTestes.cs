@@ -115,10 +115,25 @@ public sealed class SegurancaTestes : IDisposable
     {
         var resultado = VerificacaoDispositivo.Avaliar(seguro, tpm, bitlocker, admin);
         Assert.Equal(nivel, resultado.Nivel);
+        Assert.Contains("BitLocker do volume do Windows", resultado.Detalhe);
         if (tpm == false) Assert.Contains("Este PC não tem TPM (limite da placa-mãe)", resultado.Detalhe);
         if (!admin && tpm == null) Assert.Contains("precisa de administrador", resultado.Detalhe);
         if (bitlocker == false) Assert.Contains("opcional", resultado.Detalhe);
     }
+
+    [Theory]
+    [InlineData("C:", "SELECT ProtectionStatus FROM Win32_EncryptableVolume WHERE DriveLetter='C:'")]
+    [InlineData("E:", "SELECT ProtectionStatus FROM Win32_EncryptableVolume WHERE DriveLetter='E:'")]
+    [InlineData("e:", "SELECT ProtectionStatus FROM Win32_EncryptableVolume WHERE DriveLetter='E:'")]
+    [InlineData(null, null)]
+    [InlineData("", null)]
+    [InlineData("C", null)]
+    [InlineData("C:\\", null)]
+    [InlineData("\\\\servidor\\compartilhamento", null)]
+    [InlineData("C:' OR 1=1 --", null)]
+    [InlineData("1:", null)]
+    public void ConsultaBitLockerAceitaSomenteLetraDeUnidade(string? unidade, string? esperado)
+        => Assert.Equal(esperado, VerificacaoDispositivo.ConsultaBitLocker(unidade));
 
     [Fact]
     public void TpmPresenteDesativadoNaoEConfundidoComLimiteDaPlaca()
@@ -134,23 +149,23 @@ public sealed class SegurancaTestes : IDisposable
     [Fact]
     public void ExclusoesPrimeiraVez()
     {
-        var resultado = VerificacaoExclusoes.Avaliar([@"Pasta: C:\projetos"], null);
+        var resultado = VerificacaoExclusoes.Avaliar([@"Pasta: C:\ProjetosTeste"], null);
         Assert.Equal(NivelVerificacao.Atencao, resultado.Nivel);
         Assert.Equal("Confira se você reconhece estas exclusões", resultado.Resumo);
-        Assert.Equal(new[] { @"Pasta: C:\projetos" }, VerificacaoExclusoes.ListaExibida(resultado));
+        Assert.Equal(new[] { @"Pasta: C:\ProjetosTeste" }, VerificacaoExclusoes.ListaExibida(resultado));
     }
     [Fact]
     public void ExclusoesConhecidasSemDiferenciarMaiusculas()
     {
-        var resultado = VerificacaoExclusoes.Avaliar([@"Pasta: C:\projetos", "Processo: app.exe", "Extensão: .tmp"],
-            [@"PASTA: c:\PROJETOS", "processo: APP.EXE", "EXTENSÃO: .TMP"]);
+        var resultado = VerificacaoExclusoes.Avaliar([@"Pasta: C:\ProjetosTeste", "Processo: app.exe", "Extensão: .tmp"],
+            [@"PASTA: c:\PROJETOSTESTE", "processo: APP.EXE", "EXTENSÃO: .TMP"]);
         Assert.Equal(NivelVerificacao.Ok, resultado.Nivel);
         Assert.Contains("app.exe", resultado.Detalhe);
     }
     [Fact]
     public void ExclusaoNova()
     {
-        var resultado = VerificacaoExclusoes.Avaliar([@"Pasta: C:\projetos", "Processo: novo.exe"], [@"Pasta: C:\projetos"]);
+        var resultado = VerificacaoExclusoes.Avaliar([@"Pasta: C:\ProjetosTeste", "Processo: novo.exe"], [@"Pasta: C:\ProjetosTeste"]);
         Assert.Equal(NivelVerificacao.Problema, resultado.Nivel);
         Assert.Contains("Exclusão nova no Defender: Processo: novo.exe", resultado.Resumo);
         Assert.Contains("Vírus costumam fazer isso para se esconder.", resultado.Resumo);
@@ -175,8 +190,8 @@ public sealed class SegurancaTestes : IDisposable
     {
         var caminho = Path.Combine(_pasta, "exclusoes.json");
         Assert.Null(Servico.LerReferencia(caminho));
-        Assert.True(Servico.GravarReferencia(caminho, [@"Pasta: C:\projetos", "Processo: app.exe"]));
-        Assert.Equal(new[] { @"Pasta: C:\projetos", "Processo: app.exe" }, Servico.LerReferencia(caminho));
+        Assert.True(Servico.GravarReferencia(caminho, [@"Pasta: C:\ProjetosTeste", "Processo: app.exe"]));
+        Assert.Equal(new[] { @"Pasta: C:\ProjetosTeste", "Processo: app.exe" }, Servico.LerReferencia(caminho));
         Assert.False(Servico.GravarReferencia(caminho, [new string('a', 65536)]));
         Assert.False(Servico.GravarReferencia(caminho, ["N/A: Must be an administrator"]));
         Assert.Equal(2, Servico.LerReferencia(caminho)!.Length);

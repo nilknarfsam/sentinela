@@ -20,6 +20,10 @@ O Sentinela **nunca desliga nem muda** configurações de segurança do Defender
 
 **Desempenho:** checkup com nota de 0 a 100, último resultado salvo e cartão no Início. Também pode ser iniciado pela bandeja. O Histórico tem filtro de desempenho e os avisos de rotina incluem lembrete diário de reinício após 7 dias ligado com atualização pendente. Veja `PLANO-MELHORIAS.md`. Histórico de versões em `CHANGELOG.md`.
 
+## Preparação da versão 1.6.0
+
+Na primeira execução, a lista de pastas de projetos começa vazia, a menos que `C:\PROJETOS` exista. Configure as pastas em **Ajustes → Pastas de projetos**. A limpeza do temporário do Windows e a leitura do BitLocker acompanham a unidade onde o Windows está instalado. Antes de abrir a versão 1.6.0, feche qualquer versão anterior do Sentinela que ainda esteja aberta; a migração entre versões será tratada pelo instalador planejado para a etapa 8.3.
+
 ## Rotina e relatório semanal (v1.5.0)
 
 Em **Ajustes → Varredura completa semanal**, ligue ou desligue a rotina e escolha o dia e a hora (padrão: domingo às 12h). O Sentinela precisa estar aberto, inclusive só na bandeja. Ele confere a cada 5 minutos, sem criar tarefa no Agendador nem mudar a configuração do Defender. Na primeira hora após o horário, pode começar enquanto você usa o PC; depois disso, espera 10 minutos sem uso. Se a varredura falhar ou for cancelada, não tenta novamente no mesmo ciclo semanal. Na primeira execução da versão 1.5.0 e ao ligar ou alterar o dia/hora, a rotina passa a considerar o momento da alteração, sem recuperar um horário anterior. O progresso e o botão Cancelar ficam na aba **Varredura**.

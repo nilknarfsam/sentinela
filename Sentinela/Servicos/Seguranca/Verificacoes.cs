@@ -200,6 +200,27 @@ public sealed class VerificacaoRansomware : Verificacao
 
 public sealed class VerificacaoDispositivo : Verificacao
 {
+    internal static string? ConsultaBitLocker(string? unidade)
+    {
+        if (unidade is not { Length: 2 } || !char.IsAsciiLetter(unidade[0]) || unidade[1] != ':') return null;
+        return $"SELECT ProtectionStatus FROM Win32_EncryptableVolume WHERE DriveLetter='{char.ToUpperInvariant(unidade[0])}:'";
+    }
+
+    private static string? UnidadeDoWindows()
+    {
+        foreach (var pasta in new[] { Environment.GetFolderPath(Environment.SpecialFolder.Windows),
+                     Environment.GetFolderPath(Environment.SpecialFolder.System) })
+        {
+            try
+            {
+                var raiz = Path.GetPathRoot(pasta);
+                if (raiz is { Length: 3 } && ConsultaBitLocker(raiz[..2]) != null) return raiz[..2];
+            }
+            catch { /* Se não der para identificar uma unidade local, a leitura fica indisponível. */ }
+        }
+        return null;
+    }
+
     public override string Nome => "Inicialização segura, TPM e BitLocker";
     public override int Peso => 2;
     protected override async Task<ResultadoVerificacao> Ler(CancellationToken ct)
@@ -223,7 +244,8 @@ public sealed class VerificacaoDispositivo : Verificacao
                 }
             return Array.Empty<bool>();
         }));
-        var bitlocker = Task.Run(() => Leituras.Consultar(@"root\CIMV2\Security\MicrosoftVolumeEncryption", "SELECT ProtectionStatus FROM Win32_EncryptableVolume WHERE DriveLetter='C:'", itens =>
+        var consultaBitLocker = ConsultaBitLocker(UnidadeDoWindows());
+        Task<int?[]?> bitlocker = consultaBitLocker == null ? Task.FromResult<int?[]?>(null) : Task.Run(() => Leituras.Consultar(@"root\CIMV2\Security\MicrosoftVolumeEncryption", consultaBitLocker, itens =>
         {
             foreach (ManagementObject item in itens)
                 using (item)
@@ -245,7 +267,7 @@ public sealed class VerificacaoDispositivo : Verificacao
         string Estado(bool? valor) => valor == true ? "ligado" : valor == false ? "desligado ou ausente" : admin ? "não consegui ler" : "precisa de administrador";
         return Leituras.Resultado("Inicialização segura, TPM e BitLocker", "\uE950", nivel,
             chaveSecureBootAusente ? "Inicialização segura não suportada (BIOS antigo)" : seguro == false ? "Inicialização segura desligada" : tpm == false ? tpmPresente ? "TPM desativado" : "TPM ausente (limite da placa-mãe)" : faltam ? admin ? "Leitura parcial da segurança do dispositivo" : "Alguns dados precisam de administrador" : "Proteções do dispositivo verificadas",
-            $"Inicialização segura: {Estado(seguro)}. {(tpm == false ? tpmPresente ? "TPM presente, mas desativado" : "Este PC não tem TPM (limite da placa-mãe)" : "TPM: " + Estado(tpm))}. BitLocker do C:: {(bitlocker == null && admin ? "BitLocker não disponível" : Estado(bitlocker))}. Criptografar o disco é opcional para um PC de mesa em casa.", "windowsdefender://devicesecurity");
+            $"Inicialização segura: {Estado(seguro)}. {(tpm == false ? tpmPresente ? "TPM presente, mas desativado" : "Este PC não tem TPM (limite da placa-mãe)" : "TPM: " + Estado(tpm))}. BitLocker do volume do Windows: {(bitlocker == null && admin ? "BitLocker não disponível" : Estado(bitlocker))}. Criptografar o disco é opcional para um PC de mesa em casa.", "windowsdefender://devicesecurity");
     }
 }
 

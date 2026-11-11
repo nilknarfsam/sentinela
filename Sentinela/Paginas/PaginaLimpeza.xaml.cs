@@ -16,6 +16,14 @@ public partial class PaginaLimpeza : UserControl
     private bool _limpandoComponentes;
     public event Action? EspacoMudou;
 
+    internal static string? MensagemEstadoProjetos(int configuradas, int ignoradas, int validas, int itens)
+    {
+        if (configuradas == 0) return "Nenhuma pasta de projetos configurada. Adicione uma em Ajustes → Pastas de projetos para analisar.";
+        if (ignoradas == 0) return null;
+        if (validas == 0) return $"As {ignoradas} pasta(s) de projetos configuradas não estão disponíveis para análise. Confira Ajustes → Pastas de projetos.";
+        return $"Análise parcial: {itens} item(ns) encontrado(s); {ignoradas} pasta(s) ignorada(s). Confira Ajustes → Pastas de projetos.";
+    }
+
     public PaginaLimpeza()
     {
         InitializeComponent();
@@ -75,13 +83,20 @@ public partial class PaginaLimpeza : UserControl
         var ct = cancelamento.Token;
         Ocupado(true);
         var tempo = Stopwatch.StartNew();
+        string[] raizesProjetos = [];
+        int pastasProjetosConfiguradas = 0;
+        int pastasProjetosIgnoradas = 0;
         var progresso = new Progress<string>(p => TxtResultadoLimpeza.Text = "Medindo: " + p);
         try
         {
             TxtResultadoLimpeza.Text = "Medindo...";
             if (_secao == "Projetos")
             {
-                var lista = await LimpezaProjetos.Analisar(Configuracoes.Atual.PastasProjetosValidas(), ct, progresso);
+                var configuracoes = Configuracoes.Atual;
+                pastasProjetosConfiguradas = configuracoes.PastasProjetos.Count;
+                raizesProjetos = configuracoes.PastasProjetosValidas();
+                pastasProjetosIgnoradas = configuracoes.PastasIgnoradas.Count;
+                var lista = await LimpezaProjetos.Analisar(raizesProjetos, ct, progresso);
                 _sobras.Clear();
                 var itens = lista.Select(s =>
                 {
@@ -113,7 +128,11 @@ public partial class PaginaLimpeza : UserControl
                 Mostrar(itens);
             }
             if (!ct.IsCancellationRequested && _secao != "Maiores pastas") ResumoOtimizacao.Atualizar(_secao, _itens.Where(i => i.Disponivel).Sum(i => Math.Max(0, i.Bytes)));
-            TxtResultadoLimpeza.Text = ct.IsCancellationRequested ? "Análise cancelada. Resultados podem estar incompletos." : $"Análise concluída em {tempo.Elapsed.TotalSeconds:0.00} s. {_itens.Count} item(ns).";
+            var mensagemProjetos = _secao == "Projetos"
+                ? MensagemEstadoProjetos(pastasProjetosConfiguradas, pastasProjetosIgnoradas, raizesProjetos.Length, _itens.Count)
+                : null;
+            TxtResultadoLimpeza.Text = ct.IsCancellationRequested ? "Análise cancelada. Resultados podem estar incompletos."
+                : mensagemProjetos ?? $"Análise concluída em {tempo.Elapsed.TotalSeconds:0.00} s. {_itens.Count} item(ns).";
             Total();
         }
         catch { TxtResultadoLimpeza.Text = "Não foi possível concluir a análise."; }

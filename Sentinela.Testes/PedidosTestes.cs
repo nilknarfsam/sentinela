@@ -122,7 +122,7 @@ public class PedidosTestes : IDisposable
 
     [Theory]
     [InlineData(@"C:\Users\x")]
-    [InlineData("D:/pasta")]
+    [InlineData("Z:/pasta")]
     public void CaminhoLocalValido_NaoConsultaUnidade(string caminho)
     {
         Assert.True(Pedidos.CaminhoLocalValido(caminho));
