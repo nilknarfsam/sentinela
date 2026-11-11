@@ -82,7 +82,8 @@
                         <TextBlock Text="Sentinela" Style="{StaticResource Titulo}" Margin="0,0,0,4"/>
                         <TextBlock x:Name="TxtVersao" Style="{StaticResource Fraco}"/>
                         <TextBlock Text="Grátis. Usa o Windows Defender como motor." Style="{StaticResource Subtitulo}" Margin="0,10,0,4"/>
-                        <TextBlock Text="Criado por Franklin Carvalho." Style="{StaticResource Fraco}" Margin="0,0,0,14"/>
+                        <TextBlock Text="Criado por Franklin Carvalho." Style="{StaticResource Fraco}" Margin="0,0,0,2"/>
+                        <TextBlock Text="Software livre sob a licença GPL-3.0 ou posterior. Sem garantia." Style="{StaticResource Fraco}" TextWrapping="Wrap" Margin="0,0,0,14"/>
                         <TextBlock Text="Links do criador" Style="{StaticResource Subtitulo}" Margin="0,0,0,8"/>
                         <WrapPanel>
                             <Button Content="GitHub" Tag="https://github.com/nilknarfsam" Click="AbrirLinkAjuda_Click" AutomationProperties.Name="Abrir GitHub do criador"/>

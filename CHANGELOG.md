@@ -4,6 +4,13 @@
 ### Segurança
 - Os links da tela **Sobre e ajuda** passam a ser abertos pelo Explorer da sessão do usuário (`NavegadorSeguro`), para o navegador **não** herdar o privilégio de administrador do Sentinela. No padrão do Windows isso evita a elevação. Com "Iniciar janelas de pasta em processo separado" ligado, UAC desligado ou a conta Administrador embutida, o navegador ainda pode abrir elevado, como antes. Só endereços `https://` são aceitos, e continua valendo a lista fechada de links.
 
+## Etapa 8.0 — repositório público (em preparação)
+### Novo
+- O código do Sentinela agora é **aberto**, sob a licença **GPL-3.0 ou posterior** (arquivo `LICENSE`).
+- `LEIAME.md` reescrito para quem chega pelo GitHub: o que é, por que existe, privacidade, aviso do SmartScreen, licença e criador.
+- `CONTRIBUTING.md` e modelo de issue "Relatar um problema".
+- A tela **Sobre e ajuda** informa a licença.
+
 ## [1.6.1] — Em preparação
 ### Novo
 - Subaba **Sobre e ajuda** em Ajustes, com versão, apresentação do Sentinela, links exatos para os quatro perfis autorizados e uma explicação curta das nove áreas do app.

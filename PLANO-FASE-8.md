@@ -87,6 +87,8 @@ num programa profissional.
 - **Aceite:** o GitHub mostra "GPL-3.0" na página do repositório, e o LEIAME
   explica o projeto para quem nunca ouviu falar dele.
 
+**Acompanhamento (11/11/2026):** feita pelo Claude na branch `fase-8/licenca-gpl` (o Codex estava sem limite): LICENSE oficial (texto da API do GitHub), LEIAME público, CONTRIBUTING, modelo de issue, copyright no `.csproj` e licença na tela Sobre e ajuda. A busca por dados sensíveis não achou nada. **Pendente:** capturas da interface no LEIAME, que devem ser feitas sem dados do Franklin (caminhos, diário, nomes de discos), de preferência no Sandbox.
+
 ## 8.1 Generalizar o que é do PC do Franklin
 - Procure no código e nos testes: `C:\PROJETOS`, `nilkn`, `Franklin`, e-mail,
   `D:\` e caminhos absolutos. Nada pessoal fica fixo no código. A exceção é a
