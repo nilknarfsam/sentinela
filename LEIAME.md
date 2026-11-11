@@ -11,8 +11,11 @@ Ele **nunca desliga nem muda** as configurações do Defender, do firewall ou do
 Controle de Conta de Usuário.
 
 ## Por que ele existe
-- O antivírus que já vem no Windows está entre os melhores nos testes
-  independentes. Para quem usa o PC em casa, não precisa pagar antivírus.
+- O antivírus que já vem no Windows (Microsoft Defender) tem bom desempenho
+  nos testes independentes de laboratórios como o
+  [AV-TEST](https://www.av-test.org/) e o
+  [AV-Comparatives](https://www.av-comparatives.org/). Para muitos usos
+  domésticos, ele costuma bastar.
 - Muito programa de "deixar o PC mais rápido" é marketing: limpador de
   registro, "turbo de RAM", atualizador automático de drivers.
 - O que funciona é simples: menos programas abrindo com o Windows, espaço livre
@@ -21,8 +24,7 @@ Controle de Conta de Usuário.
 
 ## Baixar
 A primeira versão pública (2.0.0, com instalador) ainda está sendo preparada.
-Quando sair, ela estará em
-**[Releases](https://github.com/nilknarfsam/sentinela/releases/latest)**.
+Quando sair, ela vai aparecer na aba **Releases** deste repositório.
 
 Requisitos: Windows 10 ou 11, 64 bits.
 
@@ -34,8 +36,9 @@ Requisitos: Windows 10 ou 11, 64 bits.
 ## Privacidade
 - **Lê:** o estado do Defender, discos, programas que abrem com o Windows e
   processos em uso.
-- **Guarda:** configurações, diário e notas, **só no seu PC**, em
-  `%LOCALAPPDATA%\Sentinela`.
+- **Guarda:** configurações, diário, notas e a lista de referência das
+  exclusões do Defender (que pode ter caminhos de pastas suas), **só no seu
+  PC**, em `%LOCALAPPDATA%\Sentinela`.
 - **Envia:** **nada.** Não tem telemetria, conta nem anúncios.
 
 ## Licença
@@ -80,7 +83,7 @@ O Sentinela **nunca desliga nem muda** configurações de segurança do Defender
 
 ## Sobre e ajuda (versão 1.6.1 em preparação)
 
-Em **Ajustes → Sobre e ajuda** há uma apresentação do Sentinela, a versão, uma explicação breve de cada área e as informações do diário e do executável. Os botões abrem os perfis autorizados do criador no GitHub, site, Instagram e LinkedIn. A página do Sentinela, o relato de problemas e as informações detalhadas de privacidade ainda aparecem como **em breve**.
+Em **Ajustes → Sobre e ajuda** há uma apresentação do Sentinela, a versão, uma explicação breve de cada área e as informações do diário e do executável. Os botões abrem os perfis autorizados do criador no GitHub, site, Instagram e LinkedIn. Dentro do app, a página do Sentinela no site, o atalho para relatar problema e a privacidade detalhada ainda aparecem como **em breve**. Enquanto isso, use os [problemas do GitHub](https://github.com/nilknarfsam/sentinela/issues/new/choose) e a seção **Privacidade** no topo deste arquivo.
 
 ## Preparação da versão 1.6.0
 

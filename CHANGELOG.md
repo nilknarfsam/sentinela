@@ -1,5 +1,9 @@
 # Histórico de mudanças
 
+## [1.6.2] — Em preparação
+### Segurança
+- Os links da tela **Sobre e ajuda** passam a ser abertos pelo Explorer da sessão do usuário (`NavegadorSeguro`), para o navegador **não** herdar o privilégio de administrador do Sentinela. No padrão do Windows isso evita a elevação. Com "Iniciar janelas de pasta em processo separado" ligado, UAC desligado ou a conta Administrador embutida, o navegador ainda pode abrir elevado, como antes. Só endereços `https://` são aceitos, e continua valendo a lista fechada de links.
+
 ## Etapa 8.0 — repositório público (em preparação)
 ### Novo
 - O código do Sentinela agora é **aberto**, sob a licença **GPL-3.0 ou posterior** (arquivo `LICENSE`).

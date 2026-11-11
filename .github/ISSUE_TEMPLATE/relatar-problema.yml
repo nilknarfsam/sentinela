@@ -6,7 +6,8 @@ body:
     attributes:
       value: |
         Obrigado por avisar! Não cole senhas, dados pessoais nem o diário inteiro.
-        Falha de segurança? Não abra aqui: use a aba Security → Report a vulnerability.
+        Falha de segurança? Não descreva aqui: use a aba Security → Report a vulnerability
+        (ou abra uma issue dizendo só "encontrei um problema de segurança", sem detalhes).
   - type: input
     id: versao
     attributes:

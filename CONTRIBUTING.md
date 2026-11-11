@@ -10,8 +10,10 @@ Abra uma [issue](https://github.com/nilknarfsam/sentinela/issues/new/choose) com
 - se possível, uma captura de tela.
 
 **Não cole** dados pessoais, senhas nem o conteúdo inteiro do diário. Se for uma
-**falha de segurança**, não abra issue pública: use a aba
+**falha de segurança**, não descreva a falha numa issue pública: use a aba
 [Security → Report a vulnerability](https://github.com/nilknarfsam/sentinela/security/advisories/new).
+Se a opção não aparecer, abra uma issue dizendo só "encontrei um problema de
+segurança", sem detalhes, e o criador entra em contato.
 
 ## Propor uma mudança
 1. Leia o [AGENTS.md](AGENTS.md). Ele tem as regras de segurança e de código,
@@ -29,7 +31,7 @@ Abra uma [issue](https://github.com/nilknarfsam/sentinela/issues/new/choose) com
 ## O que não aceitamos
 - Qualquer coisa que desligue, enfraqueça ou mude o Defender, o firewall ou o
   Controle de Conta de Usuário.
-- Telemetria, coleta de dados ou conexões que não sejam a busca de atualizações.
+- Telemetria, coleta de dados ou qualquer conexão de rede sem pedido explícito do usuário.
 - "Limpador de registro", "turbo de RAM" e atualizador automático de drivers.
 - Pacotes ou código de terceiros com licença incompatível com a GPL-3.0.
 

@@ -110,15 +110,8 @@ public partial class PaginaAjustes : UserControl
         }
 
         TxtResultadoLinkAjuda.Text = "";
-        var abriu = await Task.Run(() =>
-        {
-            try
-            {
-                using var processo = Process.Start(new ProcessStartInfo(alvo) { UseShellExecute = true });
-                return true;
-            }
-            catch { return false; }
-        });
+        // Sem elevação: o navegador não herda o administrador do Sentinela (CONFERENCIAS.md, C1.1).
+        var abriu = await Task.Run(() => NavegadorSeguro.Abrir(alvo));
         if (!abriu) TxtResultadoLinkAjuda.Text = "Não foi possível abrir o link. Confira o navegador padrão e tente novamente.";
     }
 
