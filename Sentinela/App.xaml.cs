@@ -37,6 +37,8 @@ public partial class App : Application
     /// <summary>Modo de teste: salva uma imagem da janela e fecha.</summary>
     public static string? CapturaArquivo { get; private set; }
     public static string? CapturaAba { get; private set; }
+    public static int? CapturaLargura { get; private set; }
+    public static int? CapturaAltura { get; private set; }
     public bool Saindo { get; private set; }
 
     protected override void OnStartup(StartupEventArgs e)
@@ -51,6 +53,21 @@ public partial class App : Application
                 case "--bandeja": IniciarNaBandeja = true; break;
                 case "--captura" when i + 1 < e.Args.Length: CapturaArquivo = e.Args[++i]; break;
                 case "--aba" when i + 1 < e.Args.Length: CapturaAba = e.Args[++i]; break;
+                case "--captura-largura" when i + 1 < e.Args.Length:
+                    CapturaLargura = int.TryParse(e.Args[++i], out var largura) ? largura : -1; break;
+                case "--captura-altura" when i + 1 < e.Args.Length:
+                    CapturaAltura = int.TryParse(e.Args[++i], out var altura) ? altura : -1; break;
+            }
+        }
+
+        if (CapturaLargura.HasValue || CapturaAltura.HasValue)
+        {
+            if (CapturaArquivo == null || !CapturaLargura.HasValue || !CapturaAltura.HasValue
+                || CapturaLargura is < 900 or > 3000 || CapturaAltura is < 600 or > 2000)
+            {
+                MessageBox.Show("As opções --captura-largura e --captura-altura só funcionam juntas com --captura. Use largura de 900 a 3000 e altura de 600 a 2000.", "Sentinela", MessageBoxButton.OK, MessageBoxImage.Warning);
+                Shutdown();
+                return;
             }
         }
 

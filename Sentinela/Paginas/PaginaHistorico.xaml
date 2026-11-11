@@ -13,45 +13,51 @@
             </Style.Triggers>
         </Style>
     </UserControl.Resources>
-    <DockPanel Margin="0,0,12,0">
-        <StackPanel DockPanel.Dock="Top" Margin="0,0,0,18">
-            <TextBlock Text="Histórico" Style="{StaticResource Titulo}" Margin="0,0,0,4"/>
-            <Border Style="{StaticResource CartaoBorda}" Margin="0,12,0,12">
-                <StackPanel>
-                    <TextBlock Text="Relatório da semana" Style="{StaticResource Subtitulo}" Margin="0,0,0,8"/>
-                    <ComboBox x:Name="PeriodoRelatorio" Width="190" HorizontalAlignment="Left" SelectedIndex="0" SelectionChanged="PeriodoRelatorio_Changed">
-                        <ComboBoxItem Content="Semana passada"/>
-                        <ComboBoxItem Content="Últimos 7 dias"/>
-                    </ComboBox>
-                    <TextBlock x:Name="TxtResumoRelatorio" Text="Preparando o relatório..." Margin="0,10,0,10"/>
-                    <TextBlock x:Name="TxtPeriodoRelatorio" Style="{StaticResource Fraco}" Margin="0,0,0,10"/>
-                    <WrapPanel>
-                        <Button x:Name="BtnVerRelatorio" Content="Ver relatório" Click="VerRelatorio_Click" IsEnabled="False"/>
-                        <Button x:Name="BtnExportarRelatorio" Content="Exportar em HTML" Click="ExportarRelatorio_Click" IsEnabled="False"/>
-                    </WrapPanel>
-                    <TextBlock Text="Abra o HTML no navegador para imprimir ou salvar como PDF." Style="{StaticResource Fraco}" Margin="0,8,0,0"/>
-                    <ScrollViewer x:Name="DetalheRelatorio" Visibility="Collapsed" MaxHeight="260" VerticalScrollBarVisibility="Auto" Margin="0,12,0,0">
-                        <TextBlock x:Name="TxtDetalheRelatorio"/>
-                    </ScrollViewer>
-                </StackPanel>
-            </Border>
-            <TextBlock x:Name="TxtResumo" Text="Carregando eventos..." Style="{StaticResource Fraco}" Margin="0,0,0,16"/>
-            <WrapPanel x:Name="Filtros">
-                <Button Content="Tudo" Tag="tudo" Click="Filtrar_Click" Style="{StaticResource BotaoPrincipal}"/>
-                <Button Content="Ameaças" Tag="ameacas" Click="Filtrar_Click"/>
-                <Button Content="Varreduras" Tag="varreduras" Click="Filtrar_Click"/>
-                <Button Content="Proteção e ajustes" Tag="protecao" Click="Filtrar_Click"/>
-                <Button Content="Desempenho" Tag="desempenho" Click="Filtrar_Click"/>
-                <Button Content="Limpeza" Tag="limpeza" Click="Filtrar_Click"/>
-            </WrapPanel>
-        </StackPanel>
-        <DataGrid x:Name="GradeHistorico">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+      <StackPanel Margin="0,0,12,12">
+        <TextBlock Text="Histórico" Style="{StaticResource Titulo}" Margin="0,0,0,4"/>
+        <Border Style="{StaticResource CartaoBorda}" Margin="0,12,0,12">
+            <StackPanel>
+                <TextBlock Text="Relatório da semana" Style="{StaticResource Subtitulo}" Margin="0,0,0,8"/>
+                <ComboBox x:Name="PeriodoRelatorio" Width="190" HorizontalAlignment="Left" SelectedIndex="0" SelectionChanged="PeriodoRelatorio_Changed">
+                    <ComboBoxItem Content="Semana passada"/>
+                    <ComboBoxItem Content="Últimos 7 dias"/>
+                </ComboBox>
+                <TextBlock x:Name="TxtResumoRelatorio" Text="Preparando o relatório..." Margin="0,10,0,10"/>
+                <TextBlock x:Name="TxtPeriodoRelatorio" Style="{StaticResource Fraco}" Margin="0,0,0,10"/>
+                <WrapPanel>
+                    <Button x:Name="BtnVerRelatorio" Content="Ver relatório" Click="VerRelatorio_Click" IsEnabled="False"/>
+                    <Button x:Name="BtnExportarRelatorio" Content="Exportar em HTML" Click="ExportarRelatorio_Click" IsEnabled="False"/>
+                </WrapPanel>
+                <TextBlock Text="Abra o HTML no navegador para imprimir ou salvar como PDF." Style="{StaticResource Fraco}" Margin="0,8,0,0"/>
+                <ScrollViewer x:Name="DetalheRelatorio" Visibility="Collapsed" MaxHeight="260" VerticalScrollBarVisibility="Auto" Margin="0,12,0,0">
+                    <TextBlock x:Name="TxtDetalheRelatorio"/>
+                </ScrollViewer>
+            </StackPanel>
+        </Border>
+        <TextBlock x:Name="TxtResumo" Text="Carregando eventos..." Style="{StaticResource Fraco}" Margin="0,0,0,12"/>
+        <WrapPanel x:Name="Filtros" Margin="0,0,0,8">
+            <Button Content="Tudo" Tag="tudo" Click="Filtrar_Click" Style="{StaticResource BotaoPrincipal}"/>
+            <Button Content="Ameaças" Tag="ameacas" Click="Filtrar_Click"/>
+            <Button Content="Varreduras" Tag="varreduras" Click="Filtrar_Click"/>
+            <Button Content="Proteção e ajustes" Tag="protecao" Click="Filtrar_Click"/>
+            <Button Content="Desempenho" Tag="desempenho" Click="Filtrar_Click"/>
+            <Button Content="Limpeza" Tag="limpeza" Click="Filtrar_Click"/>
+        </WrapPanel>
+        <DataGrid x:Name="GradeHistorico" Height="260" MinHeight="190" MaxHeight="340" Visibility="Collapsed">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Quando" Binding="{Binding Data, StringFormat=dd/MM HH:mm}" Width="100" ElementStyle="{StaticResource TextoEvento}"/>
-                <DataGridTextColumn Header="Origem" Binding="{Binding Origem}" Width="85" ElementStyle="{StaticResource TextoEvento}"/>
-                <DataGridTextColumn Header="O que aconteceu" Binding="{Binding Titulo}" Width="230" ElementStyle="{StaticResource TextoEvento}"/>
-                <DataGridTextColumn Header="Detalhe" Binding="{Binding Detalhe}" Width="*" ElementStyle="{StaticResource TextoEvento}"/>
+                <DataGridTextColumn Header="Origem" Binding="{Binding Origem}" Width="100" ElementStyle="{StaticResource TextoEvento}"/>
+                <DataGridTextColumn Header="O que aconteceu" Binding="{Binding Titulo}" Width="*" MinWidth="150" ElementStyle="{StaticResource TextoEvento}"/>
+                <DataGridTextColumn Header="Detalhe" Binding="{Binding Detalhe}" Width="2*" MinWidth="140" ElementStyle="{StaticResource TextoEvento}"/>
             </DataGrid.Columns>
         </DataGrid>
-    </DockPanel>
+        <Border x:Name="EstadoVazio" Style="{StaticResource CartaoBorda}" HorizontalAlignment="Left" MaxWidth="500">
+            <StackPanel>
+                <TextBlock x:Name="TxtEstadoVazio" Text="Nenhum evento acessível nos últimos 30 dias." Style="{StaticResource Subtitulo}" TextAlignment="Center"/>
+                <TextBlock Text="Isso não confirma ausência de ocorrências." Style="{StaticResource Fraco}" TextAlignment="Center" Margin="0,6,0,0"/>
+            </StackPanel>
+        </Border>
+      </StackPanel>
+    </ScrollViewer>
 </UserControl>

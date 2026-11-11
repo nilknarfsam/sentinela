@@ -7,29 +7,31 @@
         FontFamily="Segoe UI Variable Text, Segoe UI">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="230"/>
+            <ColumnDefinition Width="220" MinWidth="205"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
         <!-- ===================== MENU LATERAL ===================== -->
         <Border Background="{StaticResource Lateral}" BorderBrush="{StaticResource Borda}" BorderThickness="0,0,1,0">
             <DockPanel>
-                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="22,24,16,26">
-                    <Border Width="34" Height="34" CornerRadius="9" Background="{StaticResource Destaque}">
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="18,20,14,20">
+                    <Border Width="38" Height="38" CornerRadius="10" Background="{StaticResource Destaque}">
                         <TextBlock Style="{StaticResource Icone}" Text="&#xEA18;" Foreground="White" FontSize="17" HorizontalAlignment="Center"/>
                     </Border>
                     <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
                         <TextBlock Text="Sentinela" FontWeight="SemiBold" FontSize="15"/>
-                        <TextBlock Text="motor: Windows Defender" Style="{StaticResource Fraco}" FontSize="11"/>
+                        <TextBlock Text="Windows Defender" Style="{StaticResource Fraco}"/>
                     </StackPanel>
                 </StackPanel>
 
-                <StackPanel DockPanel.Dock="Bottom" Margin="22,0,16,20">
-                    <TextBlock x:Name="TxtAdminMenu" Style="{StaticResource Fraco}" FontSize="11"/>
-                    <TextBlock x:Name="TxtVersaoMenu" Style="{StaticResource Fraco}" FontSize="11" Margin="0,4,0,0"/>
+                <StackPanel DockPanel.Dock="Bottom" Margin="18,10,14,16">
+                    <Border Height="1" Background="{StaticResource Borda}" Margin="0,0,0,10"/>
+                    <TextBlock x:Name="TxtAdminMenu" Style="{StaticResource Fraco}" TextWrapping="Wrap"/>
+                    <TextBlock x:Name="TxtVersaoMenu" Style="{StaticResource Fraco}" Margin="0,4,0,0"/>
                 </StackPanel>
 
-                <StackPanel>
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+                  <StackPanel>
                     <RadioButton x:Name="MenuInicio" Style="{StaticResource ItemMenu}" Tag="&#xE80F;" Content="Início" IsChecked="True" Checked="Menu_Checked"/>
                     <RadioButton x:Name="MenuSeguranca" Style="{StaticResource ItemMenu}" Tag="&#xEA18;" Content="Segurança" Checked="Menu_Checked"/>
                     <RadioButton x:Name="MenuDesempenho" Style="{StaticResource ItemMenu}" Tag="&#xEC4A;" Content="Desempenho" Checked="Menu_Checked"/>
@@ -39,21 +41,23 @@
                     <RadioButton x:Name="MenuLimpeza" Style="{StaticResource ItemMenu}" Tag="&#xE74D;" Content="Otimização" Checked="Menu_Checked"/>
                     <RadioButton x:Name="MenuInicializacao" Style="{StaticResource ItemMenu}" Tag="&#xE7E8;" Content="Inicialização" Checked="Menu_Checked"/>
                     <RadioButton x:Name="MenuAjustes" Style="{StaticResource ItemMenu}" Tag="&#xE713;" Content="Ajustes" Checked="Menu_Checked"/>
-                </StackPanel>
+                  </StackPanel>
+                </ScrollViewer>
             </DockPanel>
         </Border>
 
         <!-- ===================== CONTEÚDO ===================== -->
         <DockPanel Grid.Column="1">
             <!-- Aviso de administrador -->
-            <Border x:Name="FaixaAdmin" DockPanel.Dock="Top" Background="{StaticResource AmbarFundo}" BorderBrush="#40F59E0B"
-                    BorderThickness="0,0,0,1" Padding="28,10" Visibility="Collapsed">
-                <DockPanel>
-                    <Button DockPanel.Dock="Right" Content="Abrir como administrador" Click="AbrirComoAdmin_Click" Margin="0"/>
+            <Border x:Name="FaixaAdmin" DockPanel.Dock="Top" Background="{StaticResource AmbarFundo}" BorderBrush="{StaticResource Ambar}"
+                    BorderThickness="0,0,0,1" Padding="18,10" Visibility="Collapsed">
+                <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                     <TextBlock Style="{StaticResource Icone}" Text="&#xE7BA;" Foreground="{StaticResource Ambar}" Margin="0,0,10,0"/>
-                    <TextBlock VerticalAlignment="Center" Foreground="{StaticResource Ambar}"
-                               Text="Aberto sem administrador: ameaças, quarentena e a limpeza das pastas do Windows ficam limitadas."/>
-                </DockPanel>
+                    <TextBlock Grid.Column="1" VerticalAlignment="Center" Foreground="{StaticResource Texto}"
+                               TextWrapping="Wrap" Text="Modo limitado · Sem administrador. Ameaças, quarentena e a limpeza das pastas do Windows ficam limitadas."/>
+                    <Button Grid.Column="2" Content="Abrir como administrador" Click="AbrirComoAdmin_Click" Margin="12,0,0,0"/>
+                </Grid>
             </Border>
 
             <Grid Margin="28,24,16,16">

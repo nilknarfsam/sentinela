@@ -27,6 +27,7 @@
                         </StackPanel>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock x:Name="TxtFaixa" Style="{StaticResource Subtitulo}"/>
+                            <TextBlock x:Name="TxtConfianca" Style="{StaticResource Fraco}" Foreground="{StaticResource Ambar}" Margin="0,4,0,0" TextWrapping="Wrap"/>
                             <TextBlock x:Name="TxtQuando" Style="{StaticResource Fraco}" Margin="0,6,0,0"/>
                         </StackPanel>
                     </DockPanel>
@@ -45,11 +46,11 @@
                                         <TextBlock Text="{Binding Item.Nome}" FontWeight="SemiBold"/>
                                     </DockPanel>
                                     <TextBlock Text="{Binding Item.Resumo}" Margin="0,5,0,0"/>
-                                    <TextBlock Text="{Binding Item.Detalhe}" Style="{StaticResource Fraco}" FontSize="11" LineHeight="13" LineStackingStrategy="BlockLineHeight" Margin="0,3,0,0"/>
+                                    <TextBlock Text="{Binding Item.Detalhe}" Style="{StaticResource Fraco}" Margin="0,3,0,0"/>
                                     <Button Content="Como resolver" Tag="{Binding Item.Acao}" Click="Resolver_Click"
-                                            Visibility="{Binding VisibilidadeAcao}" HorizontalAlignment="Left" Margin="0,6,0,0" Padding="8,3" FontSize="11"/>
+                                            Visibility="{Binding VisibilidadeAcao}" HorizontalAlignment="Left" Margin="0,6,0,0" Padding="8,4" FontSize="13"/>
                                     <Button Content="Eu reconheço estas exclusões" Tag="{Binding Aceitar}" Click="Resolver_Click"
-                                            Visibility="{Binding VisibilidadeAceitar}" HorizontalAlignment="Left" Margin="0,6,0,0" Padding="8,3" FontSize="11"/>
+                                            Visibility="{Binding VisibilidadeAceitar}" HorizontalAlignment="Left" Margin="0,6,0,0" Padding="8,4" FontSize="13"/>
                                 </StackPanel>
                             </Border>
                         </DataTemplate>

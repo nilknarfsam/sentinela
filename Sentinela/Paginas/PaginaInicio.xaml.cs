@@ -3,6 +3,7 @@ using System.Windows.Controls;
 using Sentinela.Servicos;
 using static Sentinela.Servicos.Formatos;
 using System.Windows.Media;
+using Sentinela.Apresentacao;
 
 namespace Sentinela.Paginas;
 
@@ -16,13 +17,17 @@ public partial class PaginaInicio : UserControl
     private void Desempenho_Click(object sender, RoutedEventArgs e) => PediuDesempenho?.Invoke();
     public void AtualizarCheckup()
     {
-        var seguranca = TextoCheckup(Sentinela.Servicos.Seguranca.Seguranca.Ultimo, DateTime.Now);
-        TxtSeguranca.Text = seguranca.Texto;
-        TxtSeguranca.Foreground = Cor(seguranca.Cor);
+        var ultimoSeguranca = Sentinela.Servicos.Seguranca.Seguranca.Ultimo;
+        var seguranca = TextoCheckup(ultimoSeguranca, DateTime.Now);
+        var rotuloSeguranca = ultimoSeguranca == null ? "" : EstadoApresentacao.Rotulo(ultimoSeguranca);
+        TxtSeguranca.Text = string.IsNullOrEmpty(rotuloSeguranca) ? seguranca.Texto : $"{seguranca.Texto} · {rotuloSeguranca}";
+        TxtSeguranca.Foreground = Cor(ultimoSeguranca == null ? "TextoFraco" : EstadoApresentacao.Cor(ultimoSeguranca, seguranca.Cor));
         TxtNovaSeguranca.Visibility = seguranca.Antigo ? Visibility.Visible : Visibility.Collapsed;
-        var cartao = TextoCheckup(Sentinela.Servicos.Checkup.Checkup.Ultimo, DateTime.Now);
-        TxtDesempenho.Text = cartao.Texto;
-        TxtDesempenho.Foreground = Cor(cartao.Cor);
+        var ultimoDesempenho = Sentinela.Servicos.Checkup.Checkup.Ultimo;
+        var cartao = TextoCheckup(ultimoDesempenho, DateTime.Now);
+        var rotuloDesempenho = ultimoDesempenho == null ? "" : EstadoApresentacao.Rotulo(ultimoDesempenho);
+        TxtDesempenho.Text = string.IsNullOrEmpty(rotuloDesempenho) ? cartao.Texto : $"{cartao.Texto} · {rotuloDesempenho}";
+        TxtDesempenho.Foreground = Cor(ultimoDesempenho == null ? "TextoFraco" : EstadoApresentacao.Cor(ultimoDesempenho, cartao.Cor));
         TxtNovoCheckup.Visibility = cartao.Antigo ? Visibility.Visible : Visibility.Collapsed;
     }
     internal static (string Texto, string Cor, bool Antigo) TextoCheckup(Sentinela.Servicos.Checkup.ResultadoCheckup? ultimo, DateTime agora)
@@ -73,11 +78,15 @@ public partial class PaginaInicio : UserControl
         GradeProtecao.Children.Clear();
         if (s == null)
         {
-            DefinirStatus("Não consegui ler o Defender", erro ?? "O Windows Defender não respondeu.", "Vermelho", "\uE783");
-            App.AtualizarIcone(NivelStatus.Alerta, "Sentinela: Defender não respondeu",
-                "Atenção: o Windows Defender não respondeu. Abra o Sentinela para ver.");
+            TxtTituloProtecao.Visibility = GradeProtecao.Visibility = Visibility.Collapsed;
+            DefinirStatus("Não foi possível consultar o Defender", (erro ?? "O Windows Defender não respondeu.") + " O estado da proteção não foi confirmado.", "Ambar", "\uE783");
+            GradeProtecao.Children.Add(CartaoInfo("\uE783", "Estado da proteção", "Não confirmado", "A consulta do Defender falhou. Tente novamente ou abra como administrador.", "Ambar"));
+            App.AtualizarIcone(NivelStatus.Atencao, "Sentinela: consulta do Defender indisponível",
+                "Não foi possível confirmar o estado da proteção do Windows Defender.");
             return;
         }
+
+        TxtTituloProtecao.Visibility = GradeProtecao.Visibility = Visibility.Visible;
 
         GradeProtecao.Children.Add(CartaoProtecao("\uE9F5", "Proteção em tempo real", s.TempoReal));
         GradeProtecao.Children.Add(CartaoProtecao("\uE9D9", "Análise de comportamento", s.Comportamento));

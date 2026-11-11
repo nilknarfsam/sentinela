@@ -52,6 +52,10 @@ public partial class PaginaHistorico : UserControl
         {
             Carregada = false;
             TxtResumo.Text = "Não consegui ler o histórico: " + ex.Message;
+            GradeHistorico.ItemsSource = null;
+            GradeHistorico.Visibility = Visibility.Collapsed;
+            TxtEstadoVazio.Text = "Não foi possível carregar os eventos.";
+            EstadoVazio.Visibility = Visibility.Visible;
         }
         finally { _carregamento = null; }
     }
@@ -157,5 +161,8 @@ public partial class PaginaHistorico : UserControl
         var filtrados = _itens.Where(e => SelecionaFiltro(_filtro, e.Tipo)).ToList();
         GradeHistorico.ItemsSource = filtrados;
         TxtResumo.Text = $"{filtrados.Count} eventos nos últimos 30 dias";
+        TxtEstadoVazio.Text = "Nenhum evento acessível nos últimos 30 dias.";
+        GradeHistorico.Visibility = filtrados.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        EstadoVazio.Visibility = filtrados.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
     }
 }

@@ -7,18 +7,11 @@
             <TextBlock Text="Escolha como o Sentinela se comporta no dia a dia." Style="{StaticResource Fraco}"/>
         </StackPanel>
         <ScrollViewer VerticalScrollBarVisibility="Auto">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
+            <TabControl SelectedIndex="0">
+              <TabItem Header="Geral">
+               <Grid Margin="4">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
                 <Border Style="{StaticResource CartaoBorda}" Grid.ColumnSpan="2">
                     <StackPanel>
                         <TextBlock Text="Iniciar com o Windows" Style="{StaticResource Subtitulo}" Margin="0,0,0,10"/>
@@ -43,23 +36,12 @@
                         <TextBlock Text="Avisos de ameaça e de proteção desligada sempre aparecem." Style="{StaticResource Fraco}" Margin="0,10,0,0"/>
                     </StackPanel>
                 </Border>
-                <Border Grid.Row="2" Style="{StaticResource CartaoBorda}">
-                    <StackPanel>
-                        <TextBlock Text="Diário" Style="{StaticResource Subtitulo}" Margin="0,0,0,10"/>
-                        <TextBlock x:Name="TxtDiario" Style="{StaticResource Fraco}" Margin="0,0,0,12"/>
-                        <Button Content="Abrir a pasta do diário" HorizontalAlignment="Left" Click="AbrirDiario_Click"/>
-                    </StackPanel>
-                </Border>
-                <Border Grid.Row="2" Grid.Column="1" Style="{StaticResource CartaoBorda}">
-                    <StackPanel>
-                        <TextBlock Text="Sobre" Style="{StaticResource Subtitulo}" Margin="0,0,0,10"/>
-                        <TextBlock x:Name="TxtVersao"/>
-                        <TextBlock Text="Motor: Windows Defender" Margin="0,6,0,8"/>
-                        <TextBlock x:Name="TxtExecutavel" Style="{StaticResource Fraco}"/>
-                    </StackPanel>
-                </Border>
-                <Border Grid.Row="3" Grid.ColumnSpan="2" Style="{StaticResource CartaoBorda}">
-                    <StackPanel>
+               </Grid>
+              </TabItem>
+              <TabItem Header="Rotina semanal">
+               <StackPanel Margin="4">
+                <Border Style="{StaticResource CartaoBorda}">
+                 <StackPanel>
                         <TextBlock Text="Varredura completa semanal" Style="{StaticResource Subtitulo}" Margin="0,0,0,10"/>
                         <CheckBox x:Name="ChkSemanal" Content="Fazer uma varredura completa toda semana" Click="Semanal_Changed"/>
                         <WrapPanel Margin="0,10,0,10">
@@ -70,22 +52,48 @@
                         </WrapPanel>
                         <TextBlock Text="Se o PC estiver desligado na hora marcada, o Sentinela faz a varredura quando você voltar e o PC ficar parado por 10 minutos." Style="{StaticResource Fraco}"/>
                         <TextBlock x:Name="TxtUltimaCompleta" Text="Última varredura completa: consultando..." Margin="0,8,0,0"/>
-                    </StackPanel>
+                 </StackPanel>
                 </Border>
-                <Border Grid.Row="4" Grid.ColumnSpan="2" Style="{StaticResource CartaoBorda}">
-                    <StackPanel>
+               </StackPanel>
+              </TabItem>
+              <TabItem Header="Pastas de projetos">
+               <StackPanel Margin="4">
+                <Border Style="{StaticResource CartaoBorda}">
+                 <StackPanel>
                         <TextBlock Text="Pastas dos seus projetos" Style="{StaticResource Subtitulo}" Margin="0,0,0,10"/>
                         <TextBlock Text="Analisa até 3 níveis. SDKs do Flutter e links são ignorados." Style="{StaticResource Fraco}"/>
-                        <ListBox x:Name="ListaProjetos" Margin="0,10,0,10" MaxHeight="130"
+                        <ListBox x:Name="ListaProjetos" Margin="0,10,0,10" MaxHeight="180"
                                  Background="{StaticResource Fundo}" Foreground="{StaticResource Texto}"
                                  BorderBrush="{StaticResource Borda}"/>
                         <WrapPanel>
                             <Button Content="Adicionar pasta" Click="AdicionarPasta_Click"/>
                             <Button Content="Remover" Click="RemoverPasta_Click"/>
                         </WrapPanel>
+                 </StackPanel>
+                </Border>
+               </StackPanel>
+              </TabItem>
+              <TabItem Header="Sobre e diário">
+               <Grid Margin="4">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                <Border Style="{StaticResource CartaoBorda}">
+                    <StackPanel>
+                        <TextBlock Text="Diário" Style="{StaticResource Subtitulo}" Margin="0,0,0,10"/>
+                        <TextBlock x:Name="TxtDiario" Style="{StaticResource Fraco}" Margin="0,0,0,12"/>
+                        <Button Content="Abrir a pasta do diário" HorizontalAlignment="Left" Click="AbrirDiario_Click"/>
                     </StackPanel>
                 </Border>
-            </Grid>
+                <Border Grid.Column="1" Style="{StaticResource CartaoBorda}">
+                    <StackPanel>
+                        <TextBlock Text="Sobre" Style="{StaticResource Subtitulo}" Margin="0,0,0,10"/>
+                        <TextBlock x:Name="TxtVersao"/>
+                        <TextBlock Text="Motor: Windows Defender" Margin="0,6,0,8"/>
+                        <TextBlock x:Name="TxtExecutavel" Style="{StaticResource Fraco}"/>
+                    </StackPanel>
+                </Border>
+               </Grid>
+              </TabItem>
+            </TabControl>
         </ScrollViewer>
     </DockPanel>
 </UserControl>

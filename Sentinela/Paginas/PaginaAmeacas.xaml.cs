@@ -51,8 +51,10 @@ public partial class PaginaAmeacas : UserControl
                     .SelectMany(a => a.Local.Split("  |  ", StringSplitOptions.None).Select(local => a with { Local = local })).ToList();
             int ativas = lista.Count(a => a.Ativa);
             TxtResumoAmeacas.Text = lista.Count == 0
-                ? (_admin ? "Nenhuma ameaça no histórico do Defender." : "Nada encontrado, mas sem administrador o histórico pode vir incompleto.")
+                ? (_admin ? "Nenhuma ameaça encontrada no histórico acessível do Defender." : "Lista vazia; o histórico pode estar incompleto sem administrador.")
                 : $"{lista.Count} no histórico, {ativas} ativa(s) agora.";
+            AvisoConsulta.Visibility = _admin ? Visibility.Collapsed : Visibility.Visible;
+            if (!_admin) TxtAvisoConsulta.Text = "Não foi possível confirmar a ausência de ameaças: abra como administrador para consultar o histórico e a quarentena completos.";
             BtnTratar.IsEnabled = ativas > 0;
         }
         catch (Exception ex)
@@ -60,6 +62,10 @@ public partial class PaginaAmeacas : UserControl
             GradeAmeacas.ItemsSource = null;
             BtnTratar.IsEnabled = false;
             TxtResumoAmeacas.Text = _admin ? "Não consegui ler: " + ex.Message : "Abra como administrador para ver o histórico de ameaças.";
+            AvisoConsulta.Visibility = Visibility.Visible;
+            TxtAvisoConsulta.Text = _admin
+                ? "Não foi possível carregar o histórico de ameaças. A tabela vazia não confirma ausência de ameaças. Tente Atualizar."
+                : "A consulta de ameaças exige acesso de administrador. A lista vazia não confirma ausência de ameaças.";
         }
 
         try
