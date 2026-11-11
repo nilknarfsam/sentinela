@@ -1,5 +1,12 @@
 # Histórico de mudanças
 
+## [1.7.0] — Em preparação
+### Novo
+- Instalador MSI por máquina com WiX, para Windows x64, incluindo o .NET no pacote.
+- O instalador cria as tarefas de início, o atalho no menu Iniciar e a opção **Verificar com o Sentinela** no clique direito.
+- Atualizações por cima mantêm os dados do usuário; o instalador bloqueia downgrade e fecha a versão aberta antes de trocar os arquivos.
+- O Windows lista o Sentinela em **Configurações → Aplicativos** para desinstalar. As configurações em `%LOCALAPPDATA%\Sentinela` podem permanecer e isso aparece nos detalhes do aplicativo.
+
 ## [1.6.2] — Em preparação
 ### Segurança
 - Os links da tela **Sobre e ajuda** passam a ser abertos pelo Explorer da sessão do usuário (`NavegadorSeguro`), para o navegador **não** herdar o privilégio de administrador do Sentinela. No padrão do Windows isso evita a elevação. Com "Iniciar janelas de pasta em processo separado" ligado, UAC desligado ou a conta Administrador embutida, o navegador ainda pode abrir elevado, como antes. Só endereços `https://` são aceitos, e continua valendo a lista fechada de links.

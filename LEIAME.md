@@ -81,13 +81,13 @@ O Sentinela **nunca desliga nem muda** configurações de segurança do Defender
 
 **Desempenho:** checkup com nota de 0 a 100, último resultado salvo e cartão no Início. Também pode ser iniciado pela bandeja. O Histórico tem filtro de desempenho e os avisos de rotina incluem lembrete diário de reinício após 7 dias ligado com atualização pendente. Veja `PLANO-MELHORIAS.md`. Histórico de versões em `CHANGELOG.md`.
 
-## Sobre e ajuda (versão 1.6.1 em preparação)
+## Sobre e ajuda (versão 1.7.0 em preparação)
 
 Em **Ajustes → Sobre e ajuda** há uma apresentação do Sentinela, a versão, uma explicação breve de cada área e as informações do diário e do executável. Os botões abrem os perfis autorizados do criador no GitHub, site, Instagram e LinkedIn. Dentro do app, a página do Sentinela no site, o atalho para relatar problema e a privacidade detalhada ainda aparecem como **em breve**. Enquanto isso, use os [problemas do GitHub](https://github.com/nilknarfsam/sentinela/issues/new/choose) e a seção **Privacidade** no topo deste arquivo.
 
 ## Preparação da versão 1.6.0
 
-Na primeira execução, a lista de pastas de projetos começa vazia, a menos que `C:\PROJETOS` exista. Configure as pastas em **Ajustes → Pastas de projetos**. A limpeza do temporário do Windows e a leitura do BitLocker acompanham a unidade onde o Windows está instalado. Antes de abrir a versão 1.6.0, feche qualquer versão anterior do Sentinela que ainda esteja aberta; a migração entre versões será tratada pelo instalador planejado para a etapa 8.3.
+Na primeira execução, a lista de pastas de projetos começa vazia, a menos que `C:\PROJETOS` exista. Configure as pastas em **Ajustes → Pastas de projetos**. A limpeza do temporário do Windows e a leitura do BitLocker acompanham a unidade onde o Windows está instalado.
 
 ## Rotina e relatório semanal (v1.5.0)
 
@@ -104,16 +104,18 @@ Na aba **Varredura**, use **Escolher pasta** ou **Escolher arquivo**, ou arraste
 Depois da instalação, clique com o botão direito em uma pasta ou arquivo e escolha **Verificar com o Sentinela**. No Windows 11, a opção aparece em **Mostrar mais opções**. O pedido é encaminhado ao Sentinela aberto, inclusive quando ele roda como administrador. A caixa de pedidos só funciona quando o administrador é a mesma conta do usuário; elevar com credenciais de outra conta usa outra pasta de pedidos. Se estiver fechado, ele abre e inicia a verificação.
 
 ## Instalar
-1. Compile (precisa do .NET 9 SDK):
-   ```
-   cd Sentinela
-   dotnet publish -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o ..\publicado
-   ```
-2. Clique com o botão direito em `instalar-sentinela.bat` e escolha **Executar como administrador**.
+Quando a etapa 8.3 for aprovada, a forma recomendada será instalar `Sentinela.Instalador.msi` com duplo clique. Ele instala o Sentinela por máquina em `C:\Program Files\Sentinela`, cria as tarefas, o atalho e os menus de clique direito, e aparece em **Configurações → Aplicativos**. As configurações em `%LOCALAPPDATA%\Sentinela` podem permanecer depois da desinstalação.
 
-Ele copia o programa para `C:\Program Files\Sentinela`, cria duas tarefas agendadas (`Sentinela`, que abre na bandeja ao entrar no Windows, e `Sentinela-Abrir`, usada pelo atalho) e coloca o atalho **Sentinela** no menu Iniciar. As tarefas rodam como administrador, sem mostrar o aviso do Windows.
+Para compilar o instalador (precisa do .NET 9 SDK e de acesso ao NuGet para restaurar o WiX):
+   ```
+   dotnet build Sentinela.Instalador -c Release
+   ```
 
-Para remover, execute `desinstalar-sentinela.bat` como administrador.
+Antes de instalar o MSI pela primeira vez num PC que usa o instalador antigo, execute `desinstalar-sentinela.bat` como administrador. Depois, abra o MSI e confirme a instalação quando o Windows pedir. O arquivo `instalar-sentinela.bat` continua disponível como **modo antigo** enquanto a migração é validada.
+
+O build salva o MSI em `Sentinela.Instalador\bin\x64\Release\Sentinela.Instalador.msi`.
+
+Para remover a versão MSI, use **Configurações → Aplicativos → Sentinela → Desinstalar**. A desinstalação remove as tarefas, o atalho, os menus de clique direito e os arquivos do programa.
 
 ## Teste sem abrir a janela
 ```

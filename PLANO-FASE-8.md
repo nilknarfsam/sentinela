@@ -46,7 +46,7 @@ num programa profissional.
 | **C1** | **Correções da conferência do Claude** (`CONFERENCIAS.md`) | Codex | antes de qualquer merge |
 | 8.1 | Generalizar o que é do PC do Franklin ✅ (v1.6.0) | Codex | — |
 | 8.2 | Tela "Sobre e ajuda" | Codex | 8.1 |
-| 8.3 | Instalador MSI (WiX) | Codex | sim do Franklin para o WiX |
+| 8.3 | Instalador MSI (WiX) | Codex | SDK autorizado; WiX 5.0.2 escolhido sem OSMF |
 | 8.4 | Publicação automática de releases (no próprio repositório) | Codex | 8.3 |
 | 8.5 | Sistema de atualização dentro do app | Codex | 8.4 |
 | 8.6 | Privacidade e LEIAME público | Codex | 8.5 |
@@ -148,6 +148,10 @@ Siga a seção 6 do `AGENTS.md`. Em resumo:
   por cima e desinstalar, conferindo as sobras.
 - **Aceite:** MSI gerado pelo build; instalação, atualização e desinstalação
   testadas no Sandbox, com capturas.
+
+**Acompanhamento (11/11/2026, v1.7.0):** etapa feita no código na branch `fase-8/instalador-msi`. O workflow compila o MSI como artefato de Release com permissões de leitura. A instalação, atualização, desinstalação e conferência de sobras no Sandbox ainda aguardam validação prática do Franklin. Decisões: não há extensões do WiX; o próprio Sentinela cria/remove as tarefas em contexto SYSTEM; o aviso sobre dados preservados é `ARPCOMMENTS`, sem tela de desinstalação própria. Para a primeira migração de uma instalação pelo script antigo, desinstale-a com `desinstalar-sentinela.bat` antes de instalar o MSI. O rollback remove tarefas somente na primeira instalação e não restaura as tarefas antigas se um upgrade falhar.
+
+**Verificação local:** build Release do aplicativo e do MSI sem avisos ou erros; 806 testes aprovados. Também conferidos o build de teste com `-p:Version=1.7.1` (retornado a 1.7.0 no pacote final), as tabelas CustomAction, InstallExecuteSequence, Registry, Shortcut e Property via COM em modo somente leitura e os 265 arquivos do MSI, sem PDBs. Captura do executável publicado em `%TEMP%\Sentinela-8-3-inicio.png`, conferida visualmente, com saída 0 e sem elevação. O NuGet apresentou falha TLS nesta sessão; a validação usou o SDK oficial em cache sob `obj` e os pacotes já disponíveis como fallback, sem desabilitar a verificação de assinaturas. As validações ICE38/43/57 (atalho por máquina em ProgramMenuFolder com chave HKLM) e ICE63 (fechamento antes de RemoveExistingProducts) têm supressões pontuais documentadas no projeto. Nenhum MSI ou comando que cria/remove tarefas foi executado; o workflow ainda não foi executado no GitHub.
 
 ## 8.4 Publicação automática de releases (no próprio repositório)
 Com o repositório público, **não precisa de token pessoal**. O workflow usa o

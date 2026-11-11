@@ -204,7 +204,9 @@ Mudou em relação ao plano original:
 
 **Acompanhamento (11/11/2026):** etapa 8.1 integrada na `main` pelo commit `3e8a75b`; build Release com 0 avisos/erros, 738 testes aprovados e 10 capturas revisadas em `../REFERENCIAS-INTERFACE/fase-8-1/capturas/` (fora do repositório). Não houve validação física em PC novo/Sandbox nem instalação em unidade diferente de C:.
 
-Etapa 8.2 implementada na branch `fase-8/sobre-ajuda`, aguardando revisão e conferência. A tela tem quatro links exatos permitidos e ajuda curta para as nove áreas; preserva as informações de versão, diário e executável. Site, relato de problema e informações detalhadas de privacidade continuam pendentes das etapas 8.7, 8.4 e 8.6. A versão 1.6.1 está em preparação.
+Etapa 8.2 implementada na branch `fase-8/sobre-ajuda`, aguardando revisão e conferência. A tela tem quatro links exatos permitidos e ajuda curta para as nove áreas; preserva as informações de versão, diário e executável. Site, relato de problema e informações detalhadas de privacidade continuam pendentes das etapas 8.7, 8.4 e 8.6.
+
+**Etapa 8.3 feita no código (11/11/2026, v1.7.0):** MSI com WiX 5.0.2, publicação self-contained x64, tarefas cadastradas pelo próprio executável, upgrade por cima, desinstalação pelo Windows e artefato de build com acesso somente de leitura. Decisões: sem extensões do WiX, o Sentinela cria/remove as tarefas em contexto SYSTEM; o aviso sobre configurações preservadas aparece em `ARPCOMMENTS`, sem tela própria; a migração inicial da instalação pelo script antigo exige desinstalá-la antes. O rollback que remove tarefas só vale para uma primeira instalação e não restaura tarefas antigas se um upgrade falhar. A validação prática no Sandbox permanece pendente.
 
 Ideia do Franklin em 10/11/2026: quando o Sentinela estiver maduro, distribuí-lo
 de graça pelo GitHub e pelo site dele. Junto, explicar o raciocínio: por que o

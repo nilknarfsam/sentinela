@@ -1,0 +1,22 @@
+<Project Sdk="WixToolset.Sdk/5.0.2">
+  <PropertyGroup>
+    <OutputType>Package</OutputType>
+    <Platform>x64</Platform>
+    <!-- ICE38/43/57 são falsos positivos da entrada em ProgramMenuFolder para pacote por máquina; ICE63 é a ordem de fechamento necessária no upgrade. -->
+    <SuppressIces>ICE38;ICE43;ICE57;ICE63</SuppressIces>
+    <PublishDir>$(MSBuildProjectDirectory)\obj\$(Configuration)\publish\</PublishDir>
+    <ProjetoAplicativo>$(MSBuildProjectDirectory)\..\Sentinela\Sentinela.csproj</ProjetoAplicativo>
+    <DefineConstants>$(DefineConstants);Publicacao=$(PublishDir)</DefineConstants>
+  </PropertyGroup>
+
+  <Target Name="PrepararPublicacao" BeforeTargets="CoreCompile">
+    <XmlPeek XmlInputPath="$(ProjetoAplicativo)" Query="//*[local-name()='Version']/text()">
+      <Output TaskParameter="Result" PropertyName="VersaoAplicativo" />
+    </XmlPeek>
+    <PropertyGroup>
+      <Version Condition="'$(Version)' == ''">$(VersaoAplicativo)</Version>
+    </PropertyGroup>
+    <MSBuild Projects="$(ProjetoAplicativo)" Targets="Restore;Publish"
+             Properties="Configuration=Release;TargetFramework=net9.0-windows;RuntimeIdentifier=win-x64;SelfContained=true;PublishSingleFile=false;DebugType=None;DebugSymbols=false;Version=$(Version);PublishDir=$(PublishDir)" />
+  </Target>
+</Project>
