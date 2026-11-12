@@ -124,3 +124,53 @@ Verificado pelo Claude em 11/11/2026:
 - `taskkill /IM Sentinela.exe` fecha qualquer processo com esse nome.
 - Se a remoção de tarefas falhar na desinstalação, o MSI não avisa
   (`Return="ignore"`). Conferir no Sandbox que não sobra tarefa.
+
+---
+
+## C3 — Teste prático do MSI no Windows Sandbox (12/11/2026)
+
+**Resultado geral:** **reprovado**. O MSI não instala: 38 falhas no roteiro,
+todas em cascata de um único bug (C3.1). Os itens C1.2, C2.3 e as conferências
+pendentes da C2.5 continuam sem teste prático.
+
+Como foi testado: roteiro automático na Área Restrita (Windows 11 26100, sem
+.NET), com o MSI 1.7.0 e um 1.7.1 gerado com `-p:Version=1.7.1`. Passos:
+instalar com `/passive`, atualizar com `/qn` com o Sentinela aberto, tentar
+voltar para a 1.7.0 e desinstalar. Os logs do `msiexec /l*v` ficaram no PC do
+Franklin (fora do repositório).
+
+### C3.1 — Erro 2613: `FecharSentinela` fora de ordem · **aberto · bloqueia a etapa 8.3**
+- **Onde:** `Sentinela.Instalador/Pacote.wxs`.
+- **Sintoma:** `msiexec /i` termina com o código **1603**. O log mostra
+  `Error 2613: RemoveExistingProducts action sequenced incorrectly`, e o
+  Windows recusa o pacote antes de copiar qualquer arquivo. Por isso falharam
+  também a atualização, as tarefas, o atalho, as capturas e a desinstalação
+  (código 1619, produto inexistente).
+- **Causa:** com `MajorUpgrade Schedule="afterInstallInitialize"`, o
+  `RemoveExistingProducts` precisa vir logo depois do `InstallInitialize`,
+  antes de qualquer ação adiada. A `FecharSentinela` é `Execute="deferred"` e
+  foi sequenciada `Before="RemoveExistingProducts"`, ou seja, uma ação adiada
+  antes dele. O build e o GitHub Actions não pegam isso: o erro só aparece na
+  hora de instalar.
+- **Correção pedida:**
+  1. `FecharSentinela` passa a ser `Execute="immediate"` (sem `Impersonate`,
+     que só vale para adiada) e é sequenciada `After="InstallValidate"`, isto
+     é, antes do `InstallInitialize`. Mantenha `Return="ignore"`.
+  2. Não mexa no `MajorUpgrade` nem nas outras ações.
+  3. Atualize a versão para **1.7.1** e o `CHANGELOG.md`.
+- **Limite conhecido da correção:** ação imediata roda com o token do usuário.
+  Em dois cliques no MSI sem estar elevado, ela pode não conseguir fechar um
+  Sentinela aberto como administrador; nesse caso o Windows Installer mostra o
+  aviso de arquivo em uso. Pelo `.bat` de administrador, pelo atualizador
+  (8.5) e no Sandbox funciona. Registrar esse limite no `LEIAME.md`.
+- **Teste:**
+  - automático: um teste em `Sentinela.Testes` que lê o `Pacote.wxs` e
+    confirma que `FecharSentinela` é `immediate` e não está entre
+    `InstallInitialize` e `RemoveExistingProducts`;
+  - prático: o Franklin gera os dois MSIs (1.7.1 e 1.7.2 só para teste) e roda
+    `testar-msi-sandbox.bat` de novo. Aceite: **0 falhas**.
+
+### C3.2 — Instalação parada uns 2 minutos no começo · **informativo**
+- O Windows confere a assinatura do MSI (`SOFTWARE RESTRICTION POLICY`) e,
+  sem internet no Sandbox, espera o tempo limite. Acontece só porque o MSI não
+  é assinado. Some quando houver certificado (previsto para depois da 2.0.0).
