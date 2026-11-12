@@ -106,6 +106,8 @@ Depois da instalação, clique com o botão direito em uma pasta ou arquivo e es
 ## Instalar
 Quando a etapa 8.3 for aprovada, a forma recomendada será instalar `Sentinela.Instalador.msi` com duplo clique. Ele instala o Sentinela por máquina em `C:\Program Files\Sentinela`, cria as tarefas, o atalho e os menus de clique direito, e aparece em **Configurações → Aplicativos**. As configurações em `%LOCALAPPDATA%\Sentinela` podem permanecer depois da desinstalação.
 
+Ao atualizar com dois cliques sem elevação, o instalador pode não fechar o Sentinela aberto como administrador e mostrar um aviso de arquivo em uso; feche o Sentinela antes de atualizar.
+
 Para compilar o instalador (precisa do .NET 9 SDK e de acesso ao NuGet para restaurar o WiX):
    ```
    dotnet build Sentinela.Instalador -c Release

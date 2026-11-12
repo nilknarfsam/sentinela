@@ -14,7 +14,7 @@
     <RootNamespace>Sentinela</RootNamespace>
     <Product>Sentinela</Product>
     <Copyright>Copyright (C) 2026 Franklin Carvalho</Copyright>
-    <Version>1.7.0</Version>
+    <Version>1.7.1</Version>
     <SatelliteResourceLanguages>pt-BR</SatelliteResourceLanguages>
   </PropertyGroup>
 
