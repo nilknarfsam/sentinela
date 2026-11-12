@@ -1,5 +1,9 @@
 # Histórico de mudanças
 
+## [1.7.1] — Em preparação
+### Corrigido
+- Corrige o instalador que não instalava: erro 2613.
+
 ## [1.7.0] — Em preparação
 ### Novo
 - Instalador MSI por máquina com WiX, para Windows x64, incluindo o .NET no pacote.

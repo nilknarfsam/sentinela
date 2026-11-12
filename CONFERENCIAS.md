@@ -139,7 +139,7 @@ instalar com `/passive`, atualizar com `/qn` com o Sentinela aberto, tentar
 voltar para a 1.7.0 e desinstalar. Os logs do `msiexec /l*v` ficaram no PC do
 Franklin (fora do repositório).
 
-### C3.1 — Erro 2613: `FecharSentinela` fora de ordem · **aberto · bloqueia a etapa 8.3**
+### C3.1 — Erro 2613: `FecharSentinela` fora de ordem · **resolvido no código (12/11/2026, PR pendente) · falta teste no Sandbox**
 - **Onde:** `Sentinela.Instalador/Pacote.wxs`.
 - **Sintoma:** `msiexec /i` termina com o código **1603**. O log mostra
   `Error 2613: RemoveExistingProducts action sequenced incorrectly`, e o
@@ -169,6 +169,17 @@ Franklin (fora do repositório).
     `InstallInitialize` e `RemoveExistingProducts`;
   - prático: o Franklin gera os dois MSIs (1.7.1 e 1.7.2 só para teste) e roda
     `testar-msi-sandbox.bat` de novo. Aceite: **0 falhas**.
+- **Resolução no código (12/11/2026):** `FecharSentinela` agora é imediata,
+  mantém `Return="ignore"` e roda depois de `InstallValidate`, antes de
+  `InstallInitialize`; o comando `taskkill.exe` e as demais ações foram
+  preservados. A versão do app passou para 1.7.1. Foi adicionado teste
+  automatizado que lê o WiX como XML. **Verificação:** build Release do app e
+  do MSI sem avisos ou erros; 811 testes aprovados. Leitura somente leitura
+  das tabelas do MSI confirmou `InstallValidate=1400` <
+  `FecharSentinela=1401` < `InstallInitialize=1500` <
+  `RemoveExistingProducts=1501` e ação imediata `Type=98`. O Sandbox não foi
+  executado; continua pendente. O teste automatizado foi ajustado após revisão
+  e os 811 testes passaram novamente.
 
 ### C3.2 — Instalação parada uns 2 minutos no começo · **informativo**
 - O Windows confere a assinatura do MSI (`SOFTWARE RESTRICTION POLICY`) e,
